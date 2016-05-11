@@ -1,1 +1,9 @@
 \chapter{Deterministic Execution}
+\section{Logical Time Based Deterministic Scheduling}
+Inspired by Kendo\cite{olszewski2009kendo} and Conversion\cite{merrifieldincreasing}, this scheduling policy maintains a logical time for each task inside the Determinator's runtime. When \detstart\ is called, the system will only let the one which holds the "token" to proceed, the token is decided in the following way: only the task holds the minimal logical time can have the token, if several tasks have the same logical time, the one who has the smallest PID number gets the token. When \detend\ is called, the logical time is increased by 1. As long as the replicated application updates logical time in a same way on both primary and secondary, they will sure end up with the same thread interleaving.
+
+In this algorithm, if one running thread holds the token for too long, i.e. doesn't update its logical time frequently during its execution, other threads will be waiting for the token for a long time. In the worst case this will kill the parallelism of a multithreaded program. We provide \dettick\ syscall to manually increase the logical time with a predefined value, in order to break the logical time imbalance. In the evaluation part we will show that we are able to achieve reasonable overhead with minimal effort of instrumenting application's code.
+\section{Balance the Logical Time}
+\subsection{Execution Time Profiling}
+\subsection{Non-deterministic External Events}
+\section{Implementation}
