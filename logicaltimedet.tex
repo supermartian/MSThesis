@@ -1,17 +1,48 @@
 \chapter{Deterministic Execution}
-Deterministic execution provides a property that given the same input, a multithreaded program can always generate the same output. Such a system fits perfectly for our replication purpose. Among all the deterministic systems, there is one type called "Weak Deterministic System". Those systems assume the applications are race free, and only guarantee the deterministic interleaving of thread synchronization primitives such as mutex locks and condition variables. Our implementation falls into this category, we implemented a set of system calls to control the application's behaviour. By putting our system calls around the synchronization primitives, we are able to control the interleaving of those code sections.
+Deterministic execution provides a property that given the same input, a multithreaded program can always generate the same output. Such a system fits perfectly for our replication purpose. As long as the primary and secondary receive the same input, the replicated application will sure end up with the same state and generate the same output. Among all the deterministic systems, there is one type called "Weak Deterministic System". This type of systems assume the applications are data race free, and only guarantee the deterministic interleaving of thread synchronization primitives such as mutex locks and condition variables. Our implementation falls into this category, we implemented a set of system calls to control the application's scheduling at given points, which in turn controls the thread interleaving.
 
 \section{Logical Time Based Deterministic Scheduling}
-Inspired by Kendo\cite{olszewski2009kendo} and Conversion\cite{merrifieldincreasing}, this scheduling policy maintains a logical time for each task inside the namespace. Our system provides three system calls for the applications to control the thread-interleaving:
+Inspired by Kendo and Conversion, this scheduling policy maintains a logical time for each task inside the current Popcorn namespace. Our system provides three system calls for the applications to control the thread-interleaving:
 \begin{itemize}
    \item \_\_det\_start: Upon it is called, only the task holds the minimal logical time can proceed, if several tasks have the same logical time, the one who has the smallest PID number gets the turn. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
    \item \_\_det\_end: When is called, the system will increase the current thread's logical by 1, and marks it as "out of a deterministic section".
    \item \_\_det\_tick: This system call comes with a parameter of an integer. When it is called, the logical time will be increased by value defined by the parameter.
 \end{itemize}. 
-If the logical time is updated but the one has the minimal logical time is sleeping in \_\_det\_start, the one whose updates the tick will wake it up. As long as the replicated application updates logical time in a same way on both primary and secondary, they will sure end up with the same thread interleaving.
+If the logical time is updated but the one has the minimal logical time is sleeping in \_\_det\_start, the one whose updates the tick will wake the sleeping one up. As long as the replicated application updates logical time in a same way on both primary and secondary, they will sure end up with the same thread interleaving. Figure~\ref{f:algorithm} shows a simplified version of this algorithm (some mutual exclusion points are omitted here).
+
+To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock and pthread\_spin\_lock, so that the order of getting into critical sections is controlled under our deterministic scheduling.
+
+\begin{figure}
+\begin{lstlisting}[title=Deterministic Logical Time,frame=tlrb]{blah}
+void __det_start()
+{
+    if (token->token != current)
+        sleep(current);
+    current->ft_det_state = FT_DET_ACTIVE;        
+}
+void __det_end()
+{
+    current->ft_det_state = FT_DET_INACTIVE;
+    __update_tick(1);
+}
+void __det_tick(int tick)
+{
+    __update_tick(tick);
+}
+void __update_tick(int tick)
+{
+    current->tick += tick;
+    token = find_task_with_min_tick(ns);
+    if (is_waiting_for_token(token->task))
+    	wake_up(token->task);
+}
+\end{lstlisting}
+\caption{Simplified version of deterministic system calls}
+\label{f:algorithm}
+\end{figure}
 
 \section{Balance the Logical Time}
-Only increase the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem.
+Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program.
 
 \begin{figure}
 \centering
@@ -19,61 +50,93 @@ Only increase the logical time by 1 at \detend\ isn't enough. With an example we
    \draw[thick] (0,4) --  (0,5); 
    \draw[dotted] (0,4) --  (0,-1);
    
-   \node[align=right] at (0,5.5) {producer};
-   \node[align=right] at (1,5) {produceItem};
+   \node[align=right] at (0.5,5.5) {producer};
+   \node[align=right] at (1.5,5) {produceItem};
    \draw[thick] (-0.1,5) -- (0.1,5);
-   \node[align=right] at (1,4) {\_\_det\_start};
+   \node[align=right] at (1.5,4) {\_\_det\_start};
    \draw[thick] (-0.1,4) -- (0.1,4);
-   \node[align=right] at (1,3.5) {mutex\_lock};
+   \node[align=right] at (1.5,3.5) {mutex\_lock};
    \draw[thick] (-0.1,3.5) -- (0.1,3.5);
-   \node[align=right] at (1,3) {\_\_det\_end};
+   \node[align=right] at (1.5,3) {\_\_det\_end};
    \draw[thick] (-0.1,3) -- (0.1,3);
-   \node[align=right] at (1,2) {putItem};
+   \node[align=right] at (1.5,2) {putItem};
    \draw[thick] (-0.1,2) -- (0.1,2);
-   \node[align=right] at (1,1) {mutex\_unlock};
+   \node[align=right] at (1.5,1) {mutex\_unlock};
    \draw[thick] (-0.1,1) -- (0.1,1);   
-   \node[align=right] at (0,-2) {Logical Time:3};
+   \node[align=right] at (0.5,-2) {Logical Time:3};
    
    \draw[thick] (3,0) --  (3,5); 
    \draw[dotted] (3,0) --  (3,-1);
    
-   \node[align=right] at (3,5.5) {consumer};
+   \node[align=right] at (3.5,5.5) {consumer};
    \node[align=right] at (4,5) {};
    \draw[thick] (2.9,5) -- (3.1,5);
-   \node[align=right] at (4,4) {\_\_det\_start};
+   \node[align=right] at (4.5,4) {\_\_det\_start};
    \draw[thick] (2.9,4) -- (3.1,4);
-   \node[align=right] at (4,3.5) {mutex\_lock};
+   \node[align=right] at (4.5,3.5) {mutex\_lock};
    \draw[thick] (2.9,3.5) -- (3.1,3.5);
-   \node[align=right] at (4,3) {\_\_det\_end};
+   \node[align=right] at (4.5,3) {\_\_det\_end};
    \draw[thick] (2.9,3) -- (3.1,3);
-   \node[align=right] at (4,2) {getItem};
+   \node[align=right] at (4.5,2) {getItem};
    \draw[thick] (2.9,2) -- (3.1,2);
-   \node[align=right] at (4,1) {mutex\_unlock};
+   \node[align=right] at (4.5,1) {mutex\_unlock};
    \draw[thick] (2.9,1) -- (3.1,1);
-   \node[align=right] at (4,0) {consumeItem};
+   \node[align=right] at (4.5,0) {consumeItem};
    \draw[thick] (2.9,0) -- (3.1,0);
    \node[align=right] at (4,-2) {Logical Time:3};   
 \end{tikzpicture}
 \caption{An example of logical time imbalance.}
-\label{fig:p2-1}
+\label{fig:imbalance}
 \end{figure}
 
-In Figure~\ref{fig:p2-1}, we show a particular execution point of the producer-consumer model that corresponds to the program shown in Figure~\ref{fig:p1-1}. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that part, this waiting time is totally unnecessary. In a more complex application with more synchronization, this kind of waiting will break a parallel program into a serial program.
-
-Logical time imbalance can happen in two cases:
+Generally, logical time imbalance can happen in two cases:
 \begin{itemize}
-  \item A task is running in the userspace for a long time.
-  \item A task is sleeping in the kernel space for a long time.
+  \item A task is running in for a long time (in user space).
+  \item A task is sleeping in for a long time (in kernel space).
 \end{itemize}
 
 In the upcoming sections we will discuss the solution of each of the cases.
 \subsection{Execution Time Profiling}
-\subsection{Non-deterministic External Events}
-\begin{figure*}[ht]
-\centering
-\includegraphics[width=1.5\columnwidth]{figures/tickbump}
-\caption{ In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message along with the epoll\_wait\'s output to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output. }
-\label{f:tick_bump}
-\end{figure*}
+When a task is running in a computational region which might take a long time
 
-Some blocking system calls would put the caller into sleep. When a thread holding a token reaches such a system call, the token might be on this thread for a long time. Especially for system calls like epoll\_wait, poll and accept, the arrival time of the event is non-deterministic, as a result, we cannot simply use \dettick\ to increase the logical time with a predefined value. In order to let the token passing keep going with those blocking system calls, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping on external events. The Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase its logical time and send the delta to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the beginning, and bump its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time.
+\subsection{Dealing With Sleeping}
+When a task is sleeping in the kernel, usually it is in a system call and waiting for some events to wake it up. Especially for system calls like epoll\_wait, poll and accept and other I/O system calls, the arrival time of the event is non-deterministic, as a result, we cannot simply use \dettick\ to increase the logical time with a predefined value from a profile run, because we have no idea how long the thread will be sleeping in the kernel. In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
+
+Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output.
+
+We only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
+
+\begin{table}
+\begin{center}
+ \begin{tabular}{|c|c|}
+ \hline
+ System Call & Sleeping Type  \\ \hline
+ read & Long duration  \\ \hline
+ recvfrom, recvmsg & 1  \\ \hline 
+ write & 2  \\ \hline
+ sendto, sendmsg & 2  \\ \hline
+ accept, accept4 & 2  \\ \hline 
+ poll & 2  \\ \hline  
+ epoll\_wait & 2  \\ \hline
+ \end{tabular}
+\end{center}
+\caption{System calls intercepted by Tick Shepherd}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/tickbump}
+\caption{Tick shepherd}
+\label{f:tick_bump}
+\end{figure}
+
+\section{Related Work}
+Deterministic systems have been studied for a long time. From the implementation perspective view, they can be categorized into 4 different genres: language level, runtime level, OS level and architectural level.
+
+% Use subsections to address each work
+
+Clik++~\cite{leiserson2010cilk++} is an parallel extension to C++ which makes creating parallel program easier. This extension provides a property that can indicate threads to be executed in a serial way, so that the determinism can be ensured. Grace \cite{berger2009grace} is also a C++ extension that adds a fork-join parallel schema to C++, it enforces the determinism of the execution with its underlying language runtime. Both of them are very limited to a specific parallel programming model, and existing applications need to be rewritten to achieve determinism.
+
+Kendo\cite{olszewski2009kendo}, Parrot\cite{cui2013parrot} and Dthreads\cite{liu2011dthreads} provide runtime substitutions for pthread library. By making pthread synchronizations to be deterministic, any race-free pthread-based application can be executed in a deterministic way. They are easy to be applied onto existing applications. However they are limited to pthread only applications. Although Melchior can only make pthread to run deterministically in an automatically way, a developer is always free to use the runtime system calls to hand tune any type of parallel applications to make them deterministic. Among these three, Kendo uses the same deterministic scheduling policy as Melchior. However it relies on hardware counters to keep track of the program's progress in runtime, given the fact that hardware counters could be non-deterministic\cite{weaver2008can}, we doubt the determinism  of Kendo in some cases. DMP\cite{devietti2009dmp} provides an OS layer to make any program running on top of it deterministic, which is applicable for all kinds of parallel programming models. However DMP's overhead is too high due to massive trapping to shared memory accesses. We synchronization provided by the programming model, this could be unnecessary.
+
+In \cite{segulja2012architectural}, an architectural solution is proposed. It's a hardware layer between the CPU core and memory hierarchy, the goal is to track all the memory access and does versioning on the memory operations. By doing deterministic submission to the memory hierarchy, it ensures the determinism of the parallel execution. Although it's a promising solution which is totally transparent to the upper layer, it's not usable out of box in recent years. 
