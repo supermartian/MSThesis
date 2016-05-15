@@ -97,43 +97,67 @@ Generally, logical time imbalance can happen in two cases:
 
 In the upcoming sections we will discuss the solution of each of the cases.
 \subsection{Execution Time Profiling}
-When a task is running in a computational region which might take a long time
+When a task is running in a computational region (in user space) which might take a long time, the logical time of the task should increase along with the execution. In Kendo this is done by counting retired read instructions — using performance counters — to track to progress of a running task and increases its logical time accordingly. However it is hard to ensure that on the primary and the secondary the performance counter can have the same behaviour, as a result we have to find another way to track the progress of a running task.
 
-\subsection{Dealing With Sleeping}
+%Compiler shit here
+
+\subsection{Tick Bumping for External Events}
 When a task is sleeping in the kernel, usually it is in a system call and waiting for some events to wake it up. Especially for system calls like epoll\_wait, poll and accept and other I/O system calls, the arrival time of the event is non-deterministic, as a result, we cannot simply use \dettick\ to increase the logical time with a predefined value from a profile run, because we have no idea how long the thread will be sleeping in the kernel. In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
 
 Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output.
 
 We only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
-\begin{table}
-\begin{center}
- \begin{tabular}{|c|c|}
- \hline
- System Call & Sleeping Type  \\ \hline
- read & Long duration  \\ \hline
- recvfrom, recvmsg & 1  \\ \hline 
- write & 2  \\ \hline
- sendto, sendmsg & 2  \\ \hline
- accept, accept4 & 2  \\ \hline 
- poll & 2  \\ \hline  
- epoll\_wait & 2  \\ \hline
- \end{tabular}
-\end{center}
-\caption{System calls intercepted by Tick Shepherd}
-\end{table}
+\section{Eliminate Deadlocks}
+% cite futex and glic here
+With wrapping all the pthread\_mutex\_lock with our deterministic system calls, there is a potential risk of having deadlocks. Serializing all the lock acquisitions with our implementation means that putting a giant global mutex lock around every lock acquisition. As shown in Figure~\ref{fig:deadlock}, Thread 2 has a lower logical time and try to acquire the mutex(b), however mutex(b) is contended, as a result Thread 2 will call futex\_wait and put the thread into sleep until mutex(b) is released by someone else. At this point, Thread 2 will never increase its logical time until mutex(b) is released. So Thread 1 will never goes through the \_\_det\_start, and it will never unlock mutex(b)， which means Thread 2 will never be woken up.
+
+Since we already know that a contented mutex will call futex\_wait to wait for a unlock event, the solution to this deadlock problem is to temporary remove the thread in futex\_wait out of the deterministic schedule, and add it back when it returns from futex\_wait. In the example of Figure~\ref{fig:deadlock}， Thread 1 will be able to proceed its \_\_det\_start and keep executing. Simply doing so might break the determinism, we ensure the determinism by guaranteeing the following:
+\begin{itemize}
+\item The waiting queue in futex\_wait is strictly FIFO, which means the wakeup sequence will be the same as the sequence of getting into futex\_wait. Since the latter one is ensured by our \_\_det\_start, with this hack to futex, the timing of getting out of a contended pthread\_mutex\_lock will be the same sequence. This is implemented by changing the priority queue inside futex\_wait to a FIFO queue.
+\item When waking up from a futex\_wait, the thread always waits for the token before returning to the user space. With this implemented, the timing of getting out of a contended pthread\_mutex\_lock will be deterministic. This is implemented by adding a \_\_det\_start after the wake up point of futex\_wait.
+\end{itemize}
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/tickbump}
-\caption{Tick shepherd}
-\label{f:tick_bump}
+\begin{tikzpicture}
+   \draw[thick] (-0.1,4) --  (-0.1,5); 
+   \draw[dotted] (-0.1,4) --  (-0.1,-1);
+   
+   \node[align=right] at (0,5.5) {Thread 1};
+   \node[align=right] at (1.5,4) {\_\_det\_start};
+   \draw[thick] (-0.1,4) -- (0.1,4);
+   \node[align=right] at (1.5,3.5) {mutex\_lock(a)};
+   \draw[thick] (-0.1,3.5) -- (0.1,3.5);
+   \node[align=right] at (1.5,3) {\_\_det\_end};
+   \draw[thick] (-0.1,3) -- (0.1,3);
+   \node[align=right] at (1.5,1) {mutex\_unlock(b)};
+   \draw[thick] (-0.1,1) -- (0.1,1);   
+   \node[align=right] at (0.5,-2) {Logical Time:5};
+      %show thread 1 holds the lock previously
+   \draw[thick] (3,0) --  (3,5); 
+   \draw[dotted] (3,0) --  (3,-1);
+   
+   \node[align=right] at (3.5,5.5) {Thread 2};
+   \node[align=right] at (4,5) {};
+   \draw[thick] (2.9,5) -- (3.1,5);
+   \node[align=right] at (4.5,4) {\_\_det\_start};
+   \draw[thick] (2.9,4) -- (3.1,4);
+   \node[align=right] at (4.5,3.5) {mutex\_lock(b)};
+   \draw[thick] (2.9,3.5) -- (3.1,3.5);
+   \node[align=right] at (4.5,3) {\_\_det\_end}; 
+   \draw[thick] (2.9,5.5) -- (3.1,5.5);   
+   \node[align=right] at (3,-2) {Logical Time:3};
+\end{tikzpicture}
+\caption{An example of deadlock}
+\label{fig:deadlock}
 \end{figure}
 
 \section{Related Work}
 Deterministic systems have been studied for a long time. From the implementation perspective view, they can be categorized into 4 different genres: language level, runtime level, OS level and architectural level.
 
 % Use subsections to address each work
+% To be fullfilled
 
 Clik++~\cite{leiserson2010cilk++} is an parallel extension to C++ which makes creating parallel program easier. This extension provides a property that can indicate threads to be executed in a serial way, so that the determinism can be ensured. Grace \cite{berger2009grace} is also a C++ extension that adds a fork-join parallel schema to C++, it enforces the determinism of the execution with its underlying language runtime. Both of them are very limited to a specific parallel programming model, and existing applications need to be rewritten to achieve determinism.
 
