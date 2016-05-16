@@ -1,19 +1,60 @@
 \chapter{Deterministic Execution}
-Deterministic execution provides a property that given the same input, a multithreaded program can always generate the same output. Such a system fits perfectly for our replication purpose. As long as the primary and secondary receive the same input, the replicated application will sure end up with the same state and generate the same output. Among all the deterministic systems, there is one type called "Weak Deterministic System". This type of systems assume the applications are data race free, and only guarantee the deterministic interleaving of thread synchronization primitives such as mutex locks and condition variables. Our implementation falls into this category, we implemented a set of system calls to control the application's scheduling at given points, which in turn controls the thread interleaving.
+Deterministic execution provides a property that given the same input, a multithreaded program can always generate the same output. Such a system fits perfectly for our replication purpose. As long as the primary and secondary receive the same input, the replicated application will sure end up with the same state and generate the same output.
 
-\section{Logical Time Based Deterministic Scheduling}
+For multi-threaded programs, an observation is that as long as the threads don't communicate with each other, the execution is sure to be deterministic\cite{devietti2009dmp}. For example, in pthread based programs, all the inter-thread communications are synchronized by pthread primitives. By making the interleaving of sychronization primitives to be deterministic, the entire program is sure to be deterministic. With this observation, some runtime deterministic solutions actually enforce determinism by trapping pthread primitives\cite{cui2013parrot}\cite{liu2011dthreads}\cite{olszewski2009kendo}. This type of deterministic system is called "Weak Deterministic System". It assumes that the applications are data race free, and only guarantee the deterministic interleaving of thread synchronization primitives such as mutex locks and condition variables. Our implementation falls into this category, but unlike other runtime deterministic systems, our runtime does not directly trap pthread primitives, but provides two system calls for programmer to define a deterministic section. The runtime maintains a global execution order, according to this order, an execution token is passed among all the tasks deterministically. Only the task with the execution token can enter the deterministic area, and the token will be held on this task only if it leaves its deterministic area.
+
+This chapter is structured as follows:
+\begin{itemize}
+\item Section \ref{sec:detsched} shows the basic algorithm and programming interface of the deterministic system.
+\item Section \ref{sec:logimbalance} explains the logical time imbalance problem of this algorithm and two solutions for two different cases.
+\item Section \ref{sec:edeadlock} shows the case which might cause deadlock, and the solution to it.
+\end{itemize}
+
+\section{Logical Time Based Deterministic Scheduling} \label{sec:detsched}
 Inspired by Kendo and Conversion, this scheduling policy maintains a logical time for each task inside the current Popcorn namespace. Our system provides three system calls for the applications to control the thread-interleaving:
 \begin{itemize}
-   \item \_\_det\_start: Upon it is called, only the task holds the minimal logical time can proceed, if several tasks have the same logical time, the one who has the smallest PID number gets the turn. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
-   \item \_\_det\_end: When is called, the system will increase the current thread's logical by 1, and marks it as "out of a deterministic section".
+   \item \_\_det\_start: When it is called, only the task holds the minimal logical time can proceed, if several tasks have the same logical time, the one who has the smallest PID number gets the turn. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
+   \item \_\_det\_end: When it is called, the system will increase the current thread's logical time by 1, and marks it as "out of a deterministic section".
    \item \_\_det\_tick: This system call comes with a parameter of an integer. When it is called, the logical time will be increased by value defined by the parameter.
-\end{itemize}. 
+\end{itemize}.
+
+\begin{figure}
+\centering
+\begin{lstlisting}[frame=tlrb]{blah}
+void producer() {
+	while (running){
+		item = generate_item();
+		syscall(__NR_det_start);
+		pthread_mutex_lock(mutex);
+		syscall(__NR_det_end);    
+		putItem(queue, item);    
+		pthread_mutex_unlock(mutex);
+	}
+}
+
+void consumer() {
+	while (running){
+		syscall(__NR_det_start);
+		pthread_mutex_lock(mutex);
+		syscall(__NR_det_end);
+		item = getItem(queue);    
+		pthread_mutex_unlock(mutex);		
+		consume_item(item);
+	}
+}
+\end{lstlisting}
+\caption{An example use of the deterministic syscalls}
+\label{fig:example}
+\end{figure}
+Figure~\ref{fig:example} shows an example use of the system calls. Simply wrap pthread\_mutex\_lock with \_\_det\_start and \_\_det\_end will make the acquisition of the mutex to be deterministic.
+
+
 If the logical time is updated but the one has the minimal logical time is sleeping in \_\_det\_start, the one whose updates the tick will wake the sleeping one up. As long as the replicated application updates logical time in a same way on both primary and secondary, they will sure end up with the same thread interleaving. Figure~\ref{f:algorithm} shows a simplified version of this algorithm (some mutual exclusion points are omitted here).
 
 To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock and pthread\_spin\_lock, so that the order of getting into critical sections is controlled under our deterministic scheduling.
 
 \begin{figure}
-\begin{lstlisting}[title=Deterministic Logical Time,frame=tlrb]{blah}
+\begin{lstlisting}[frame=tlrb]{blah}
 void __det_start()
 {
     if (token->token != current)
@@ -37,12 +78,12 @@ void __update_tick(int tick)
     	wake_up(token->task);
 }
 \end{lstlisting}
-\caption{Simplified version of deterministic system calls}
+\caption{Simplified implementation of deterministic system calls}
 \label{f:algorithm}
 \end{figure}
 
-\section{Balance the Logical Time}
-Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program.
+\section{Balance the Logical Time} \label{sec:logimbalance}
+Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model in the program snippet we presented in Figure~\ref{fig:example}, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program.
 
 \begin{figure}
 \centering
@@ -81,7 +122,7 @@ Only increasing the logical time by 1 at \detend\ isn't enough. With an example 
    \draw[thick] (2.9,2) -- (3.1,2);
    \node[align=right] at (4.5,1) {mutex\_unlock};
    \draw[thick] (2.9,1) -- (3.1,1);
-   \node[align=right] at (4.5,0) {consumeItem};
+   \node[align=right] at (4.5,0) {consumeItem};   \node[align=right] at (7,0) {(Takes 10s)};
    \draw[thick] (2.9,0) -- (3.1,0);
    \node[align=right] at (4,-2) {Logical Time:3};   
 \end{tikzpicture}
@@ -99,55 +140,78 @@ In the upcoming sections we will discuss the solution of each of the cases.
 \subsection{Execution Time Profiling}
 When a task is running in a computational region (in user space) which might take a long time, the logical time of the task should increase along with the execution. In Kendo this is done by counting retired read instructions — using performance counters — to track to progress of a running task and increases its logical time accordingly. However it is hard to ensure that on the primary and the secondary the performance counter can have the same behaviour, as a result we have to find another way to track the progress of a running task.
 
+
+
 %Compiler shit here
 
 \subsection{Tick Bumping for External Events}
-When a task is sleeping in the kernel, usually it is in a system call and waiting for some events to wake it up. Especially for system calls like epoll\_wait, poll and accept and other I/O system calls, the arrival time of the event is non-deterministic, as a result, we cannot simply use \dettick\ to increase the logical time with a predefined value from a profile run, because we have no idea how long the thread will be sleeping in the kernel. In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/tickbump}
+\caption{An example of tick bumping}
+\label{f:tick_bump}
+\end{figure}
+
+When a task is sleeping in the kernel, usually it is in a system call and waiting for some events to wake it up. Especially for system calls like epoll\_wait, poll and accept and other I/O system calls, the arrival time of the event is non-deterministic, as a result, we cannot simply use \dettick\ to increase the logical time with a predefined value from a profile run, because we have no idea how long the thread will be sleeping in the kernel.
+
+In some deterministic systems, they simply remove the tasks that in sleeping out of the deterministic schedule and put them back after they are back to user space. This is not applicable in a replication system like ours, as previously stated, the wake up time of those system calls might be different from the primary and secondary replica. As a result we must maintain those tasks sleeping in such system calls in the deterministic system, and also maintain the consistent state of the logical time for those tasks.
+
+In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
 
 Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output.
 
 We only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
-\section{Eliminate Deadlocks}
+\section{Eliminate Deadlocks} \label{sec:edeadlock}
 % cite futex and glic here
-With wrapping all the pthread\_mutex\_lock with our deterministic system calls, there is a potential risk of having deadlocks. Serializing all the lock acquisitions with our implementation means that putting a giant global mutex lock around every lock acquisition. As shown in Figure~\ref{fig:deadlock}, Thread 2 has a lower logical time and try to acquire the mutex(b), however mutex(b) is contended, as a result Thread 2 will call futex\_wait and put the thread into sleep until mutex(b) is released by someone else. At this point, Thread 2 will never increase its logical time until mutex(b) is released. So Thread 1 will never goes through the \_\_det\_start, and it will never unlock mutex(b)， which means Thread 2 will never be woken up.
+With wrapping all the pthread\_mutex\_lock with our deterministic system calls, there is a potential risk of having deadlocks. Serializing all the lock acquisitions with our implementation basically means putting a giant global mutex lock around every lock acquisition. As shown in Figure~\ref{fig:deadlock}, Thread 2 has a lower logical time and try to acquire the mutex(b), however mutex(b) is contended, as a result Thread 2 will call futex\_wait and put the thread into sleep until mutex(b) is released by someone else. At this point, Thread 2 will never increase its logical time until mutex(b) is released. So Thread 1 will never goes through the \_\_det\_start, and it will never unlock mutex(b)， which means Thread 2 will never be woken up.
 
 Since we already know that a contented mutex will call futex\_wait to wait for a unlock event, the solution to this deadlock problem is to temporary remove the thread in futex\_wait out of the deterministic schedule, and add it back when it returns from futex\_wait. In the example of Figure~\ref{fig:deadlock}， Thread 1 will be able to proceed its \_\_det\_start and keep executing. Simply doing so might break the determinism, we ensure the determinism by guaranteeing the following:
 \begin{itemize}
-\item The waiting queue in futex\_wait is strictly FIFO, which means the wakeup sequence will be the same as the sequence of getting into futex\_wait. Since the latter one is ensured by our \_\_det\_start, with this hack to futex, the timing of getting out of a contended pthread\_mutex\_lock will be the same sequence. This is implemented by changing the priority queue inside futex\_wait to a FIFO queue.
-\item When waking up from a futex\_wait, the thread always waits for the token before returning to the user space. With this implemented, the timing of getting out of a contended pthread\_mutex\_lock will be deterministic. This is implemented by adding a \_\_det\_start after the wake up point of futex\_wait.
+\item We guarantee that the waiting queue in futex\_wait is strictly FIFO, which means the wakeup sequence will be the same as the sequence of getting into futex\_wait. Since the latter one is ensured by our \_\_det\_start, with this hack to futex, the wake up sequence from futex\_wait will be the same sequence determined by previous \_\_det\_start. This is implemented by fixing the priority of each futex object, so that the priority queue inside futex\_wait can behave like a FIFO queue.
+\item We guarantee that when waking up from a futex\_wait, the thread always waits for the token before returning to the user space. With this implemented, the timing (in terms of logical time) of getting out of a contended pthread\_mutex\_lock will be deterministic. This is implemented by adding a \_\_det\_start after the wake up point of futex\_wait.
 \end{itemize}
 
 \begin{figure}
 \centering
 \begin{tikzpicture}
-   \draw[thick] (-0.1,4) --  (-0.1,5); 
-   \draw[dotted] (-0.1,4) --  (-0.1,-1);
+   \draw[thick] (-0.1,4) --  (-0.1,7); 
+   \draw[dotted] (-0.1,4) --  (-0.1,0.3);
    
-   \node[align=right] at (0,5.5) {Thread 1};
+   \node[align=right] at (0,7.5) {Thread 1};
+   
+   \node[align=right] at (1.5,7) {\_\_det\_start};
+   \draw[thick] (-0.1,7) -- (0.1,7);
+   \node[align=right] at (1.5,6.5) {mutex\_lock(b)};
+   \draw[thick] (-0.1,6.5) -- (0.1,6.5);
+   \node[align=right] at (1.5,6) {\_\_det\_end};
+   \draw[thick] (-0.1,6) -- (0.1,6);
+   \node[align=right] at (1.5,5) {mutex\_lock(a)};
+   \draw[thick] (-0.1,5) -- (0.1,5);      
+   
    \node[align=right] at (1.5,4) {\_\_det\_start};
    \draw[thick] (-0.1,4) -- (0.1,4);
-   \node[align=right] at (1.5,3.5) {mutex\_lock(a)};
+   \node[align=right] at (1.5,3.5) {mutex\_lock(b)};
    \draw[thick] (-0.1,3.5) -- (0.1,3.5);
    \node[align=right] at (1.5,3) {\_\_det\_end};
    \draw[thick] (-0.1,3) -- (0.1,3);
-   \node[align=right] at (1.5,1) {mutex\_unlock(b)};
+   \node[align=right] at (1.5,1) {mutex\_lock(a)};
    \draw[thick] (-0.1,1) -- (0.1,1);   
-   \node[align=right] at (0.5,-2) {Logical Time:5};
+   \node[align=right] at (0,0) {Logical Time:5};
       %show thread 1 holds the lock previously
-   \draw[thick] (3,0) --  (3,5); 
-   \draw[dotted] (3,0) --  (3,-1);
+
+   \draw[thick] (3,6) --  (3,7); 
+   \draw[dotted] (3,6) --  (3,0.3);
    
-   \node[align=right] at (3.5,5.5) {Thread 2};
-   \node[align=right] at (4,5) {};
-   \draw[thick] (2.9,5) -- (3.1,5);
-   \node[align=right] at (4.5,4) {\_\_det\_start};
-   \draw[thick] (2.9,4) -- (3.1,4);
-   \node[align=right] at (4.5,3.5) {mutex\_lock(b)};
-   \draw[thick] (2.9,3.5) -- (3.1,3.5);
-   \node[align=right] at (4.5,3) {\_\_det\_end}; 
-   \draw[thick] (2.9,5.5) -- (3.1,5.5);   
-   \node[align=right] at (3,-2) {Logical Time:3};
+   \node[align=right] at (3.5,7.5) {Thread 2};
+   \node[align=right] at (4.5,6) {\_\_det\_start};
+   \draw[thick] (2.9,6) -- (3.1,6);
+   \node[align=right] at (4.5,5.5) {mutex\_lock(b)};
+   \draw[thick] (2.9,5.5) -- (3.1,5.5);
+   \node[align=right] at (4.5,5) {\_\_det\_end}; 
+   \draw[thick] (2.9,5) -- (3.1,5);   
+   \node[align=right] at (3.5,0) {Logical Time:3};
 \end{tikzpicture}
 \caption{An example of deadlock}
 \label{fig:deadlock}
