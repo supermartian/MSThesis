@@ -20,27 +20,27 @@ Inspired by Kendo and Conversion, this scheduling policy maintains a logical tim
 
 \begin{figure}
 \centering
-\begin{lstlisting}[frame=tlrb]{blah}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
 void producer() {
-	while (running){
-		item = generate_item();
-		syscall(__NR_det_start);
-		pthread_mutex_lock(mutex);
-		syscall(__NR_det_end);    
-		putItem(queue, item);    
-		pthread_mutex_unlock(mutex);
-	}
+    while (running){
+        item = generate_item();
+	    syscall(__NR_det_start);
+	    pthread_mutex_lock(mutex);
+	    syscall(__NR_det_end);    
+	    putItem(queue, item);    
+	    pthread_mutex_unlock(mutex);
+    }
 }
 
 void consumer() {
-	while (running){
-		syscall(__NR_det_start);
-		pthread_mutex_lock(mutex);
-		syscall(__NR_det_end);
-		item = getItem(queue);    
-		pthread_mutex_unlock(mutex);		
-		consume_item(item);
-	}
+    while (running){
+        syscall(__NR_det_start);
+        pthread_mutex_lock(mutex);
+        syscall(__NR_det_end);
+        item = getItem(queue);    
+        pthread_mutex_unlock(mutex);		
+        consume_item(item);
+    }
 }
 \end{lstlisting}
 \caption{An example use of the deterministic syscalls}
@@ -53,7 +53,7 @@ If the logical time is updated but the one has the minimal logical time is sleep
 To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock and pthread\_spin\_lock, so that the order of getting into critical sections is controlled under our deterministic scheduling.
 
 \begin{figure}
-\begin{lstlisting}[frame=tlrb]{blah}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
 void __det_start()
 {
     if (token->token != current)
