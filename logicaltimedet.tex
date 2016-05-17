@@ -1,4 +1,4 @@
-\chapter{Deterministic Execution}
+\chapter{Deterministic Execution} \label{chap:detexec}
 Deterministic execution provides a property that given the same input, a multithreaded program can always generate the same output. Such a system fits perfectly for our replication purpose. As long as the primary and secondary receive the same input, the replicated application will sure end up with the same state and generate the same output.
 
 For multi-threaded programs, an observation is that as long as the threads don't communicate with each other, the execution is sure to be deterministic\cite{devietti2009dmp}. For example, in pthread based programs, all the inter-thread communications are synchronized by pthread primitives. By making the interleaving of sychronization primitives to be deterministic, the entire program is sure to be deterministic. With this observation, some runtime deterministic solutions actually enforce determinism by trapping pthread primitives\cite{cui2013parrot}\cite{liu2011dthreads}\cite{olszewski2009kendo}. This type of deterministic system is called "Weak Deterministic System". It assumes that the applications are data race free, and only guarantee the deterministic interleaving of thread synchronization primitives such as mutex locks and condition variables. Our implementation falls into this category, but unlike other runtime deterministic systems, our runtime does not directly trap pthread primitives, but provides two system calls for programmer to define a deterministic section. The runtime maintains a global execution order, according to this order, an execution token is passed among all the tasks deterministically. Only the task with the execution token can enter the deterministic area, and the token will be held on this task only if it leaves its deterministic area.
@@ -24,11 +24,11 @@ Inspired by Kendo and Conversion, this scheduling policy maintains a logical tim
 void producer() {
     while (running){
         item = generate_item();
-	    syscall(__NR_det_start);
-	    pthread_mutex_lock(mutex);
-	    syscall(__NR_det_end);    
-	    putItem(queue, item);    
-	    pthread_mutex_unlock(mutex);
+        syscall(__NR_det_start);
+        pthread_mutex_lock(mutex);
+        syscall(__NR_det_end);    
+        putItem(queue, item);    
+        pthread_mutex_unlock(mutex);
     }
 }
 
@@ -81,6 +81,7 @@ void __update_tick(int tick)
 \label{f:algorithm}
 \end{figure}
 
+\newpage
 \section{Balance the Logical Time} \label{sec:logimbalance}
 Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model in the program snippet we presented in Figure~\ref{fig:example}, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program.
 
@@ -147,6 +148,8 @@ In order to get the execution time of a program, we make a profile pass to colle
 \paragraph{Logical Time Pass}
 After the program finished one profile run with the instrumentation of profile pass, we can launch our compiler again to generate the final executable. The logical time pass will take the profile data file as input. This time at the end of each basic block, a \_\_det\_tick will be inserted with the parameter of a scaled execution time of the current basic block. So that the logical time will be bumped at the end of each basic block according to the actual execution time of each basic block. Fiin gure~\ref{fig:instrumented} shows an example of instrument basic block in LLVM-IR. In this example, Line 9 is the end of the basic block, it comes with a \dettick\ system call with a value 2895535, which is generated and normalized from a previous profile run. In this basic block, line 5 is the most time consuming part in the entire program (pbzip2), as a result this basic block needs a relatively large tick increment.
 
+% put a bb with profile instrumentation here
+
 \begin{figure}
 \centering
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]
@@ -185,9 +188,26 @@ Some deterministic systems simply remove the sleeping tasks out of the determini
 
 In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
 
-
 Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works in action. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output.
 
+% bullshit about tick bump in detail
+
+\begin{figure}
+\centering
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]
+struct tick_bump_msg {
+    struct pcn_kmsg_hdr header;
+    struct ft_pop_rep_id ft_pop_id;
+    int level;
+    int id_array[MAX_GENERATION_LENGTH];
+    int syscall_id;
+    uint64_t prev_tick;
+    uint64_t new_tick;
+};
+\end{lstlisting}
+\caption{Tick bump message data structure}
+\label{fig:tick_bump_data}
+\end{figure}
 
 We only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
