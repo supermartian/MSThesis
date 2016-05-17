@@ -131,8 +131,8 @@ Only increasing the logical time by 1 at \detend\ isn't enough. With an example 
 
 Generally, logical time imbalance can happen in two cases:
 \begin{itemize}
-  \item A task is running in for a long time (in user space).
-  \item A task is sleeping in for a long time (in kernel space).
+  \item A task is running for a long time (in user space).
+  \item A task is sleeping for a long time (in kernel space).
 \end{itemize}
 
 In the upcoming sections we will discuss the solution of each of the cases.
@@ -142,10 +142,10 @@ When a task is running in a computational region (in user space) which might tak
 Instead of deciding the logical time during the runtime, we discovered a way to settle the logical time during the compilation time. The basic idea is to collect the execution time of via a profile run, then compile the application with the data from the profile run. Based on LLVM, we implemented two compiler passes to do the profiling and instrumentation.
 
 \paragraph{Profile Pass}
-In order to get the execution time of each section of a program, we make a profile pass to collect the execution time of each basic block, and then output the profile result to a file. During the compilation time, this compiler pass will assign a unique number to each basic block, and inserts time profiling functions around this basic block. We implemented an additional runtime to collect the execution time of each basic block, indexed by the unique number assigned previously. When the application finishes, the runtime will calculate the average execution time of each basic block, and write it to a file.
+In order to get the execution time of a program, we make a profile pass to collect the execution time at the granularity of basic block. During the compilation time, this compiler pass will assign a unique number to each basic block, and inserts time profiling functions around every basic block beyond a certain threshold in terms of number of instructions. The profile run is launched by our profile launcher, which will keep track of the execution time of the application, and compute the average execution time for each instrumented basic block upon the application exits. In the end, all the gathered information will be output to a file for future use.
 
 \paragraph{Logical Time Pass}
-After the program finished one profile run with the instrumentation of profile pass, we can launch our compiler again to generate the final executable. The logical time pass will take the profile data file as input. This time at the end of each basic block, a \_\_det\_tick will be inserted with the parameter of a scaled execution time of the current basic block. So that the logical time will be bumped at the end of each basic block according to the actual execution time of each basic block. Figure~\ref{fig:instrumented} shows an example of instrument basic block in LLVM-IR. Since the value of logical time bumping is determined during the compilation time and won't change , the runtime binary is sure to be deterministic.
+After the program finished one profile run with the instrumentation of profile pass, we can launch our compiler again to generate the final executable. The logical time pass will take the profile data file as input. This time at the end of each basic block, a \_\_det\_tick will be inserted with the parameter of a scaled execution time of the current basic block. So that the logical time will be bumped at the end of each basic block according to the actual execution time of each basic block. Fiin gure~\ref{fig:instrumented} shows an example of instrument basic block in LLVM-IR. In this example, Line 9 is the end of the basic block, it comes with a \dettick\ system call with a value 2895535, which is generated and normalized from a previous profile run. In this basic block, line 5 is the most time consuming part in the entire program (pbzip2), as a result this basic block needs a relatively large tick increment.
 
 \begin{figure}
 \centering
@@ -162,9 +162,11 @@ After the program finished one profile run with the instrumentation of profile p
   br i1 %cmp26, label %if.then.27, label %if.end.29
 
 \end{lstlisting}
-\caption{An instrumented basic block in pbzip2.}
+\caption{An instrumented basic block in pbzip2 with dettick.}
 \label{fig:instrumented}
 \end{figure}
+
+\newpage
 
 %Compiler shit here
 
@@ -172,8 +174,7 @@ After the program finished one profile run with the instrumentation of profile p
 
 When a task is sleeping in the kernel, usually it is in a system call and waiting for some events to wake it up. Especially for system calls like epoll\_wait, poll and accept and other I/O system calls, the arrival time of the event is non-deterministic, as a result, we cannot simply use \dettick\ to increase the logical time with a predefined value from a profile run, because we have no idea how long the thread will be sleeping in the kernel.
 
-
-Some deterministic systems simply remove the tasks that in sleeping out of the deterministic schedule and put them back after they are back to user space. This is not applicable in a replication system like ours, as previously stated, the wake up time of those system calls might be different from the primary and secondary replica. As a result we must not abandon those sleeping tasks, and also maintain the consistent state of the logical time for those tasks.
+Some deterministic systems simply remove the sleeping tasks out of the deterministic schedule and put them back after they are back to user space. This is not applicable in a replication system like ours, as previously stated, the wake up time of those system calls might be different from the primary and secondary replica. As a result we must not abandon those sleeping tasks, and have to maintain the consistent state of the logical time for those tasks.
 
 \begin{figure}
 \centering
