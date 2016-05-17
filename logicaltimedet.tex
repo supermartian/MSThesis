@@ -216,13 +216,47 @@ Some deterministic systems simply remove the sleeping tasks out of the determini
 \label{f:tick_bump}
 \end{figure}
 
-In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
+In order to let the token passing keep going with those blocking system calls, we need a way to keep bumping those thread's logical time while they are sleeping, a "Tick Shepherd" is implemented to dynamically bump the logical time of the threads that are sleeping in such system calls. The Tick Shepherd is a kernel thread which is mostly sleeping in the background, whenever the token is passed on to a thread that is sleeping on external events or a thread is going to sleep with the token, the shepherd will be woken up to increase the sleeping thread's logical time and send the increased value to the replica. In the meanwhile the corresponding system call on the replica will be blocked at the entry point, and bumps its logical time according to the information from the primary. Figure~\ref{f:tickbump_code} shows the simplified version of Tick Shepherd, it only runs on the primary replica. The syscall on the secondary doesn't proceed until the primary returns from the syscall. In this way we can make sure that when both of the syscalls wake up from sleeping, all the replicas will end up with a consistent state, in terms of logical time. The Tick Shepherd will keep bumping sleeping tasks logical time until for a given period the state of all the tasks comes to a stable point, where nobody makes a single syscall. After that, it will go back to sleep again.
 
-Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works in action. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output.
+Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works in action. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output. In order to be efficient, we only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
-% bullshit about tick bump in detail
+\begin{figure}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
+while (!kthread_should_stop()) {
+  if (ns->task_count == 0 ||
+    ns->wait_count == 0) {
+    sleep(); // Sleep until some task wakes it up
+    continue;
+  }
+  token = ns->token;
+  tick = token->task->ft_det_tick;
+  udelay(20); // delay for a small duration
+  token2 = ns->token;
+  tick2 = token2->task->ft_det_tick;
+  // Which means the token hasn't been changed during the delay,
+  // It's time to bump the tick
+  if (token == token2 && tick2 == tick) {
+    if (!is_waiting_for_token(token->task) &&
+      (is_concerned_syscall(token->task->current_syscall)) {
+        if (ns->wait_count != 0 &&
+          token->task->bumped == 0) {
+            bump_task = token->task;
+            id_syscall = token->task->id_syscall;
+            bump = ns->last_tick + 1;
+            previous_bump = token->task->ft_det_tick;
+            token->task->ft_det_tick = ns->last_tick + 1;
+            update_token(ns);
+            send_bump(bump_task, id_syscall, previous_bump, bump);
+            continue;
+         }
+      }
+   }
+}
+\end{lstlisting}
+\caption{Simplified implementation of Tick Shepherd}
+\label{f:tickbump_code}
+\end{figure}
 
-We only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
 \section{Eliminate Deadlocks} \label{sec:edeadlock}
 % cite futex and glic here

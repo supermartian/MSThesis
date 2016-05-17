@@ -1,12 +1,7 @@
 \chapter{Schedule Replication}
-In chapter ~\ref{chap:detexec} we described using a deterministic system to ensure the applications on the primary and secondary replica can have the same thread interleaving. The major advantage of the deterministic system is that we can minimize the communication between the replicas. However the downside is that we need to precisely adjust the logical time to maintain decent parallelism for multithreaded applications. We showed various solutions to balance the logical time because we need to keep the execution to be deterministic. If all the burdens come from being deterministic, can we break the determinism once for all but still keep the replicas to be deterministic? The answer is yes.
+In chapter ~\ref{chap:detexec} we described using a deterministic system to ensure the applications on the primary and secondary replica can have the same thread interleaving. The major advantage of the deterministic system is that we can minimize the communication between the replicas. However the downside is that we need to precisely adjust the logical time to maintain decent parallelism for multithreaded applications. We showed various solutions to balance the logical time because we need to keep the execution to be fast and deterministic. If all the burdens come from being deterministic, can we break the determinism once for all but still keep the replicas to be synchronized? The answer is yes.
 
-In this chapter we are going to describe Execute-Follow model for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica. This chapter is organized as follows:
-
-\begin{itemize}
-  \item In blah we describe blah
-  \item In blah we describe blah
-\end{itemize}
+In this chapter we are going to describe Schedule Replication for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica. For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication, Figure~\ref{f:tradeoff} shows the relation between two different algorithms. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with negatable latency. As a result having massive massages between replicas won't put too much overhead to the replication.
 
 \begin{figure}
 \centering
@@ -14,5 +9,58 @@ In this chapter we are going to describe Execute-Follow model for replicated app
 \caption{Trade off between two algorithms}
 \label{f:tradeoff}
 \end{figure}
-\section{Execute-Follow Model}
+
+\section{Execute-Log-Replay}
+Before we get into the detail of this algorithm, let's revisit some important properties that are provided by the deterministic system.
+
+\begin{itemize}
+\item Serialization of deterministic areas. (The code region between detstart and detend).
+\item Same total order of getting into deterministic areas on primary and secondary.
+\end{itemize}
+
+The first property is guaranteed by the fact that the logical time won't change during the execution of a deterministic area, and the second property is guaranteed by increasing the logical time in a same way on both primary and replica. As long as these two properties are guaranteed, the thread interleaving on both primary and secondary are sure to be the same (also for tick bump). In our Schedule Replication mode, we guarantee these two properties with the following approaches:
+
+\begin{itemize}
+\item Serialize deterministic areas with a global mutex on both primary and secondary.
+\item Log the sequence of getting into deterministic areas on the primary and replay it on the secondary.
+\end{itemize}
+
+From the implementation perspective, Schedule Replication multiplexes the programming interface of Deterministic Execution, a user is able to switch between two different algorithms without changing the existing application code. Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_code} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
+
+\begin{figure}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
+void __det_start()
+{
+    if (is_secondary(current))
+        wait_for_sync(current->seq, 
+            ns->seq, current->ft_pid);
+    lock(ns->global_mutex);
+    current->ft_det_state = FT_DET_ACTIVE;
+}
+void __det_end()
+{
+    if (is_primary(current))
+        send_sync(current->seq, 
+            ns->seq, current->ft_pid);
+    current->seq++;
+    ns->seq++;
+    current->ft_det_state = FT_DET_INACTIVE;
+    unlock(ns->global_mutex);
+}
+\end{lstlisting}
+\caption{Simplified implementation of system calls for schedule replication}
+\label{f:schedrep_c}
+\end{figure}
+
+Figure~\ref{f:schedrep} shows an example of how Schedule Replication works in action.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.9\columnwidth]{figures/sched_rep}
+\caption{An example of Schedule Replication}
+\label{f:scherep}
+\end{figure}
+
+
 \section{Implementation}
+\section{Related Work}
