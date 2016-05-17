@@ -7,15 +7,14 @@ This chapter is structured as follows:
 \begin{itemize}
 \item Section \ref{sec:detsched} shows the basic algorithm and programming interface of the deterministic system.
 \item Section \ref{sec:logimbalance} explains the logical time imbalance problem of this algorithm and two solutions for two different cases.
-\item Section \ref{sec:edeadlock} shows the case which might cause deadlock, and the solution to it.
+\item Section \ref{sec:deadlock} shows the case which might cause deadlock, and the solution to the problem.
 \end{itemize}
 
 \section{Logical Time Based Deterministic Scheduling} \label{sec:detsched}
-Inspired by Kendo and Conversion, this scheduling policy maintains a logical time for each task inside the current Popcorn namespace. Our system provides three system calls for the applications to control the thread-interleaving:
+Inspired by Kendo and Conversion, this scheduling policy maintains a logical time for each task inside the current Popcorn namespace. There is a "token" being passed among all the tasks in the namespace according to the logical time of each task. Our system provides following system calls for the applications to control the thread-interleaving:
 \begin{itemize}
-   \item \_\_det\_start: When it is called, only the task holds the minimal logical time can proceed, if several tasks have the same logical time, the one who has the smallest PID number gets the turn. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
+   \item \_\_det\_start: When it is called, only the task holds the token can proceed. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
    \item \_\_det\_end: When it is called, the system will increase the current thread's logical time by 1, and marks it as "out of a deterministic section".
-   \item \_\_det\_tick: This system call comes with a parameter of an integer. When it is called, the logical time will be increased by value defined by the parameter.
 \end{itemize}.
 
 \begin{figure}
@@ -50,7 +49,7 @@ Figure~\ref{fig:example} shows an example use of the system calls. Simply wrap p
 
 If the logical time is updated but the one has the minimal logical time is sleeping in \_\_det\_start, the one whose updates the tick will wake the sleeping one up. As long as the replicated application updates logical time in a same way on both primary and secondary, they will sure end up with the same thread interleaving. Figure~\ref{f:algorithm} shows a simplified version of this algorithm (some mutual exclusion points are omitted here).
 
-To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock and pthread\_spin\_lock, so that the order of getting into critical sections is controlled under our deterministic scheduling.
+To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock , so that the order of getting into critical sections is controlled under our deterministic scheduling.
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
@@ -72,7 +71,7 @@ void __det_tick(int tick)
 void __update_tick(int tick)
 {
     current->tick += tick;
-    token = find_task_with_min_tick(ns);
+    token->task = find_task_with_min_tick(ns);
     if (is_waiting_for_toUponken(token->task))
     	wake_up(token->task);
 }
@@ -127,7 +126,7 @@ Only increasing the logical time by 1 at \detend\ isn't enough. With an example 
    \node[align=right] at (4,-2) {Logical Time:3};   
 \end{tikzpicture}
 \caption{An example of logical time imbalance.}
-\label{fig:imbalance}
+\label{fig:imbalance}and pthread\_spin\_lock
 \end{figure}
 
 Generally, logical time imbalance can happen in two cases:
@@ -140,19 +139,52 @@ In the upcoming sections we will discuss the solution of each of the cases.
 \subsection{Execution Time Profiling}
 When a task is running in a computational region (in user space) which might take a long time, the logical time of the task should increase along with the execution. In Kendo this is done by counting retired read instructions — using performance counters — to track to progress of a running task and increases its logical time accordingly. However it is hard to ensure that on the primary and the secondary the performance counter can have the same behaviour, as a result we have to find another way to track the progress of a running task.
 
-Instead of deciding the logical time during the runtime, we discovered a way to settle the logical time during the compilation time. The basic idea is to collect the execution time of via a profile run, then compile the application with the data from the profile run. Based on LLVM, we implemented two compiler passes to do the profiling and instrumentation.
+Instead of deciding the logical time during the runtime, we discovered a way to settle the logical time during the compilation time. The basic idea is to collect the execution time of via a profile run, then compile the application with the data from the profile run. First, we introduce another system call to increase the logical time of a task:
+
+\begin{itemize}
+   \item \_\_det\_tick: This system call comes with a parameter of an integer. When it is called, the logical time will be increased by value defined by the parameter.
+\end{itemize}
+
+This system call should be inserted in the program where the logical time needs to be increased. In order to automate this instrumentation process, based on LLVM, we implemented two compiler passes to do the profiling and instrumentation.
 
 \paragraph{Profile Pass}
-In order to get the execution time of a program, we make a profile pass to collect the execution time at the granularity of basic block. During the compilation time, this compiler pass will assign a unique number to each basic block, and inserts time profiling functions around every basic block beyond a certain threshold in terms of number of instructions. The profile run is launched by our profile launcher, which will keep track of the execution time of the application, and compute the average execution time for each instrumented basic block upon the application exits. In the end, all the gathered information will be output to a file for future use.
+In order to get the execution time of a program, we make a profile pass to collect the execution time at the granularity of basic block. During the compilation time, this compiler pass will assign a unique number to each basic block, and inserts time profiling functions around every basic block beyond a certain threshold in terms of number of instructions. Figure~\ref{fig:profiled} shows a basic block instrumented with the profile functions in LLVM-IR. In this basic block, bbprof\_start (line 3) and bbprof\_end (line 16) are inserted at the beginning and the end of this basic block.
+
+The profile run is launched by our profile launcher, which will keep track of the execution time of the application, and compute the average execution time for each instrumented basic block upon the application exits. In the end, all the gathered information will be output to a file for future use.
 
 \paragraph{Logical Time Pass}
-After the program finished one profile run with the instrumentation of profile pass, we can launch our compiler again to generate the final executable. The logical time pass will take the profile data file as input. This time at the end of each basic block, a \_\_det\_tick will be inserted with the parameter of a scaled execution time of the current basic block. So that the logical time will be bumped at the end of each basic block according to the actual execution time of each basic block. Fiin gure~\ref{fig:instrumented} shows an example of instrument basic block in LLVM-IR. In this example, Line 9 is the end of the basic block, it comes with a \dettick\ system call with a value 2895535, which is generated and normalized from a previous profile run. In this basic block, line 5 is the most time consuming part in the entire program (pbzip2), as a result this basic block needs a relatively large tick increment.
+After the program finished one profile run with the instrumentation of profile pass, we can launch our compiler again to generate the final executable. The logical time pass will take the profile data file as input. This time at the end of each basic block, a \_\_det\_tick will be inserted with the parameter of a scaled execution time of the current basic block. So that the logical time will be bumped at the end of each basic block according to the actual execution time of each basic block. Fi gure~\ref{fig:instrumented} shows an example of instrumented basic block in LLVM-IR. This is the same basic block as we showed in Figure~\ref{fig:profiled}. In this example, Line 9 is the end of the basic block, it comes with a \dettick\ system call with a value 2895535, which is generated and normalized from a previous profile run. In this basic block, line 5 is the most time consuming part in the entire program (pbzip2), as a result this basic block needs a relatively large tick increment.
 
+\begin{figure}
+\centering
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]
+if.end.23:                                        ; preds = %for.end
+  %38 = load i8*, i8** %CompressedData, align 8
+  %39 = call i32 (i32, ...) @bbprof_start(i32 249)
+  %40 = load %struct.outBuff*, %struct.outBuff** %fileData, align 8
+  %buf = getelementptr inbounds %struct.outBuff, %struct.outBuff* %40, i32 0, i32 0
+  %41 = load i8*, i8** %buf, align 8
+  %42 = load %struct.outBuff*, %struct.outBuff** %fileData, align 8
+  %bufSize24 = getelementptr inbounds %struct.outBuff, %struct.outBuff* %42, i32 0, i32 1
+  %43 = load i32, i32* %bufSize24, align 4
+  %44 = load i32, i32* @_ZL12BWTblockSize, align 4
+  %45 = load i32, i32* @_ZL9Verbosity, align 4
+  %call25 = call i32 @BZ2_bzBuffToBuffCompress(i8* %38, i32* %outSize, i8* %41, i32 %43, i32 %44, i32 %45, i32 30)
+  store i32 %call25, i32* %ret, align 4
+  %46 = load i32, i32* %ret, align 4
+  %cmp26 = icmp ne i32 %46, 0
+  %47 = call i32 (i32, ...) @bbprof_end(i32 249)
+  br i1 %cmp26, label %if.then.27, label %if.end.29
+\end{lstlisting}
+\caption{An instrumented basic block in pbzip2 with execution time profiling functions.}
+\label{fig:profiled}
+\end{figure}
 % put a bb with profile instrumentation here
 
 \begin{figure}
 \centering
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]
+  (.....)
   %bufSize24 = getelementptr inbounds %struct.outBuff, %struct.outBuff* %35, i32 0, i32 1
   %36 = load i32, i32* %bufSize24, align 4
   %37 = load i32, i32* @_ZL12BWTblockSize, align 4
@@ -168,8 +200,6 @@ After the program finished one profile run with the instrumentation of profile p
 \caption{An instrumented basic block in pbzip2 with dettick.}
 \label{fig:instrumented}
 \end{figure}
-
-\newpage
 
 %Compiler shit here
 
@@ -191,23 +221,6 @@ In order to let the token passing keep going with those blocking system calls, w
 Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works in action. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output.
 
 % bullshit about tick bump in detail
-
-\begin{figure}
-\centering
-\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]
-struct tick_bump_msg {
-    struct pcn_kmsg_hdr header;
-    struct ft_pop_rep_id ft_pop_id;
-    int level;
-    int id_array[MAX_GENERATION_LENGTH];
-    int syscall_id;
-    uint64_t prev_tick;
-    uint64_t new_tick;
-};
-\end{lstlisting}
-\caption{Tick bump message data structure}
-\label{fig:tick_bump_data}
-\end{figure}
 
 We only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
