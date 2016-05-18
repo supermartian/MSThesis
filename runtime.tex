@@ -1,6 +1,41 @@
 \chapter{Additional Runtime Support}
-\section{Synchronization Exclusion}
-% skip the next detstart
+In this chapter we will address some remaining issues of the replication system.
+
 \section{Syscall Synchronization}
 % put syscall hooks here
-\section{Modified Pthread Library}
+During the execution of an application, for most of the system calls, given the same external input, the application on both primary and secondary can produce the same result, however there are still some system calls that are intrinsically non-deterministic, which will lead to divergence of the execution on all the replicas. As a result we have to synchronize the output of them to ensure the consistent final output of the applications on both sides.
+
+\paragraph{Disabling vDSO}
+
+vDSO(virtual dynamic shared object) is a mechanism that allows a system call to be done in user space, instead of having context switch to the kernel space. This is done by having a shared memory section between the user space and the kernel. When the system call is initiated, the corresponding function in the vDSO library is called instead of trapping into the kernel, then the library will fetch the result from this shared memory area and return. This boosts the performance for some "read only" system calls (like gettimeofday/time). However, in our case, if the system call doesn't go into the kernel space, we cannot track and synchronize them. Also, in order to synchronize the system call data we have to get into the kernel space anyway to send inter-kernel messages. So vDSO in our context becomes a burden to the implementation. As a result in our system we have to disable vDSO.
+
+In the following subsections we will describe each synchronized system call in detail.
+
+\subsection{gettimeofday/time}
+
+gettimeofday and time are used for getting the current timestamp. Since the primary and secondary can not always have the same execution progress, the timing of calling gettimeofday/time might be different. For those applications that the output is time related, those system calls will cause output divergence. For gettimeofday/time, the primary simply copies the result to the secondary, when secondary executes the corresponding gettimeofday/time, it directly uses the output from the primary and bypasses it's original path.
+
+\subsection{poll}
+
+poll is used for waiting on a set of file descriptors for I/O. A programmer can register a set of file descriptors to poll along with the type of events that is related to those file descriptors. poll takes an array of pollfd struct as shown in Figure~\ref{f:pollfd}. When it is called, it waits until one or more registered file descriptors become ready with registered events.
+
+\begin{figure}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{ble}
+struct pollfd {
+    int   fd;         /* file descriptor */
+    short events;     /* requested events */
+    short revents;    /* returned events */
+};
+\end{lstlisting}
+\caption{pollfd data structure}
+\label{f:pollfd}
+\end{figure}
+
+poll notification mechanism relies on the Linux VFS subsystem. However, as described in previous chapter, on the secondary kernel the replicated TCP/IP stack will bypass the original execution path for accept/read/write on sockets, in other words, the VFS subsystem is partially bypassed. As a result, poll will not be woken up properly on the secondary even when the event already arrives, which leads to a different output other than the primary.
+
+\section{Override Pthread Library}
+
+\section{STDIO and STDERR}
+
+\section{Synchronization Exclusion}
+% skip the next detstart
