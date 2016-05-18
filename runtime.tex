@@ -1,8 +1,8 @@
 \chapter{Additional Runtime Support}
 In this chapter we will address some remaining issues of the replication system.
 
-\section{Syscall Synchronization}
-% put syscall hooks here
+\section{System Call Synchronization}
+% put syscall hooks here??
 During the execution of an application, for most of the system calls, given the same external input, the application on both primary and secondary can produce the same result, however there are still some system calls that are intrinsically non-deterministic, which will lead to divergence of the execution on all the replicas. As a result we have to synchronize the output of them to ensure the consistent final output of the applications on both sides.
 
 \paragraph{Disabling vDSO}
@@ -17,23 +17,55 @@ gettimeofday and time are used for getting the current timestamp. Since the prim
 
 \subsection{poll}
 
-poll is used for waiting on a set of file descriptors for I/O. A programmer can register a set of file descriptors to poll along with the type of events that is related to those file descriptors. poll takes an array of pollfd struct as shown in Figure~\ref{f:pollfd}. When it is called, it waits until one or more registered file descriptors become ready with registered events.
+poll is used for waiting on a set of file descriptors for I/O. A programmer can register a set of file descriptors to poll along with the type of events that is related to those file descriptors. poll takes an array of pollfd struct as shown in Figure~\ref{f:pollfd}. When it is called, it waits until one or more registered file descriptors become ready with registered events. When it returns, it fills the array with those file descriptors that are ready and returns the number of ready file descriptors. The user space application iterates the array and reacts to each file descriptor according to the events and revents field.
 
 \begin{figure}
-\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{ble}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{poll}
+int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+
 struct pollfd {
     int   fd;         /* file descriptor */
     short events;     /* requested events */
     short revents;    /* returned events */
 };
 \end{lstlisting}
-\caption{pollfd data structure}
+\caption{poll prototype and pollfd data structure}
 \label{f:pollfd}
 \end{figure}
 
 poll notification mechanism relies on the Linux VFS subsystem. However, as described in previous chapter, on the secondary kernel the replicated TCP/IP stack will bypass the original execution path for accept/read/write on sockets, in other words, the VFS subsystem is partially bypassed. As a result, poll will not be woken up properly on the secondary even when the event already arrives, which leads to a different output other than the primary.
 
+The solution is similar to time/gettimeofday, we simply send the output of poll to the secondary. As shown in Figure~\ref{f:pollfd}, the output of poll is the fds array and the return value. Upon receives the information, the secondary uses this as the output of itself and bypasses its original execution path.
+
+\subsection{epoll}
+Similar to poll, epoll\_wait is also used for waiting on a set of file descriptors for I/O. It waits on a set of registered file descriptors and outputs the ready ones to an epoll\_event array. Due to the implementation of our replicated network stack, epoll mechanism has the same problem as poll. Figure~\ref{f:epoll} shows the prototype of epoll\_wait and epoll\_event structure. Compare to the relatively simpe pollfd structure, epoll\_event contains a data field which can be an arbitrary data structure. It is OK to just copy the data field to the other side if it only contains integers. However if this field is a pointer, due to the non-determinism of memory address on both side, simply passing the pointer to the other side may lead to an illegal memory access. As a result, on the secondary, along the output path of epoll\_wait, we need to find the corresponding data structure in its own address space.
+
+On the primary kernel, once the epoll\_wait is ready to return, it will send a message which contains the current epfd, all the ready file descriptors and the value of events field of every file descriptor. Upon the secondary receives the message, it will search the RB tree associated to the given epfd, find the previous registered epoll\_event of the ready file descriptors, and overrides the events field with the information from the primary. At the end, return to the user space with the array of epoll\_event and bypass the original epoll\_wait execution.
+
+\begin{figure}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{epoll}
+int epoll_wait(int epfd, struct epoll_event *events,
+                      int maxevents, int timeout);
+
+typedef union epoll_data {
+    void    *ptr;
+    int      fd;
+    uint32_t u32;
+    uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event {
+    uint32_t     events;    /* Epoll events */
+    epoll_data_t data;      /* User data variable */
+};
+
+\end{lstlisting}
+\caption{epoll\_wait prototype and epoll\_event data structure}
+\label{f:epoll}
+\end{figure}
+
 \section{Override Pthread Library}
+In Chapter~\ref{chap:detexec} and Chapter~\ref{chap:schedrep} we described how to replicate multithreaded applications with the same thread interleaving on the primary and secondary. However it is tedious to manually wrap every single pthread function inside an application
 
 \section{STDIO and STDERR}
 

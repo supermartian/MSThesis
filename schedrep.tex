@@ -1,4 +1,4 @@
-\chapter{Schedule Replication}
+\chapter{Nigoki: Schedule Replication System} \label{chap:schedrep}
 In chapter ~\ref{chap:detexec} we described using a deterministic system to ensure the applications on the primary and secondary replica can have the same thread interleaving. The major advantage of the deterministic system is that we can minimize the communication between the replicas. However the downside is that we need to precisely adjust the logical time to maintain decent parallelism for multithreaded applications. We showed various solutions to balance the logical time because we need to keep the execution to be fast and deterministic. If all the burdens come from being deterministic, can we break the determinism once for all but still keep the replicas to be synchronized? The answer is yes.
 
 In this chapter we are going to describe Schedule Replication for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica. For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication, Figure~\ref{f:tradeoff} shows the relation between two different algorithms. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with negatable latency. As a result having massive massages between replicas won't put too much overhead to the replication.
@@ -28,7 +28,7 @@ The first property is guaranteed by the fact that the logical time won't change 
 Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_code} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
 
 \begin{figure}
-\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{schedrep}
 void __det_start()
 {
     if (is_secondary(current))

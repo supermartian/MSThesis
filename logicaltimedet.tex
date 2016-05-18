@@ -1,4 +1,4 @@
-\chapter{Deterministic Execution} \label{chap:detexec}
+\chapter{Shogoki: Deterministic Execution System} \label{chap:detexec}
 Deterministic execution provides a property that given the same input, a multithreaded program can always generate the same output. Such a system fits perfectly for our replication purpose. As long as the primary and secondary receive the same input, the replicated application will sure end up with the same state and generate the same output.
 
 For multi-threaded programs, an observation is that as long as the threads don't communicate with each other, the execution is sure to be deterministic\cite{devietti2009dmp}. For example, in pthread based programs, all the inter-thread communications are synchronized by pthread primitives. By making the interleaving of sychronization primitives to be deterministic, the entire program is sure to be deterministic. With this observation, some runtime deterministic solutions actually enforce determinism by trapping pthread primitives\cite{cui2013parrot}\cite{liu2011dthreads}\cite{olszewski2009kendo}. This type of deterministic system is called "Weak Deterministic System". It assumes that the applications are data race free, and only guarantee the deterministic interleaving of thread synchronization primitives such as mutex locks and condition variables. Our implementation falls into this category, but unlike other runtime deterministic systems, our runtime does not directly trap pthread primitives, but provides two system calls for programmer to define a deterministic section. The runtime maintains a global execution order, according to this order, an execution token is passed among all the tasks deterministically. Only the task with the execution token can enter the deterministic area, and the token will be held on this task only if it leaves its deterministic area.
@@ -14,6 +14,12 @@ Inspired by Kendo and Conversion, this scheduling policy maintains a logical tim
 \begin{itemize}
    \item \_\_det\_start: When it is called, only the task holds the token can proceed. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
    \item \_\_det\_end: When it is called, the system will increase the current thread's logical time by 1, and marks it as "out of a deterministic section".
+\end{itemize}.
+
+The token is updated whenever the logical time is changed, and it is passed based on following rules:
+\begin{itemize}
+   \item Among all the tasks inside the namespace, the one with the minimal logical time gets the token.
+   \item If multiple tasks have the same minimal logical time, the one with the smallest PID gets the token.
 \end{itemize}.
 
 \begin{figure}
@@ -50,8 +56,9 @@ If the logical time is updated but the one has the minimal logical time is sleep
 
 To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock , so that the order of getting into critical sections is controlled under our deterministic scheduling.
 
+
 \begin{figure}
-\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{detsys}
 void __det_start()
 {
     if (token->token != current)
@@ -276,7 +283,7 @@ In order to let the token passing keep going with those blocking system calls, w
 Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works in action. In this example, tick shepherd detects the token is on a thread sleeping in epoll\_wait, so it bumps its tick by 3 and sends this info to the secondary so that the token can leave this thread. And after the primary returns from epoll\_wait, it sends a message to the secondary, so that the corresponding thread can start to execute its epoll\_wait and uses the output from the primary as its own output. In order to be efficient, we only let Tick Shepherd to bump the system calls that for sure will be called for deterministic times, the current implementation covers all the major I/O related system calls.
 
 \begin{figure}
-\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{tickshepherd}
 while (!kthread_should_stop()) {
   if (ns->task_count == 0 ||
     ns->wait_count == 0) {
@@ -313,13 +320,18 @@ while (!kthread_should_stop()) {
 \end{figure}
 
 \section{Related Work}
-Deterministic systems have been studied for a long time. From the implementation perspective view, they can be categorized into 4 different genres: language level, runtime level, OS level and architectural level.
 
-% Use subsections to address each work
-% To be fullfilled
-
+\subsection{Deterministic Language Extension}
 Clik++~\cite{leiserson2010cilk++} is an parallel extension to C++ which makes creating parallel program easier. This extension provides a property that can indicate threads to be executed in a serial way, so that the determinism can be ensured. Grace \cite{berger2009grace} is also a C++ extension that adds a fork-join parallel schema to C++, it enforces the determinism of the execution with its underlying language runtime. Both of them are very limited to a specific parallel programming model, and existing applications need to be rewritten to achieve determinism.
 
-Kendo\cite{olszewski2009kendo}, Parrot\cite{cui2013parrot} and Dthreads\cite{liu2011dthreads} provide runtime substitutions for pthread library. By making pthread synchronizations to be deterministic, any race-free pthread-based application can be executed in a deterministic way. They are easy to be applied onto existing applications. However they are limited to pthread only applications. Although Melchior can only make pthread to run deterministically in an automatically way, a developer is always free to use the runtime system calls to hand tune any type of parallel applications to make them deterministic. Among these three, Kendo uses the same deterministic scheduling policy as Melchior. However it relies on hardware counters to keep track of the program's progress in runtime, given the fact that hardware counters could be non-deterministic\cite{weaver2008can}, we doubt the determinism  of Kendo in some cases. DMP\cite{devietti2009dmp} provides an OS layer to make any program running on top of it deterministic, which is applicable for all kinds of parallel programming models. However DMP's overhead is too high due to massive trapping to shared memory accesses. We synchronization provided by the programming model, this could be unnecessary.
+\subsection{Deterministic Runtime}
+\subsubsection{Weak Determinism}
+Weak Deterministic systems usually only target on making synchronization primitives to be deterministic. Kendo\cite{olszewski2009kendo}, Parrot\cite{cui2013parrot} and Dthreads\cite{liu2011dthreads} are three typical weak deterministic systems, they provide runtime substitutions for pthread library. By making pthread synchronizations to be deterministic, any race-free pthread-based application can be executed in a deterministic way. They are easy to be applied onto existing applications. However they are limited to pthread only applications. Among these three, Kendo is the basis of our algorithm. However it relies on hardware counters to keep track of the program's progress in runtime, given the fact that hardware counters could be non-deterministic\cite{weaver2008can}, we doubt the determinism  of Kendo in our replication case. 
 
+\subsubsection{Strong Determinism}
+Strong Deterministic systems aims to make every shared memory access to happen in a deterministic order. DMP\cite{devietti2009dmp} provides an OS layer to make any program running on top of it deterministic, which is applicable for all kinds of parallel programming models. However DMP's overhead is too high due to massive trapping to shared memory accesses.
+
+\subsection{Architectural Determinism}
 In \cite{segulja2012architectural}, an architectural solution is proposed. It's a hardware layer between the CPU core and memory hierarchy, the goal is to track all the memory access and does versioning on the memory operations. By doing deterministic submission to the memory hierarchy, it ensures the determinism of the parallel execution. Although it's a promising solution which is totally transparent to the upper layer, it's not usable out of box in recent years. 
+
+\subsection{Deterministic System For Replication}
