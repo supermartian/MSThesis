@@ -25,7 +25,7 @@ The first property is guaranteed by the fact that the logical time won't change 
 \item Log the sequence of getting into deterministic areas on the primary and replay it on the secondary.
 \end{itemize}
 
-From the implementation perspective, Schedule Replication multiplexes the programming interface of Deterministic Execution, a user is able to switch between two different algorithms without changing the existing application code. Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_code} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
+Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_code} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
