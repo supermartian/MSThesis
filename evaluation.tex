@@ -1,21 +1,31 @@
 \chapter{Evaluation}
 
-In this chapter we will show some experiment results of our system, 
+In this chapter we will show some experiment results of our system. We will discuss the performance of the system in the following perspective:
+
+\begin{itemize}
+  \item Correctness: Given the same input, can the primary and secondary should consistently generate the same output?
+  \item Slowdown: Compare to non-replicated execution, how much overhead is introduced by our system?
+  \item Breakdown: Where does the overhead come from?
+\end{itemize}
 % Evaluation factors:
 % 1. Lock count & pcnmsg count for schedule part
 % 2. Breakdown
 % 3. Absolute time
 \section{Correctness Evaluation}
 \subsection{Racey Benchmarks}
+
 \section{PBZip2}
 \subsection{Overhead Profiling}
 \subsection{Results}
+
 \section{Mongoose Webserver}
 \subsection{Overhead Profiling}
 \subsection{Results}
+
 \section{Nginx Webserver}
 \subsection{Overhead Profiling}
 \subsection{Results}
+
 \section{Redis Database Server}
 \subsection{Overhead Profiling}
 \subsection{Results}
