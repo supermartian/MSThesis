@@ -68,8 +68,8 @@ struct epoll_event {
 \section{Override Pthread Library}
 In Chapter~\ref{chap:detexec} and Chapter~\ref{chap:schedrep} we described how to wrap the pthread primitives with \_\_det\_start and \_\_det\_end to ensure the same thread interleaving for the replicated application on the primary and the secondary. Manually instrument the code is tedious, one has to find every single pthread primitive in the code. Moreover, if an application uses an external library that uses pthread, it will be even more troublesome to recompile the needed external library. An intuitive solution is to modify the pthread library and wrap our \_\_det\_start and \_\_det\_end directly in the pthread code. However updating the glibc of a system can be very dangerous and might harm other applications that don't need to be replicated.
 
-\subsection{LD\_PRELOAD}
-In Linux, the behaviour of the dynamic linker can be altered by setting LD\_PRELOAD environment variable. This can change the runtime linking process and make the linker to search for symbols in the path defined in LD\_PRELOAD. If we are able to implement our own pthread functions wrapped with \_\_det\_start and \_\_det\_end, and set LD\_PRELOAD to be our own library, we can transparently make the application replicable.
+\paragraph{LD\_PRELOAD}
+In Linux, the behaviour of the dynamic linker can be altered by setting LD\_PRELOAD environment variable. This can change the runtime linking process and make the linker to search for symbols in the path defined in LD\_PRELOAD. With this trick we are able to alter the behaviour of glibc without actually changing it. We implemented our LD\_PRELOAD library with instrumented pthread function in it, and the namespace launching script will automatically set LD\_PRELOAD to be the path of our library, so that only the application running in the namespace will be affected by our LD\_PRELOAD library. In the upcoming sections we will describe how we wrap pthread functions in our LD\_PRELOAD library.
 
 \subsection{Override Lock Functions}
 
@@ -99,6 +99,17 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
 \end{figure}
 
 \subsection{Override Condition Variable Functions}
+
+Condition Variables are much more complicated than mutex locks. In the glibc implementation, it involves multiple internal lock and unlock operations. As a result simply wrapping pthread\_cond\_wait with \_\_det\_start and \_\_det\_end will not work, because of multiple non-deterministic execution points are inside the implementation. Figure~\ref{f:cond_wait} shows the brief flow of the pthread\_cond\_wait in glibc implementation. cond->lock is a lock inside the condition variable  data structure, it is used to provide mutual exclusion for the futex value for the condition variable. futex\_wait will wait until cond\->futex differs from futex\_val. When it wakes up, it will check again if this condition variable is contended, if so, go back to futex\_wait again. If not, re-acquire the mutex lock and return. Every single lock acquisition here is a non-deterministic point, which leads to passing different values to futex\_wait on primary and replica, which in turn leads to diverged wakeup timing of pthread\_cond\_wait.
+
+In our LD\_PRELOAD library, we re-implemented pthread\_cond\_wait following the existing glibc\'s implementation, and wrapped every single lock acquisition with \_\_det\_start and \_\_det\_end, we also did the same wrapping for pthread\_cond\_signal. With this, we are able to make sure that the pthread\_cond\_wait can return at the same timing with the same condition variable on both primary and secondary.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\columnwidth]{figures/cond_wait}
+\caption{glibc pthread\_cond\_wait internal work flow}
+\label{f:cond_wait}
+\end{figure}
 
 \section{STDIO and STDERR}
 
