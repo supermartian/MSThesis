@@ -40,15 +40,7 @@ void __det_start()
 void __det_end()
 {
     if (is_primary(current))
-        send_sync(c
-2263-25 - Available: June 27, 2016 - Upstairs Unit
-
-Leasing Office: 2249 Ulric Street, San Diego, CA 92111
-Hours: 9:00am - 6:00pm Monday - Friday and 9:00am - 4:00pm Saturday
-
-Large Studios with ALL utilities included 
-
-Non-Refundable Application Fee: $35.00 (18 years and older)urrent->seq, 
+        send_sync(current->seq, 
             ns->seq, current->ft_pid);
     current->seq++;
     ns->seq++;
