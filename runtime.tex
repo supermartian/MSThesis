@@ -1,8 +1,13 @@
 \chapter{Additional Runtime Support}
-In this chapter we will address some remaining issues of the replication system.
-%please expand this part
+With the implementation of the thread synchronization interface, we are able to control the thread interleaving for all the regions surrounded by \_\_det\_start and \_\_det\_end. In this chapter we will discuss the additional runtime support which eliminates some other non-deterministic facts that cannot be simply solved by \_\_det\_start and \_\_det\_end, and some optimizations to the current runtime. This chapter is organized as follows:
 
-\section{System Call Synchronization}
+\begin{itemize}
+  \item Section ~\ref{chap:syscall} shows the non-deterministic facts come from some system calls and our system call synchronization mechanism.
+  \item Section ~\ref{chap:library} shows how we instrument pthread primitives with \_det\_start and \_\_det\_end transparently.
+  \item Section ~\ref{chap:stdxxx} shows how we create a consistent stdin, stdio and stderr interface for the replicated process.
+\end{itemize}
+
+\section{System Call Synchronization} \label{chap:syscall}
 % put syscall hooks here??
 During the execution of an application, for most of the system calls, given the same external input, the application on both primary and secondary can produce the same result, however there are still some system calls that are intrinsically non-deterministic, which will lead to divergence of the execution on all the replicas. As a result we have to synchronize the output of them to ensure the consistent final output of the applications on both sides.
 
@@ -65,7 +70,7 @@ struct epoll_event {
 \label{f:epoll}
 \end{figure}
 
-\section{Override Pthread Library}
+\section{Override Pthread Library} \label{chap:library}
 In Chapter~\ref{chap:detexec} and Chapter~\ref{chap:schedrep} we described how to wrap the pthread primitives with \_\_det\_start and \_\_det\_end to ensure the same thread interleaving for the replicated application on the primary and the secondary. Manually instrument the code is tedious, one has to find every single pthread primitive in the code. Moreover, if an application uses an external library that uses pthread, it will be even more troublesome to recompile the needed external library. An intuitive solution is to modify the pthread library and wrap our \_\_det\_start and \_\_det\_end directly in the pthread code. However updating the glibc of a system can be very dangerous and might harm other applications that don't need to be replicated.
 
 \paragraph{LD\_PRELOAD}
@@ -111,7 +116,6 @@ In our LD\_PRELOAD library, we re-implemented pthread\_cond\_wait following the 
 \label{f:cond_wait}
 \end{figure}
 
-\section{STDIO and STDERR}
+\section{stdin, stdio and stderr} \label{chap:stdxxx}
 
-\section{Synchronization Exclusion}
-% skip the next detstart
+In the booting process of Linux, init is the very first userspace process and it creates the file descriptors for stdin, stdio and stderr. All upcoming process inherit those three file descriptors from init. This gives all the processes the ability to interact with a terminal device, also gives the fact that 0, 1 and 2 are the "preserved" file descriptor numbers in a process, any newly created file descriptor starts from 3. However, as we described in previous, Popcorn Linux generates a replicated process on the secondary from the kernel space, pretty much like how init is created. As a result the replicated process doesn't inherit the stdin, stdio and stderr and newly created file descriptor starts from 0. This creates divergence on applications which take file descriptor numbers as some sort of input. An example is poll and epoll\_wait, since we copy the ready file descriptors on the primary to the secondary, the divergence on file descriptor numbers will lead to unexpected results for upcoming I/O operations after poll or epoll\_wait. The solution is very straightforward, upon the creation of the replicated process on the secondary kernel, we look for an available pts device, and  use it as the terminal for stdin, stdio and stderr of the replicated process. In this way we are able to have consistent file descriptor numbers on primary and replica, and also be able to see the replicated process\'s console output.
