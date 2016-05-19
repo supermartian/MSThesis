@@ -1,5 +1,6 @@
 \chapter{Additional Runtime Support}
 In this chapter we will address some remaining issues of the replication system.
+%please expand this part
 
 \section{System Call Synchronization}
 % put syscall hooks here??
@@ -9,7 +10,7 @@ During the execution of an application, for most of the system calls, given the 
 
 vDSO(virtual dynamic shared object) is a mechanism that allows a system call to be done in user space, instead of having context switch to the kernel space. This is done by having a shared memory section between the user space and the kernel. When the system call is initiated, the corresponding function in the vDSO library is called instead of trapping into the kernel, then the library will fetch the result from this shared memory area and return. This boosts the performance for some "read only" system calls (like gettimeofday/time). However, in our case, if the system call doesn't go into the kernel space, we cannot track and synchronize them. Also, in order to synchronize the system call data we have to get into the kernel space anyway to send inter-kernel messages. So vDSO in our context becomes a burden to the implementation. As a result in our system we have to disable vDSO.
 
-In the following subsections we will describe each synchronized system call in detail.
+In our implementation we only synchronize those system calls that are strongly related to network I/O: gettimeofday/time, poll, epoll\_wait. We didn't implement select because it is relatively out-dated, modern network applications hardly use it, as a result it doesn't worth to put any effort into it. In the following subsections we will describe each synchronized system call in detail. 
 
 \subsection{gettimeofday/time}
 
@@ -37,7 +38,7 @@ poll notification mechanism relies on the Linux VFS subsystem. However, as descr
 
 The solution is similar to time/gettimeofday, we simply send the output of poll to the secondary. As shown in Figure~\ref{f:pollfd}, the output of poll is the fds array and the return value. Upon receives the information, the secondary uses this as the output of itself and bypasses its original execution path.
 
-\subsection{epoll}
+\subsection{epoll\_wait}
 Similar to poll, epoll\_wait is also used for waiting on a set of file descriptors for I/O. It waits on a set of registered file descriptors and outputs the ready ones to an epoll\_event array. Due to the implementation of our replicated network stack, epoll mechanism has the same problem as poll. Figure~\ref{f:epoll} shows the prototype of epoll\_wait and epoll\_event structure. Compare to the relatively simpe pollfd structure, epoll\_event contains a data field which can be an arbitrary data structure. It is OK to just copy the data field to the other side if it only contains integers. However if this field is a pointer, due to the non-determinism of memory address on both side, simply passing the pointer to the other side may lead to an illegal memory access. As a result, on the secondary, along the output path of epoll\_wait, we need to find the corresponding data structure in its own address space.
 
 On the primary kernel, once the epoll\_wait is ready to return, it will send a message which contains the current epfd, all the ready file descriptors and the value of events field of every file descriptor. Upon the secondary receives the message, it will search the RB tree associated to the given epfd, find the previous registered epoll\_event of the ready file descriptors, and overrides the events field with the information from the primary. At the end, return to the user space with the array of epoll\_event and bypass the original epoll\_wait execution.
@@ -65,7 +66,39 @@ struct epoll_event {
 \end{figure}
 
 \section{Override Pthread Library}
-In Chapter~\ref{chap:detexec} and Chapter~\ref{chap:schedrep} we described how to replicate multithreaded applications with the same thread interleaving on the primary and secondary. However it is tedious to manually wrap every single pthread function inside an application
+In Chapter~\ref{chap:detexec} and Chapter~\ref{chap:schedrep} we described how to wrap the pthread primitives with \_\_det\_start and \_\_det\_end to ensure the same thread interleaving for the replicated application on the primary and the secondary. Manually instrument the code is tedious, one has to find every single pthread primitive in the code. Moreover, if an application uses an external library that uses pthread, it will be even more troublesome to recompile the needed external library. An intuitive solution is to modify the pthread library and wrap our \_\_det\_start and \_\_det\_end directly in the pthread code. However updating the glibc of a system can be very dangerous and might harm other applications that don't need to be replicated.
+
+\subsection{LD\_PRELOAD}
+In Linux, the behaviour of the dynamic linker can be altered by setting LD\_PRELOAD environment variable. This can change the runtime linking process and make the linker to search for symbols in the path defined in LD\_PRELOAD. If we are able to implement our own pthread functions wrapped with \_\_det\_start and \_\_det\_end, and set LD\_PRELOAD to be our own library, we can transparently make the application replicable.
+
+\subsection{Override Lock Functions}
+
+Figure~\ref{f:orverridelocks} shows the implementation of pthread\_mutex\_lock in our LD\_PRELOAD library. Line 9 loads the real pthread\_mutex\_lock function from the real pthread library, in Line 12 we simply call this function with \_\_det\_start and \_\_det\_end wrapped around. In our LD\_PRELOAD library, we wrapped all the pthread lock functions include pthread\_mutex\_lock, pthread\_mutex\_trylock, pthread\_rwlock\_rdlock, pthread\_rwlock\_tryrdlock, pthread\_rwlock\_wrlock, pthread\_rwlock\_trywrlock.
+
+\begin{figure}
+\begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{locks}
+int pthread_mutex_lock(pthread_mutex_t *mutex)
+{
+    int ret;
+    static int (*pthread_mutex_lock_real)(pthread_mutex_t *mutex) = NULL;    
+    if (!handle) {
+        handle = dlopen(PTHREAD_PATH, RTLD_LAZY);
+    }
+    if (!pthread_mutex_lock_real)
+        pthread_mutex_lock_real = dlsym(handle, "pthread_mutex_lock");
+
+    syscall(__NR_det_start);
+    ret = pthread_mutex_lock_real(mutex);
+    syscall(__NR_det_end);
+
+    return ret;
+}
+\end{lstlisting}
+\caption{pthread\_mutex\_lock in the LD\_PRELOAD library}
+\label{f:orverridelocks}
+\end{figure}
+
+\subsection{Override Condition Variable Functions}
 
 \section{STDIO and STDERR}
 

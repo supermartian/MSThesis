@@ -56,7 +56,6 @@ If the logical time is updated but the one has the minimal logical time is sleep
 
 To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock , so that the order of getting into critical sections is controlled under our deterministic scheduling.
 
-
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{detsys}
 void __det_start()
@@ -141,9 +140,8 @@ Since we already know that a contented mutex will call futex\_wait to wait for a
 \label{fig:deadlock}
 \end{figure}
 
-\newpage
 \section{Balance the Logical Time} \label{sec:logimbalance}
-Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model in the program snippet we presented in Figure~\ref{fig:example}, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program.
+Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model in the program snippet we presented in Figure~\ref{fig:example}, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program. Figure~\ref{f:pbzip_bad} shows an extreme example where pbzip2 becomes a serial program with unbalanced logical time, it doesn't scale at all as we increase the thread count.
 
 \begin{figure}
 \centering
@@ -188,6 +186,13 @@ Only increasing the logical time by 1 at \detend\ isn't enough. With an example 
 \end{tikzpicture}
 \caption{An example of logical time imbalance.}
 \label{fig:imbalance}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/pbzip-no-tick}
+\caption{pbzip2 without logical time balancing}
+\label{f:pbzip_bad}
 \end{figure}
 
 Generally, logical time imbalance can happen in two cases:
