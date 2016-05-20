@@ -18,13 +18,26 @@ We used a variant of racey~\cite{hillstress} to evaluate the correctness of our 
 
 \paragraph{racey-forkmmap} racey-forkmmap utilizes mmap to create a shared memory area, and uses fork to create multiple processes to read and modify the shared memory area. We manually added \_\_det\_start and \_\_det\_end around each access to the shared memory area. With both synchronization algorithms, we are able to create consistent results on the primary and secondary for over 100 consecutive runs.
 
-\paragraph{racey-tcp} Based on the idea of racey, we developed racey-tcp to stress the determinism for I/O related tasks. racey-tcp uses pthread to create multiple threads. One thread listens to the socket, whenever a new connection arrives, it puts the connection into a queue, other threads retrieves the connection from the queue, read the data on that connection and write the data into a file. For this benchmark, we wrapped the write system call for writing to the file with \_\_det\_start and \_\_det\_end. With both synchronization algorithms, we are able to create consistent results on the primary and secondary for over 2000 requests.
+\paragraph{racey-tcp} Based on the idea of racey, we developed racey-tcp to stress the determinism for I/O related tasks. racey-tcp uses pthread to create multiple threads. One thread listens to the socket, whenever a new connection arrives, it puts the connection into a queue, other threads retrieve the connection from the queue, read the data on that connection and write the data into a file. For this benchmark, we wrapped the write system call for writing to the file with \_\_det\_start and \_\_det\_end. With both synchronization algorithms, we are able to create consistent output file on the primary and secondary for over 2000 requests.
 
 \section{PBZip2}
 % 1. threading model
 % 2. A table of lock and cond var count
 % 3. A table of instrumented dettick count
-PBZip2 is the parallel version of bzip2.
+PBZip2 is the parallel version of bzip2. The concurrent model of this application is a typical producer-consumer model
+
+% The concurrent model is shown in Figure~\ref{f:pbzip_model}. The FileReader thread reads the content of the file, break the input data into data chunks and put all the chunks into a queue. Worker threads get the data chunks from the queue 
+
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.8\columnwidth]{figures/pbzip2_model}
+%\caption{pbzip2 concurrent model}
+%\label{f:pbzip_model}
+%\end{figure}
+
+
+For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to gain a decent performance in the deterministic execution, while for schedule replication nothing is modified.
 
 Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is only used for showing the time spent on the whole process, so it is not critical to the output of the application. But since we synchronized it, both the primary and secondary showed the same finishing time all the time.
 
@@ -68,7 +81,7 @@ Nginx is a sophisticated webserver with multiple threading modes.
  \begin{tabular}{c | c | c}
 System Call & Use in the Application\\ \hline
  time & Generate HTTP header\\ \hline
- poll & Wait for accept, read and write\\ \hline 
+ poll & Wait for accept, read and write
  \end{tabular}
 \end{center}
 \label{t:nginx_syscall}

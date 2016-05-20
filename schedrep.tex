@@ -25,8 +25,6 @@ The first property is guaranteed by the fact that the logical time won't change 
 \item Log the sequence of getting into deterministic areas on the primary and replay it on the secondary.
 \end{itemize}
 
-Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_c} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
-
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{schedrep}
 void __det_start()
@@ -51,6 +49,9 @@ void __det_end()
 \caption{Simplified implementation of system calls for schedule replication}
 \label{f:schedrep_c}
 \end{figure}
+
+Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_c} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.  Every thread in the namespace maintains a sequence number $Seq_{thread}$ and the entire namespace maintains a sequence number $Seq_{global}$. On the primary, \detstart\ simply locks the global mutex, \detend\ unlocks the global mutex, sends a tuple of $< Seq_{thread}, Seq_{global}, ft\_pid >$ to the secondary and then increase the value of $Seq_{global}$ and $Seq_{thread}$. On the secondary, \detstart\ blocks until it receives a $< Seq_{thread}, Seq_{global}, ft\_pid >$ tuple corresponds to its caller thread, then holds the global mutex, and \detend\ increases $Seq_{global}$ and $Seq_{thread}$, then release the global mutex.
+
 
 Figure~\ref{f:scherep} shows an example of how Schedule Replication works in action.
 
