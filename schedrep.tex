@@ -25,7 +25,7 @@ The first property is guaranteed by the fact that the logical time won't change 
 \item Log the sequence of getting into deterministic areas on the primary and replay it on the secondary.
 \end{itemize}
 
-Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_code} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
+Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_c} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{schedrep}
@@ -52,7 +52,7 @@ void __det_end()
 \label{f:schedrep_c}
 \end{figure}
 
-Figure~\ref{f:schedrep} shows an example of how Schedule Replication works in action.
+Figure~\ref{f:scherep} shows an example of how Schedule Replication works in action.
 
 \begin{figure}
 \centering
