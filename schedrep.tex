@@ -11,6 +11,8 @@ In this chapter we are going to describe Schedule Replication for replicated app
 \label{f:tradeoff}
 \end{figure}
 
+% Discuss the latency benefit
+
 \section{Execute-Log-Replay}
 Before we get into the detail of this algorithm, let's revisit some important properties that are provided by the deterministic system.
 
@@ -51,6 +53,10 @@ void __det_end()
 \label{f:schedrep_c}
 \end{figure}
 
+% explain something for tha variables
+% reference to ft_pid
+% why I dont need to handle I/O
+
 Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_c} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.  Every thread in the namespace maintains a sequence number $Seq_{thread}$ and the entire namespace maintains a sequence number $Seq_{global}$. On the primary, \detstart\ simply locks the global mutex, \detend\ unlocks the global mutex, sends a tuple of $< Seq_{thread}, Seq_{global}, ft\_pid >$ to the secondary and then increase the value of $Seq_{global}$ and $Seq_{thread}$. On the secondary, \detstart\ blocks until it receives a $< Seq_{thread}, Seq_{global}, ft\_pid >$ tuple corresponds to its caller thread, then holds the global mutex, and \detend\ increases $Seq_{global}$ and $Seq_{thread}$, then release the global mutex.
 
 
@@ -68,5 +74,6 @@ Figure~\ref{f:scherep} shows an example of how Schedule Replication works in act
 %doublePlay
 
 %REX
+Partial order
 
 %ALL about EVE
