@@ -276,6 +276,8 @@ When a task is sleeping in the kernel, usually it is in a system call and waitin
 Some deterministic systems simply remove the sleeping tasks out of the deterministic schedule and put them back after they are back to user space. This is not applicable in a replication system like ours, as previously stated, the wake up time of those system calls might be different from the primary and secondary replica.
 As a result we must not abandon those sleeping tasks, and have to maintain the consistent state of the logical time for those tasks.
 
+% say something about accept, epoll and poll
+
 \begin{figure}
 \centering
 \includegraphics[width=0.8\columnwidth]{figures/tickbump}

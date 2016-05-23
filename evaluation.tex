@@ -39,6 +39,8 @@ PBZip2 is the parallel version of bzip2. The concurrent model of this applicatio
 %\label{f:pbzip_model}
 %\end{figure}
 
+% instrumentation taken with what block size
+% Benchmarks with certain block sizes
 
 For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to gain a decent performance in the deterministic execution, while for schedule replication nothing is modified.
 
@@ -75,8 +77,10 @@ System Call & Use in the Application\\ \hline
 \label{t:mongoose_syscall}
 \end{table}
 
+% show the performance of each thread count, then put the overall scalability.
+
 \section{Nginx Webserver}
-Nginx is a sophisticated webserver with multiple threading modes.
+Nginx is a sophisticated webserver with multiple concurrent modes.
 
 \begin{table}
 \caption{Tracked system calls used by nginx}

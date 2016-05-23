@@ -1,0 +1,275 @@
+STARTING thread count mongoose 8 file size t800k iter 0
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t800k
+Document Length:        819200 bytes
+
+Concurrency Level:      100
+Time taken for tests:   138.353 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      16387860000 bytes
+HTML transferred:       16384000000 bytes
+Requests per second:    144.56 [#/sec] (mean)
+Time per request:       691.765 [ms] (mean)
+Time per request:       6.918 [ms] (mean, across all concurrent requests)
+Transfer rate:          115673.40 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2   1.2      1       9
+Processing:    73  689  35.3    685     775
+Waiting:       10  635  26.8    636     674
+Total:         76  690  35.2    687     777
+
+Percentage of the requests served within a certain time (ms)
+  50%    687
+  66%    699
+  75%    708
+  80%    713
+  90%    728
+  95%    738
+  98%    748
+  99%    753
+ 100%    777 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 8 file size t800k iter 1
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t800k
+Document Length:        819200 bytes
+
+Concurrency Level:      100
+Time taken for tests:   138.357 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      16387860000 bytes
+HTML transferred:       16384000000 bytes
+Requests per second:    144.55 [#/sec] (mean)
+Time per request:       691.786 [ms] (mean)
+Time per request:       6.918 [ms] (mean, across all concurrent requests)
+Transfer rate:          115669.97 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2   1.2      1      10
+Processing:    52  688  35.3    685     776
+Waiting:        9  634  26.8    636     674
+Total:         55  690  35.3    686     777
+
+Percentage of the requests served within a certain time (ms)
+  50%    686
+  66%    699
+  75%    708
+  80%    713
+  90%    728
+  95%    738
+  98%    747
+  99%    753
+ 100%    777 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 8 file size t800k iter 2
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t800k
+Document Length:        819200 bytes
+
+Concurrency Level:      100
+Time taken for tests:   138.354 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      16387860000 bytes
+HTML transferred:       16384000000 bytes
+Requests per second:    144.56 [#/sec] (mean)
+Time per request:       691.769 [ms] (mean)
+Time per request:       6.918 [ms] (mean, across all concurrent requests)
+Transfer rate:          115672.81 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2   1.2      1      10
+Processing:    60  689  35.2    685     777
+Waiting:       12  635  26.7    636     684
+Total:         63  690  35.2    686     780
+
+Percentage of the requests served within a certain time (ms)
+  50%    686
+  66%    699
+  75%    708
+  80%    713
+  90%    728
+  95%    739
+  98%    748
+  99%    753
+ 100%    780 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 8 file size t800k iter 3
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t800k
+Document Length:        819200 bytes
+
+Concurrency Level:      100
+Time taken for tests:   138.371 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      16387860000 bytes
+HTML transferred:       16384000000 bytes
+Requests per second:    144.54 [#/sec] (mean)
+Time per request:       691.857 [ms] (mean)
+Time per request:       6.919 [ms] (mean, across all concurrent requests)
+Transfer rate:          115658.03 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2   1.2      1      10
+Processing:    56  688  35.1    685     779
+Waiting:       13  634  26.7    636     678
+Total:         61  690  35.0    687     780
+
+Percentage of the requests served within a certain time (ms)
+  50%    687
+  66%    699
+  75%    708
+  80%    713
+  90%    728
+  95%    738
+  98%    747
+  99%    752
+ 100%    780 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 8 file size t800k iter 4
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t800k
+Document Length:        819200 bytes
+
+Concurrency Level:      100
+Time taken for tests:   138.364 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      16387860000 bytes
+HTML transferred:       16384000000 bytes
+Requests per second:    144.55 [#/sec] (mean)
+Time per request:       691.821 [ms] (mean)
+Time per request:       6.918 [ms] (mean, across all concurrent requests)
+Transfer rate:          115664.01 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2   1.2      1       9
+Processing:    57  689  34.8    685     777
+Waiting:       13  635  26.2    636     688
+Total:         61  690  34.7    686     778
+
+Percentage of the requests served within a certain time (ms)
+  50%    686
+  66%    699
+  75%    708
+  80%    713
+  90%    727
+  95%    738
+  98%    748
+  99%    754
+ 100%    778 (longest request)
+ ******************************************************************************************************* 

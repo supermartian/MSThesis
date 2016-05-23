@@ -1,0 +1,275 @@
+STARTING thread count mongoose 4 file size t100k iter 0
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t100k
+Document Length:        102400 bytes
+
+Concurrency Level:      100
+Time taken for tests:   22.945 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      2051860000 bytes
+HTML transferred:       2048000000 bytes
+Requests per second:    871.66 [#/sec] (mean)
+Time per request:       114.723 [ms] (mean)
+Time per request:       1.147 [ms] (mean, across all concurrent requests)
+Transfer rate:          87330.61 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       4
+Processing:    12  105  74.4    103    2397
+Waiting:        1  102  74.4     99    2395
+Total:         16  105  74.4    103    2398
+
+Percentage of the requests served within a certain time (ms)
+  50%    103
+  66%    103
+  75%    104
+  80%    104
+  90%    104
+  95%    104
+  98%    105
+  99%    106
+ 100%   2398 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 4 file size t100k iter 1
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t100k
+Document Length:        102400 bytes
+
+Concurrency Level:      100
+Time taken for tests:   22.818 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      2051860000 bytes
+HTML transferred:       2048000000 bytes
+Requests per second:    876.52 [#/sec] (mean)
+Time per request:       114.088 [ms] (mean)
+Time per request:       1.141 [ms] (mean, across all concurrent requests)
+Transfer rate:          87816.82 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       3
+Processing:    18  105  79.5    102    2397
+Waiting:        1  101  79.5     99    2394
+Total:         22  105  79.5    102    2397
+
+Percentage of the requests served within a certain time (ms)
+  50%    102
+  66%    103
+  75%    103
+  80%    103
+  90%    104
+  95%    104
+  98%    105
+  99%    105
+ 100%   2397 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 4 file size t100k iter 2
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t100k
+Document Length:        102400 bytes
+
+Concurrency Level:      100
+Time taken for tests:   23.002 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      2051860000 bytes
+HTML transferred:       2048000000 bytes
+Requests per second:    869.50 [#/sec] (mean)
+Time per request:       115.009 [ms] (mean)
+Time per request:       1.150 [ms] (mean, across all concurrent requests)
+Transfer rate:          87113.66 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       4
+Processing:    17  105  76.4    103    2408
+Waiting:        2  102  76.5    100    2405
+Total:         22  106  76.4    103    2408
+
+Percentage of the requests served within a certain time (ms)
+  50%    103
+  66%    104
+  75%    104
+  80%    104
+  90%    104
+  95%    105
+  98%    106
+  99%    106
+ 100%   2408 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 4 file size t100k iter 3
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t100k
+Document Length:        102400 bytes
+
+Concurrency Level:      100
+Time taken for tests:   22.869 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      2051860000 bytes
+HTML transferred:       2048000000 bytes
+Requests per second:    874.54 [#/sec] (mean)
+Time per request:       114.346 [ms] (mean)
+Time per request:       1.143 [ms] (mean, across all concurrent requests)
+Transfer rate:          87618.40 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.3      0       6
+Processing:    16  105  75.7    102    2386
+Waiting:        2  101  75.8     99    2383
+Total:         21  105  75.7    103    2386
+
+Percentage of the requests served within a certain time (ms)
+  50%    103
+  66%    103
+  75%    103
+  80%    103
+  90%    104
+  95%    104
+  98%    105
+  99%    108
+ 100%   2386 (longest request)
+ ******************************************************************************************************* 
+STARTING thread count mongoose 4 file size t100k iter 4
+This is ApacheBench, Version 2.3 <$Revision: 1528965 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.1.1.47 (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        10.1.1.47
+Server Port:            8080
+
+Document Path:          /t100k
+Document Length:        102400 bytes
+
+Concurrency Level:      100
+Time taken for tests:   22.942 seconds
+Complete requests:      20000
+Failed requests:        0
+Total transferred:      2051860000 bytes
+HTML transferred:       2048000000 bytes
+Requests per second:    871.76 [#/sec] (mean)
+Time per request:       114.710 [ms] (mean)
+Time per request:       1.147 [ms] (mean, across all concurrent requests)
+Transfer rate:          87340.71 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0      11
+Processing:    13  105  74.6    103    2403
+Waiting:        1  102  74.6     99    2400
+Total:         15  105  74.6    103    2404
+
+Percentage of the requests served within a certain time (ms)
+  50%    103
+  66%    103
+  75%    103
+  80%    104
+  90%    104
+  95%    104
+  98%    108
+  99%    109
+ 100%   2404 (longest request)
+ ******************************************************************************************************* 

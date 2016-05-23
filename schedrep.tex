@@ -3,6 +3,7 @@ In chapter ~\ref{chap:detexec} we described using a deterministic system to ensu
 
 In this chapter we are going to describe Schedule Replication for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica. For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication, Figure~\ref{f:tradeoff} shows the relation between two different algorithms. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with negatable latency. As a result having massive massages between replicas won't put too much overhead to the replication.
 
+% !!!!!!!!!put this into conclusion
 \begin{figure}
 \centering
 \includegraphics[width=0.8\columnwidth]{figures/tradeoff}
