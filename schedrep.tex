@@ -1,17 +1,17 @@
-\chapter{Nigoki: Schedule Replication System} \label{chap:schedrep}
+\chapter{Nigoki: Schedule Replication} \label{chap:schedrep}
 In chapter ~\ref{chap:detexec} we described using a deterministic system to ensure the applications on the primary and secondary replica can have the same thread interleaving. The major advantage of the deterministic system is that we can minimize the communication between the replicas. However the downside is that we need to precisely adjust the logical time to maintain decent parallelism for multithreaded applications. We showed various solutions to balance the logical time because we need to keep the execution to be fast and deterministic. If all the burdens come from being deterministic, can we break the determinism once for all but still keep the replicas to be synchronized? The answer is yes.
 
-In this chapter we are going to describe Schedule Replication for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica. For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication, Figure~\ref{f:tradeoff} shows the relation between two different algorithms. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with negatable latency. As a result having massive massages between replicas won't put too much overhead to the replication.
+In this chapter we are going to describe Schedule Replication for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica.
+
+For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication. Any latency in the the messaging will cause the secondary to fall behind the primary. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with relatively low latency (basically memcpy from one kernel to another). As a result having massive massages between replicas won't put too much overhead to the replication.
 
 % !!!!!!!!!put this into conclusion
-\begin{figure}
-\centering
-\includegraphics[width=0.8\columnwidth]{figures/tradeoff}
-\caption{Trade off between two algorithms}
-\label{f:tradeoff}
-\end{figure}
-
-% Discuss the latency benefit
+% \begin{figure}
+% \centering
+% \includegraphics[width=0.8\columnwidth]{figures/tradeoff}
+% \caption{Trade off between two algorithms}
+% \label{f:tradeoff}
+% \end{figure}
 
 \section{Execute-Log-Replay}
 Before we get into the detail of this algorithm, let's revisit some important properties that are provided by the deterministic system.
@@ -30,6 +30,14 @@ The first property is guaranteed by the fact that the logical time won't change 
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{schedrep}
+/*
+ * Definitions:
+ * ns: current popcorn namespace
+ * ns->global_mutex: global_mutex in current namespace
+ * ns->seq: global sequence number Seq_global
+ * current->seq: task sequence number Seq_thread
+ * current->ft_pid: replicated task unique identifier
+ */
 void __det_start()
 {
     if (is_secondary(current))
@@ -59,8 +67,14 @@ void __det_end()
 
 Here we still use \detstart\ and \detend\ to wrap around a code section that needs to be synchronized with the replica. Figure~\ref{f:schedrep_c} shows a simplified version of \detstart\ and \detend\ in Schedule Replication.  Every thread in the namespace maintains a sequence number $Seq_{thread}$ and the entire namespace maintains a sequence number $Seq_{global}$. On the primary, \detstart\ simply locks the global mutex, \detend\ unlocks the global mutex, sends a tuple of $< Seq_{thread}, Seq_{global}, ft\_pid >$ to the secondary and then increase the value of $Seq_{global}$ and $Seq_{thread}$. On the secondary, \detstart\ blocks until it receives a $< Seq_{thread}, Seq_{global}, ft\_pid >$ tuple corresponds to its caller thread, then holds the global mutex, and \detend\ increases $Seq_{global}$ and $Seq_{thread}$, then release the global mutex.
 
+Figure~\ref{f:scherep} shows an example of how Schedule Replication works in action. In this example, T1 on the primary reached \detstart\ first and acquired the global mutex, which blocked T2 from getting into its \detstart\. After the primary reached \detend\, the global mutex is released and T2 was able to proceed. On the secondary, both T1' and T2' got blocked on \detstart\ at the beginning, no matter which one reached its \detstart\ first. T1' was able to proceed after T1 on the primary reached \detend\ and sent the notification to the secondary. T2' proceeded in the same way as T1' did. With this, the timing of calling mutex\_lock on the primary and secondary are synchronized on the primary and secondary.
 
-Figure~\ref{f:scherep} shows an example of how Schedule Replication works in action.
+For each namespace on the secondary, we have a queue for logging the incoming schedule replication message from the primary. The Popcorn message handler for schedule replication message simply appends the message into the queue tail and \detstart\ waits on the queue head to become the schedule sequence that it needs. A crucial prerequisite for this mechanism is that the message in the queue shall preserve strict FIFO sequence. Otherwise an out-of-order message in the queue tail will cause a deadlock in the system, because no \detstart\ will find the matching message in the queue tail. Our implementation guarantees the correct order of the messages, i.e, the messages are put in the queue in a monotonic sequence by their global sequence number $Seq_{global}$.
+
+\begin{itemize}
+  \item The synchronization message is sent with the global mutex on hold, this guarantees the monotonic sequence from the sender side.
+  \item The messaging layer is strictly FIFO, which will not re-order the messages in its buffer, this guarantees the monotonic sequence from the receiver side.
+\end{itemize}
 
 \begin{figure}
 \centering
@@ -68,6 +82,12 @@ Figure~\ref{f:scherep} shows an example of how Schedule Replication works in act
 \caption{An example of Schedule Replication}
 \label{f:scherep}
 \end{figure}
+
+\subsection{Eliminate Deadlocks} \label{sec:rdeadlock}
+As we mentioned in Section~\ref{sec:edeadlock}, wrapping all the lock acquisitions with \detstart\ and \detend\ will occur the same deadlock issue, the reason is similar to the case in the Deterministic Execution because we don't release the lock acquisition order when the mutex is contended. The solution in Schedule Replication is similar to what we did in the Deterministic Execution, upon getting into sleep in futex, we release the global mutex and re-acquire it when it wakes up from futex. The futex modification mentioned in Section~\ref{sec:edeadlock} is also applied in this case to ensure the determinism of waking up from futex.
+
+% However in this implementation we might have the case where the primary is able to proceed but the secondary got deadlocked. ????
+
 
 \section{Related Work}
 

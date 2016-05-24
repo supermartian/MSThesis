@@ -27,24 +27,18 @@ We used a variant of racey~\cite{hillstress} to evaluate the correctness of our 
 % 1. threading model
 % 2. A table of lock and cond var count
 % 3. A table of instrumented dettick count
-PBZip2 is the parallel version of bzip2. The concurrent model of this application is a typical producer-consumer model
+PBZip2 is the parallel version of bzip2. The concurrent model of this application is a typical producer-consumer model, as shown in Figure~\ref{f:pbzip_model}. The FileReader thread reads the content of the file, break the input data into data chunks and put all the chunks into a queue. Worker threads get the data chunks from the queue and do the compression/decompression, after all put the produced data to another queue. The FileWriter will keep getting products from the queue and write them to the final zip file. Multiple pthread\_mutex\_lock and pthread\_cond\_wait functions are applied to provide the mutual exclusion to the access of the queues.
 
-% The concurrent model is shown in Figure~\ref{f:pbzip_model}. The FileReader thread reads the content of the file, break the input data into data chunks and put all the chunks into a queue. Worker threads get the data chunks from the queue 
-
-
-%\begin{figure}
-%\centering
-%\includegraphics[width=0.8\columnwidth]{figures/pbzip2_model}
-%\caption{pbzip2 concurrent model}
-%\label{f:pbzip_model}
-%\end{figure}
-
-% instrumentation taken with what block size
-% Benchmarks with certain block sizes
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/pbzip2_model}
+\caption{pbzip2 concurrent model}
+\label{f:pbzip_model}
+\end{figure}
 
 For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to gain a decent performance in the deterministic execution, while for schedule replication nothing is modified.
 
-Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is only used for showing the time spent on the whole process, so it is not critical to the output of the application. But since we synchronized it, both the primary and secondary showed the same finishing time all the time.
+Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is only used for showing the time spent on the whole process, so it is not critical to the output of the application. But since we synchronized it, it is  interesting that both the primary and secondary showed the same finishing time for each run, regardless if the secondary was falling behind the progress or not.
 
 \begin{table}
  \caption{Tracked system calls used by pbzip2}
@@ -61,9 +55,9 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 % 1. threading model
 % 2. A table of lock and cond var count
 
-Mongoose is a compact multithreaded webserver.
+Mongoose is a compact multithreaded webserver. It
 
-Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. In mongoose, both system calls are critical to the final output.
+Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. In mongoose, both system calls are critical to the final output, any mismatch happens in those two system calls will either cause output divergence or different thread interleaving.
 
 \begin{table}
 \caption{Tracked system calls used by mongoose}
@@ -77,15 +71,13 @@ System Call & Use in the Application\\ \hline
 \label{t:mongoose_syscall}
 \end{table}
 
-% show the performance of each thread count, then put the overall scalability.
-
 \section{Nginx Webserver}
-Nginx is a sophisticated webserver with multiple concurrent modes.
+Nginx is a sophisticated webserver with multiple threading modes.
 
 \begin{table}
 \caption{Tracked system calls used by nginx}
 \begin{center}
- \begin{tabular}{c | c | c}
+ \begin{tabular}{c | c }
 System Call & Use in the Application\\ \hline
  time & Generate HTTP header\\ \hline
  poll & Wait for accept, read and write
@@ -98,7 +90,43 @@ System Call & Use in the Application\\ \hline
 \section{Redis Database Server}
 Redis is an in-memory database server. It uses a single thread to process requests, but it dynamically creates new threads to write the in-memory data to the disk. This benchmark is perfect for stressing the flexibility of dealing with dynamically spawned threads.
 
-\subsection{Overhead Profiling}
-\subsection{Results}
+For the performance test we used the redis-benchmark tool, we used the default benchmark parameter which will test all the operations. Each operation is tested for 10000 requests. We also have different number of concurrent clients to stress the server with different frequency of requests. We ran each setup for 5 times and took the average of the numbers.
 
-% Trace the lock distribution
+\subsection{Results}
+Figure~\ref{f:redis_2}, figure~\ref{f:redis_16} and figure~\ref{f:redis_64} show the  performance of redis with 2, 16 and 64 concurrent clients. Table~\ref{t:redis_overall} shows the overall overhead of each replication mode. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/redis_2}
+\caption{redis benchmark with 10000 requests and 2 clients}
+\label{f:redis_2}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/redis_16}
+\caption{redis benchmark with 10000 requests and 16 clients}
+\label{f:redis_16}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/redis_64}
+\caption{redis benchmark with 10000 requests and 64 clients}
+\label{f:redis_64}
+\end{figure}
+
+\begin{table}
+\caption{Redis Overall Overhead of Each Replication Mode}
+\begin{center}
+ \begin{tabular}{c | c | c}
+Client count & Deterministic Execution & Schedule Replication \\ \hline
+ 2 & 30.38\% & 11.93\% \\ \hline
+ 16 & 41.05\% & 26.94\% \\ \hline
+ 64 & 39.66\% & 26.48\% \\ \hline
+ \end{tabular}
+\end{center}
+\label{t:redis_overall}
+\end{table}
+
+\subsection{Overhead Profiling}
