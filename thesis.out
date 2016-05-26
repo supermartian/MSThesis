@@ -1,6 +1,6 @@
 \BOOKMARK [0][-]{chapter.1}{Introduction}{}% 1
 \BOOKMARK [0][-]{chapter.2}{Popcorn Linux Background}{}% 2
-\BOOKMARK [1][-]{section.2.1}{Multikernel Boot}{chapter.2}% 3
+\BOOKMARK [1][-]{section.2.1}{Hardware Partitioning}{chapter.2}% 3
 \BOOKMARK [1][-]{section.2.2}{Inter-Kernel Messaging Layer}{chapter.2}% 4
 \BOOKMARK [1][-]{section.2.3}{Popcorn Namespace}{chapter.2}% 5
 \BOOKMARK [2][-]{subsection.2.3.1}{Replicated Execution}{section.2.3}% 6
@@ -45,4 +45,3 @@
 \BOOKMARK [2][-]{subsection.7.2.2}{Arbitrary Number Replicas}{section.7.2}% 45
 \BOOKMARK [2][-]{subsection.7.2.3}{Hybrid Replication}{section.7.2}% 46
 \BOOKMARK [1][-]{section.7.3}{Further Evaluation}{chapter.7}% 47
-\BOOKMARK [0][-]{chapter.8}{Bibliography}{}% 48

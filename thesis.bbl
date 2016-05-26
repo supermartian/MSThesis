@@ -1,0 +1,71 @@
+\begin{thebibliography}{10}
+
+\bibitem{devietti2009dmp}
+Joseph Devietti, Brandon Lucia, Luis Ceze, and Mark Oskin.
+\newblock Dmp: deterministic shared memory multiprocessing.
+\newblock In {\em ACM SIGARCH Computer Architecture News}, volume~37, pages
+  85--96. ACM, 2009.
+
+\bibitem{cui2013parrot}
+Heming Cui, Jiri Simsa, Yi-Hong Lin, Hao Li, Ben Blum, Xinan Xu, Junfeng Yang,
+  Garth~A Gibson, and Randal~E Bryant.
+\newblock Parrot: A practical runtime for deterministic, stable, and reliable
+  threads.
+\newblock In {\em Proceedings of the Twenty-Fourth ACM Symposium on Operating
+  Systems Principles}, pages 388--405. ACM, 2013.
+
+\bibitem{liu2011dthreads}
+Tongping Liu, Charlie Curtsinger, and Emery~D Berger.
+\newblock Dthreads: efficient deterministic multithreading.
+\newblock In {\em Proceedings of the Twenty-Third ACM Symposium on Operating
+  Systems Principles}, pages 327--336. ACM, 2011.
+
+\bibitem{olszewski2009kendo}
+Marek Olszewski, Jason Ansel, and Saman Amarasinghe.
+\newblock Kendo: efficient deterministic multithreading in software.
+\newblock {\em ACM Sigplan Notices}, 44(3):97--108, 2009.
+
+\bibitem{leiserson2010cilk++}
+Charles~E Leiserson.
+\newblock The cilk++ concurrency platform.
+\newblock {\em The Journal of Supercomputing}, 51(3):244--257, 2010.
+
+\bibitem{berger2009grace}
+Emery~D Berger, Ting Yang, Tongping Liu, and Gene Novark.
+\newblock Grace: Safe multithreaded programming for c/c++.
+\newblock In {\em ACM Sigplan Notices}, volume~44, pages 81--96. ACM, 2009.
+
+\bibitem{weaver2008can}
+Vincent~M Weaver, Sally McKee, et~al.
+\newblock Can hardware performance counters be trusted?
+\newblock In {\em Workload Characterization, 2008. IISWC 2008. IEEE
+  International Symposium on}, pages 141--150. IEEE, 2008.
+
+\bibitem{bergan2010deterministic}
+Tom Bergan, Nicholas Hunt, Luis Ceze, and Steven~D Gribble.
+\newblock Deterministic process groups in dos.
+\newblock In {\em OSDI}, volume~10, pages 177--192, 2010.
+
+\bibitem{segulja2012architectural}
+Cedomir Segulja and Tarek~S Abdelrahman.
+\newblock Architectural support for synchronization-free deterministic parallel
+  programming.
+\newblock In {\em High Performance Computer Architecture (HPCA), 2012 IEEE 18th
+  International Symposium on}, pages 1--12. IEEE, 2012.
+
+\bibitem{devietti2011rcdc}
+Joseph Devietti, Jacob Nelson, Tom Bergan, Luis Ceze, and Dan Grossman.
+\newblock Rcdc: a relaxed consistency deterministic computer.
+\newblock In {\em ACM SIGPLAN Notices}, volume~46, pages 67--78. ACM, 2011.
+
+\bibitem{cui2015p}
+Heming Cui, Rui Gu, Cheng Liu, Tianyu Chen, and Junfeng Yang.
+\newblock P axos made transparent.
+\newblock In {\em Proceedings of the 25th Symposium on Operating Systems
+  Principles}, pages 105--120. ACM, 2015.
+
+\bibitem{hillstress}
+M~Hill and M~Xu Racey.
+\newblock A stress test for deterministic execution.
+
+\end{thebibliography}

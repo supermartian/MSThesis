@@ -1,40 +1,4 @@
 \chapter{Introduction}
+State machine replication (SMR) has been widely used for fault-tolerance purpose in nowadays computing services. In SMR, it models the service to be replicated with a set of inputs, a set of outputs and a set of states. The replication system ensures that for a given input set, from the same initial state, the replicas can produces the same state transition which in turn leads to the same result. Such a system is able to be resilient to failures in one or more replicas (depends on how many replicas are there in the system). To provide such property, determinism is required for the state machine, otherwise state machines will get diverged in different states even with the same input set.
 
-William Shakespeare has profoundly affected the field of literature
-worldwide.  In the United States there was a surge of Shakespearean
-literature starting in the 1960s, with the opening of the Montgomery
-Shakespearean festival and continuing into the present ...
-
-%%%%%%%%%%%%%%%%%
-%
-% Include an EPS figure with this command:
-%   \epsffile{filename.eps}
-%
-
-%%%%%%%%%%%%%%%%
-%
-% Do tables like this:
-
- \begin{table}
- \caption{The Graduate School wants captions above the tables.}
-\begin{center}
- \begin{tabular}{ccc}
- x & 1 & 2 \\ \hline
- 1 & 1 & 2 \\
- 2 & 2 & 4 \\ \hline
- \end{tabular}
-\end{center}
- \end{table}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% If you are using BibTeX, uncomment the following:
-% \thebibliography
-%
-% Otherwise, uncomment the following:
-% \chapter*{Bibliography}
-
-% \appendix
-
-% In LaTeX, each appendix is a "chapter"
-% \chapter{Program Source}
+Current State Machine Replication approaches

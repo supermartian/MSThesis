@@ -21,7 +21,7 @@ Before we get into the detail of this algorithm, let's revisit some important pr
 \item Same total order of getting into deterministic areas on primary and secondary.
 \end{itemize}
 
-The first property is guaranteed by the fact that the logical time won't change during the execution of a deterministic area, and the second property is guaranteed by increasing the logical time in a same way on both primary and replica. As long as these two properties are guaranteed, the thread interleaving on both primary and secondary are sure to be the same (also for tick bump). In our Schedule Replication mode, we guarantee these two properties with the following approaches:
+The first property is guaranteed by the fact that the logical time won't change during the execution of a deterministic area, and the second property is guaranteed by increasing the logical time in a same way on both primary and replica. As long as these two properties are guaranteed, the thread interleaving on both primary and secondary are sure to be the same (also for tick bump). By following this paradigm, in our Schedule Replication mode, we guarantee these two properties with the following approaches:
 
 \begin{itemize}
 \item Serialize deterministic areas with a global mutex on both primary and secondary.
@@ -88,7 +88,6 @@ As we mentioned in Section~\ref{sec:edeadlock}, wrapping all the lock acquisitio
 
 % However in this implementation we might have the case where the primary is able to proceed but the secondary got deadlocked. ????
 
-
 \section{Related Work}
 
 %doublePlay
@@ -97,3 +96,4 @@ As we mentioned in Section~\ref{sec:edeadlock}, wrapping all the lock acquisitio
 Partial order
 
 %ALL about EVE
+Execute and verify
