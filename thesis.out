@@ -14,7 +14,7 @@
 \BOOKMARK [2][-]{subsection.3.2.2}{Tick Bumping for External Events}{section.3.2}% 14
 \BOOKMARK [1][-]{section.3.3}{Related Work}{chapter.3}% 15
 \BOOKMARK [2][-]{subsection.3.3.1}{Deterministic Language Extension}{section.3.3}% 16
-\BOOKMARK [2][-]{subsection.3.3.2}{Deterministic Runtime}{section.3.3}% 17
+\BOOKMARK [2][-]{subsection.3.3.2}{Software Deterministic Runtime}{section.3.3}% 17
 \BOOKMARK [2][-]{subsection.3.3.3}{Architectural Determinism}{section.3.3}% 18
 \BOOKMARK [2][-]{subsection.3.3.4}{Deterministic System For Replication}{section.3.3}% 19
 \BOOKMARK [0][-]{chapter.4}{Nigoki: Schedule Replication}{}% 20
@@ -30,18 +30,19 @@
 \BOOKMARK [2][-]{subsection.5.2.1}{Interposing at Lock Functions}{section.5.2}% 30
 \BOOKMARK [2][-]{subsection.5.2.2}{Interposing at Condition Variable Functions}{section.5.2}% 31
 \BOOKMARK [1][-]{section.5.3}{stdin, stdio and stderr}{chapter.5}% 32
-\BOOKMARK [0][-]{chapter.6}{Evaluation}{}% 33
-\BOOKMARK [1][-]{section.6.1}{Racey}{chapter.6}% 34
-\BOOKMARK [1][-]{section.6.2}{PBZip2}{chapter.6}% 35
-\BOOKMARK [1][-]{section.6.3}{Mongoose Webserver}{chapter.6}% 36
-\BOOKMARK [1][-]{section.6.4}{Nginx Webserver}{chapter.6}% 37
-\BOOKMARK [1][-]{section.6.5}{Redis Database Server}{chapter.6}% 38
-\BOOKMARK [2][-]{subsection.6.5.1}{Results}{section.6.5}% 39
-\BOOKMARK [2][-]{subsection.6.5.2}{Overhead Profiling}{section.6.5}% 40
-\BOOKMARK [0][-]{chapter.7}{Conclusion}{}% 41
-\BOOKMARK [1][-]{section.7.1}{Contributions}{chapter.7}% 42
-\BOOKMARK [1][-]{section.7.2}{Future Work}{chapter.7}% 43
-\BOOKMARK [2][-]{subsection.7.2.1}{Pre-Lock Synchronization}{section.7.2}% 44
-\BOOKMARK [2][-]{subsection.7.2.2}{Arbitrary Number Replicas}{section.7.2}% 45
-\BOOKMARK [2][-]{subsection.7.2.3}{Hybrid Replication}{section.7.2}% 46
-\BOOKMARK [1][-]{section.7.3}{Further Evaluation}{chapter.7}% 47
+\BOOKMARK [1][-]{section.5.4}{Synchronization Elision}{chapter.5}% 33
+\BOOKMARK [0][-]{chapter.6}{Evaluation}{}% 34
+\BOOKMARK [1][-]{section.6.1}{Racey}{chapter.6}% 35
+\BOOKMARK [1][-]{section.6.2}{PBZip2}{chapter.6}% 36
+\BOOKMARK [1][-]{section.6.3}{Mongoose Webserver}{chapter.6}% 37
+\BOOKMARK [1][-]{section.6.4}{Nginx Webserver}{chapter.6}% 38
+\BOOKMARK [1][-]{section.6.5}{Redis Database Server}{chapter.6}% 39
+\BOOKMARK [2][-]{subsection.6.5.1}{Results}{section.6.5}% 40
+\BOOKMARK [2][-]{subsection.6.5.2}{Overhead Profiling}{section.6.5}% 41
+\BOOKMARK [0][-]{chapter.7}{Conclusion}{}% 42
+\BOOKMARK [1][-]{section.7.1}{Contributions}{chapter.7}% 43
+\BOOKMARK [1][-]{section.7.2}{Future Work}{chapter.7}% 44
+\BOOKMARK [2][-]{subsection.7.2.1}{Pre-Lock Synchronization}{section.7.2}% 45
+\BOOKMARK [2][-]{subsection.7.2.2}{Arbitrary Number Replicas}{section.7.2}% 46
+\BOOKMARK [2][-]{subsection.7.2.3}{Hybrid Replication}{section.7.2}% 47
+\BOOKMARK [1][-]{section.7.3}{Further Evaluation}{chapter.7}% 48
