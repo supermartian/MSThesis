@@ -59,7 +59,7 @@ Mongoose is a compact multithreaded webserver. The concurrent model is shown in 
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/mongoose_model}
+\includegraphics[width=0.6\columnwidth]{figures/mongoose_model}
 \caption{mongoose concurrent model}
 \label{f:mongoose_model}
 \end{figure}
@@ -111,7 +111,6 @@ System Call & Use in the Application\\ \hline
 \end{center}
 \label{t:nginx_syscall}
 \end{table}
-
 
 \section{Redis Database Server}
 Redis is an in-memory database server. It uses a single thread to process requests, but it dynamically creates new threads to write the in-memory data to the disk. This benchmark is perfect for stressing the flexibility of dealing with dynamically spawned threads.
