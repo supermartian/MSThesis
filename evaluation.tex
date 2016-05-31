@@ -36,7 +36,7 @@ PBZip2 is the parallel version of bzip2. The concurrent model of this applicatio
 \label{f:pbzip_model}
 \end{figure}
 
-For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to gain a decent performance in the deterministic execution, while for schedule replication nothing is modified.
+For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to gain a decent performance in the deterministic execution, while for schedule replication nothing is modified. The benchmark is to compress a 177MB file with different thread counts, here we measure the performance with the total execution time reported by pbzip2.
 
 Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is only used for showing the time spent on the whole process, so it is not critical to the output of the application. But since we synchronized it, it is  interesting that both the primary and secondary showed the same finishing time for each run, regardless if the secondary was falling behind the progress or not.
 
@@ -45,11 +45,24 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 \begin{center}
  \begin{tabular}{c | c}
  System Call & Use in the Application\\ \hline
- gettimeofday & Calculate execution time
+ gettimeofday & Calculate execution time/calculate the timeout for pthread\_cond\_timed\_wait
  \end{tabular}
 \end{center}
 \label{t:pbzip2_syscall}
 \end{table}
+
+\paragraph{Correctness} For Deterministic Execution, any mismatch of the schedule will lead to different calling sequence of gettimeofday on the primary and secondary, which will result different reported execution time. For Schedule Replication, any mismatch of the schedule will lead the secondary waiting for a wrong schedule event forever. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
+
+\subsection{Overall Performance}
+
+Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both two algorithms achieved decent scalability. In terms of overhead, both algorithms' overhead increases with the thread count. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/pbzip2_b10}
+\caption{pbzip2 performance}
+\label{f:pbzip_b10_performance}
+\end{figure}
 
 \section{Mongoose Webserver}
 % 1. threading model
