@@ -1,6 +1,6 @@
-set terminal postscript eps noenhanced color font 'Helvetica,15' size 7, 4
+set terminal postscript eps noenhanced color font 'Helvetica,16' size 7, 4
 set style data histogram
-set style histogram rowstack gap 0.5 title offset 0,-1
+set style histogram rowstack gap 1 title offset 0,-1
 set boxwidth 0.4
 set style fill solid
 set xlabel "File Size"

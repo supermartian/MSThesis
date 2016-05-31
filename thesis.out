@@ -35,14 +35,17 @@
 \BOOKMARK [1][-]{section.6.1}{Racey}{chapter.6}% 35
 \BOOKMARK [1][-]{section.6.2}{PBZip2}{chapter.6}% 36
 \BOOKMARK [1][-]{section.6.3}{Mongoose Webserver}{chapter.6}% 37
-\BOOKMARK [1][-]{section.6.4}{Nginx Webserver}{chapter.6}% 38
-\BOOKMARK [1][-]{section.6.5}{Redis Database Server}{chapter.6}% 39
-\BOOKMARK [2][-]{subsection.6.5.1}{Results}{section.6.5}% 40
-\BOOKMARK [2][-]{subsection.6.5.2}{Overhead Profiling}{section.6.5}% 41
-\BOOKMARK [0][-]{chapter.7}{Conclusion}{}% 42
-\BOOKMARK [1][-]{section.7.1}{Contributions}{chapter.7}% 43
-\BOOKMARK [1][-]{section.7.2}{Future Work}{chapter.7}% 44
-\BOOKMARK [2][-]{subsection.7.2.1}{Pre-Lock Synchronization}{section.7.2}% 45
-\BOOKMARK [2][-]{subsection.7.2.2}{Arbitrary Number Replicas}{section.7.2}% 46
-\BOOKMARK [2][-]{subsection.7.2.3}{Hybrid Replication}{section.7.2}% 47
-\BOOKMARK [1][-]{section.7.3}{Further Evaluation}{chapter.7}% 48
+\BOOKMARK [2][-]{subsection.6.3.1}{Overall Performance}{section.6.3}% 38
+\BOOKMARK [2][-]{subsection.6.3.2}{Overhead Breakdown}{section.6.3}% 39
+\BOOKMARK [2][-]{subsection.6.3.3}{Message Breakdown}{section.6.3}% 40
+\BOOKMARK [1][-]{section.6.4}{Nginx Webserver}{chapter.6}% 41
+\BOOKMARK [1][-]{section.6.5}{Redis Database Server}{chapter.6}% 42
+\BOOKMARK [2][-]{subsection.6.5.1}{Results}{section.6.5}% 43
+\BOOKMARK [2][-]{subsection.6.5.2}{Overhead Profiling}{section.6.5}% 44
+\BOOKMARK [0][-]{chapter.7}{Conclusion}{}% 45
+\BOOKMARK [1][-]{section.7.1}{Contributions}{chapter.7}% 46
+\BOOKMARK [1][-]{section.7.2}{Future Work}{chapter.7}% 47
+\BOOKMARK [2][-]{subsection.7.2.1}{Pre-Lock Synchronization}{section.7.2}% 48
+\BOOKMARK [2][-]{subsection.7.2.2}{Arbitrary Number Replicas}{section.7.2}% 49
+\BOOKMARK [2][-]{subsection.7.2.3}{Hybrid Replication}{section.7.2}% 50
+\BOOKMARK [1][-]{section.7.3}{Further Evaluation}{chapter.7}% 51

@@ -79,21 +79,29 @@ System Call & Use in the Application\\ \hline
 \label{t:mongoose_syscall}
 \end{table}
 
+\subsection{Overall Performance}
+
+\subsection{Overhead Breakdown}
+
+\subsection{Message Breakdown}
+In order to measure the message consumption of the benchmark, we put counters in different subsystems to count how many messages we need for each benchmark. Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. In all the figures, "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, while in Schedule Replication this stands for the messages for logging the execution sequence.
+
+
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/mg_msg_4}
+\includegraphics[width=1\columnwidth]{figures/mg_msg_4}
 \caption{mongoose messages in 4 threads}
 \label{f:mg_msg_4}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/mg_msg_8}
+\includegraphics[width=1\columnwidth]{figures/mg_msg_8}
 \caption{mongoose messages in 8 threads}
 \label{f:mg_msg_8}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/mg_msg_16}
+\includegraphics[width=1\columnwidth]{figures/mg_msg_16}
 \caption{mongoose messages in 16 threads}
 \label{f:mg_msg_16}
 \end{figure}
