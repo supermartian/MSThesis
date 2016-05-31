@@ -55,7 +55,7 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 % 1. threading model
 % 2. A table of lock and cond var count
 
-Mongoose is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value.
+Mongoose is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value. For all our benchmarks, both the primary and secondary ended in the same state at the end of the benchmark, and both responded the same HTTP payload.
 
 \begin{figure}
 \centering
@@ -64,7 +64,7 @@ Mongoose is a compact multithreaded webserver. The concurrent model is shown in 
 \label{f:mongoose_model}
 \end{figure}
 
-We used ApacheBench to stress test mongoose with different file sizes and different mongoose thread counts, in this way we can see if our system scales or not. Figure blah blah shows the throughput under different setup for both replication algorithms. 
+We used ApacheBench to stress test mongoose with different file sizes and different mongoose thread counts. Given mongoose's concurrent model, we can see that different file size will affect the frequency of acquiring locks. In this way we can figure out how will two algorithm perform under different lock acquisition load. Also, different thread counts can reflect the scalability of our system.
 %cite ab
 
 \begin{table}
