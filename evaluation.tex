@@ -86,6 +86,9 @@ System Call & Use in the Application\\ \hline
 \subsection{Message Breakdown}
 In order to measure the message consumption of the benchmark, we put counters in different subsystems to count how many messages we need for each benchmark. Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. In all the figures, "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, while in Schedule Replication this stands for the messages for logging the execution sequence.
 
+% mongoose is using synchronous read and write
+
+An interesting result is that actually we need much more messages for deterministic execution, which contradicts the assumption we made for Deterministic Execution. Bigger network payload leads to more socket calls, thus we need more messages for the Tick Shepherd to synchronize the tick bumps. However for Schedule Replication, since the messages for scheduling only depends on the number of synchronization primitives, which totally depends on the number of requests (not the size), as a result, across all the benchmarks, the number of schedule messages for Schedule Replication show a near constant value.
 
 \begin{figure}
 \centering
@@ -114,7 +117,7 @@ Nginx is a sophisticated webserver with multiple threading modes.
  \begin{tabular}{c | c }
 System Call & Use in the Application\\ \hline
  time & Generate HTTP header\\ \hline
- poll & Wait for accept, read and write
+ epoll\_wait & Wait for accept, read and write
  \end{tabular}
 \end{center}
 \label{t:nginx_syscall}
