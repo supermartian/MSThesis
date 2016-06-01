@@ -57,7 +57,7 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 
 Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions become more obvious.
 
-For deterministic execution, another overhead comes from the calculation of the token. Current implementation requires O(N) time to decide which task should execute on next \detstart\, where N is the number of threads. Every logical time update comes with such a calculation, more threads leads to more calculation time. Although this could be optimized to O(logN), this overhead is still inevitable as the thread count increases.
+For deterministic execution, another overhead comes from the calculation of the token. Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads leads to more calculation time.
 
 %different block sizes
 
