@@ -36,16 +36,16 @@ PBZip2 is the parallel version of bzip2. The concurrent model of this applicatio
 \label{f:pbzip_model}
 \end{figure}
 
-For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to gain a decent performance in the deterministic execution, while for schedule replication nothing is modified. The benchmark is to compress a 177MB file with different thread counts, here we measure the performance with the total execution time reported by pbzip2.
+For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to balance the logical time for the deterministic execution, while for schedule replication nothing is modified. The benchmark is to compress a 177MB file with different thread counts, here we measure the performance with the total execution time reported by pbzip2.
 
-Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is only used for showing the time spent on the whole process, so it is not critical to the output of the application. But since we synchronized it, it is  interesting that both the primary and secondary showed the same finishing time for each run, regardless if the secondary was falling behind the progress or not.
+Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is used for showing the time spent on the whole process, which it is not critical to the output of the application. However pthread\_cond\_timed\_wait also uses gettimeofday to calculate the timeout for the wait time, which is critical to the consistency of the execution.
 
 \begin{table}
  \caption{Tracked system calls used by pbzip2}
 \begin{center}
  \begin{tabular}{c | c}
  System Call & Use in the Application\\ \hline
- gettimeofday & Calculate execution time/calculate the timeout for pthread\_cond\_timed\_wait
+ gettimeofday & Calculate execution time/pthread\_cond\_timed\_wait
  \end{tabular}
 \end{center}
 \label{t:pbzip2_syscall}
@@ -53,9 +53,28 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 
 \paragraph{Correctness} For Deterministic Execution, any mismatch of the schedule will lead to different calling sequence of gettimeofday on the primary and secondary, which will result different reported execution time. For Schedule Replication, any mismatch of the schedule will lead the secondary waiting for a wrong schedule event forever. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
 
-\subsection{Overall Performance}
+\subsection{Results}
 
-Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both two algorithms achieved decent scalability. In terms of overhead, both algorithms' overhead increases with the thread count. 
+Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions become more obvious.
+
+For deterministic execution, another overhead comes from the calculation of the token. Current implementation requires O(N) time to decide which task should execute on next \detstart\, where N is the number of threads. Every logical time update comes with such a calculation, more threads leads to more calculation time. Although this could be optimized to O(logN), this overhead is still inevitable as the thread count increases.
+
+%different block sizes
+
+\begin{table}
+\caption{pbzip2 Overall Overhead of Each Replication Mode}
+\begin{center}
+ \begin{tabular}{c | c | c}
+Thread count & Deterministic Execution & Schedule Replication \\ \hline
+ 2 & 14.27\% & 0.89\% \\ \hline
+ 4 & 22.89\% & 4.08\% \\ \hline
+ 8 & 33.82\% & 6.72\% \\ \hline
+ 16 & 69.00\% & 24.7\% \\ \hline
+ 24 & 100.02\% & 36.3\% \\ \hline 
+ \end{tabular}
+\end{center}
+\label{t:pbzip2_overall}
+\end{table}
 
 \begin{figure}
 \centering
@@ -68,7 +87,7 @@ Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, 
 % 1. threading model
 % 2. A table of lock and cond var count
 
-Mongoose is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value. For all our benchmarks, both the primary and secondary ended in the same state at the end of the benchmark, and both responded the same HTTP payload.
+Mongoose is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value.
 
 \begin{figure}
 \centering
@@ -92,7 +111,9 @@ System Call & Use in the Application\\ \hline
 \label{t:mongoose_syscall}
 \end{table}
 
-\subsection{Overall Performance}
+\paragraph{Correctness} For both replication mode, any mismatch will lead to either different thread handling different socket, or divergence in the HTTP responses. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
+
+\subsection{Results}
 
 \subsection{Overhead Breakdown}
 
@@ -181,3 +202,5 @@ Client count & Deterministic Execution & Schedule Replication \\ \hline
 \end{table}
 
 \subsection{Overhead Profiling}
+
+\section{Discussion}
