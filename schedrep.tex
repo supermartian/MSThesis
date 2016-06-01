@@ -87,8 +87,12 @@ For each namespace on the secondary, we have a queue for logging the incoming sc
 As we mentioned in Section~\ref{sec:edeadlock}, wrapping all the lock acquisitions with \detstart\ and \detend\ will occur the same deadlock issue, the reason is similar to the case in the Deterministic Execution because we don't release the lock acquisition order when the mutex is contended. The solution in Schedule Replication is similar to what we did in the Deterministic Execution, upon getting into sleep in futex, we release the global mutex and re-acquire it when it wakes up from futex. The futex modification mentioned in Section~\ref{sec:edeadlock} is also applied in this case to ensure the determinism of waking up from futex.
 
 \section{Related Work}
-
+Several previous works also presented the idea that not using a deterministic system for replication.
 %doublePlay
+
+\subsection{Replication}
+\subsection{Execute And Verify}
+\subsection{Record And Replay}
 
 %REX
 Partial order

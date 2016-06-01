@@ -55,9 +55,9 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 
 \subsection{Results}
 
-Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions become more obvious.
+Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions become more obvious. 
 
-For deterministic execution, another overhead comes from the calculation of the token. Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads leads to more calculation time.
+The result for deterministic execution seems more interesting. For all the benchmark runs, there seems to be a constant 2~3 seconds overhead compare to vanilla Linux. This is due to 
 
 %different block sizes
 
@@ -67,10 +67,10 @@ For deterministic execution, another overhead comes from the calculation of the 
  \begin{tabular}{c | c | c}
 Thread count & Deterministic Execution & Schedule Replication \\ \hline
  2 & 14.27\% & 0.89\% \\ \hline
- 4 & 22.89\% & 4.08\% \\ \hline
- 8 & 33.82\% & 6.72\% \\ \hline
- 16 & 69.00\% & 24.7\% \\ \hline
- 24 & 100.02\% & 36.3\% \\ \hline 
+ 4 & 29.47\% & 4.08\% \\ \hline
+ 8 & 44.77\% & 6.72\% \\ \hline
+ 16 & 54.44\% & 24.7\% \\ \hline
+ 24 & 63.39\% & 36.3\% \\ \hline 
  \end{tabular}
 \end{center}
 \label{t:pbzip2_overall}
@@ -204,3 +204,15 @@ Client count & Deterministic Execution & Schedule Replication \\ \hline
 \subsection{Overhead Profiling}
 
 \section{Discussion}
+The selected benchmarks were used to stress different aspects of this project. Although there are still some optimizations to go, we still achieved decent overhead for different types of concurrent models and different application types. Here we will discuss some particular performance issues, and also some problems during the benchmark.
+
+\subsection{Benchmark for Nginx's Multi-process Mode}
+So far for all the marco benchmarks, we only showed benchmarks for multi-threaded applications. However our system  also supports multi-process applications. Nginx supports multi-worker mode, which spawns multiple worker processes, all of the worker processes wait on the listening socket together. Nginx implements the accept\_mutex, which is lock across processes, to ensure an incoming request only wakes up one waiting worker. In order to figure whether our replication works for this concurrent model or not, we manually instrumented the accept\_mutex acquisition with \detstart\ and \detend\ . During the benchmark, both primary and secondary were able to end up in the same state all the time. However no matter how many workers we put, it was always only one worker hands all the request. This is due to a relatively low workload we used in our benchmark. However, because of the limitation of both our network card (1Gbps) and the limitation of the network stack replication, we couldn't saturate the worker. With Nginx's design, the accept\_mutex mechanism will not pass the request to another worker if the current worker is not saturated. Which is the reason we only see one worker handling all the requests.
+
+Although this benchmark showed the correctness of our system, the unbalanced load seems not making any sense in terms of scalability. As a result we didn't include the result in this chapter. In the future with the optimization of the network stack replication and a better network card, we might be able show a more reasonable result for this benchmark.
+
+\subsection{Deterministic Execution's Dilemma}
+For deterministic execution, a type of overhead comes from the calculation of the token. Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads leads to more calculation time.  As we can see from all the benchmarks, deterministic system always leads to a higher overhead when thread count increases. In a previous discussion ~\cite{bergan2011deterministic}, it is pointed out that all the existing deterministic systems, regardless of what type of deterministic algorithm (lockstep or wait for turn), this kind of global communication is inevitable. This also implies that deterministic might not be practical for highly concurrent application with highly intensive inter-thread communications (synchronization primitives). Webservers like mongoose and nginx have very simple inter-thread communication , so that we achieved decent overhead during the benchmark. But for more complicated applications with more different types of locks, we might face severe performance overhead.
+
+\subsection{Benefit From Messaging Layer}
+Our implementation benefits a lot from the messaging layer.
