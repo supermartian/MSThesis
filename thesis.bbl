@@ -1,5 +1,17 @@
 \begin{thebibliography}{10}
 
+\bibitem{barbalace2014popcorn}
+Antonio Barbalace, Binoy Ravindran, and David Katz.
+\newblock Popcorn: a replicated-kernel os based on linux.
+\newblock In {\em Proceedings of the Linux Symposium, Ottawa, Canada}, 2014.
+
+\bibitem{shelton2013popcorn}
+Benjamin~H Shelton.
+\newblock {\em Popcorn Linux: enabling efficient inter-core communication in a
+  Linux-based multikernel operating system}.
+\newblock PhD thesis, Virginia Polytechnic Institute and State University,
+  2013.
+
 \bibitem{devietti2009dmp}
 Joseph Devietti, Brandon Lucia, Luis Ceze, and Mark Oskin.
 \newblock Dmp: deterministic shared memory multiprocessing.
@@ -24,6 +36,20 @@ Tongping Liu, Charlie Curtsinger, and Emery~D Berger.
 Marek Olszewski, Jason Ansel, and Saman Amarasinghe.
 \newblock Kendo: efficient deterministic multithreading in software.
 \newblock {\em ACM Sigplan Notices}, 44(3):97--108, 2009.
+
+\bibitem{lattner2004llvm}
+Chris Lattner and Vikram Adve.
+\newblock Llvm: A compilation framework for lifelong program analysis \&
+  transformation.
+\newblock In {\em Code Generation and Optimization, 2004. CGO 2004.
+  International Symposium on}, pages 75--86. IEEE, 2004.
+
+\bibitem{bergan2011deterministic}
+Tom Bergan, Joseph Devietti, Nicholas Hunt, and Luis Ceze.
+\newblock The deterministic execution hammer: How well does it actually pound
+  nails.
+\newblock In {\em The 2nd Workshop on Determinism and Correctness in Parallel
+  Programming (WODET’11)}, 2011.
 
 \bibitem{leiserson2010cilk++}
 Charles~E Leiserson.
@@ -53,6 +79,12 @@ Cedomir Segulja and Tarek~S Abdelrahman.
 \newblock In {\em High Performance Computer Architecture (HPCA), 2012 IEEE 18th
   International Symposium on}, pages 1--12. IEEE, 2012.
 
+\bibitem{hower2011calvin}
+Derek~R Hower, Polina Dudnik, Mark~D Hill, and David~A Wood.
+\newblock Calvin: Deterministic or not? free will to choose.
+\newblock In {\em High Performance Computer Architecture (HPCA), 2011 IEEE 17th
+  International Symposium on}, pages 333--334. IEEE, 2011.
+
 \bibitem{devietti2011rcdc}
 Joseph Devietti, Jacob Nelson, Tom Bergan, Luis Ceze, and Dan Grossman.
 \newblock Rcdc: a relaxed consistency deterministic computer.
@@ -67,5 +99,16 @@ Heming Cui, Rui Gu, Cheng Liu, Tianyu Chen, and Junfeng Yang.
 \bibitem{hillstress}
 M~Hill and M~Xu Racey.
 \newblock A stress test for deterministic execution.
+\newblock \url{http://pages.cs.wisc.edu/~markhill/racey.html}.
+
+\bibitem{reese2008nginx}
+Will Reese.
+\newblock Nginx: the high-performance web server and reverse proxy.
+\newblock {\em Linux Journal}, 2008(173):2, 2008.
+
+\bibitem{nginxscalability}
+Inside nginx: How we designed for performance \& scale.
+\newblock
+  \url{https://www.nginx.com/blog/inside-nginx-how-we-designed-for-performance-scale/}.
 
 \end{thebibliography}

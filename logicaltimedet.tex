@@ -211,7 +211,9 @@ Instead of deciding the logical time during the runtime, we discovered a way to 
    \item \_\_det\_tick: This system call comes with a parameter of an integer. When it is called, the logical time will be increased by value defined by the parameter.
 \end{itemize}
 
-This system call should be inserted in the program where the logical time needs to be increased. In order to automate this instrumentation process, based on LLVM, we implemented two compiler passes to do the profiling and instrumentation.
+This system call should be inserted in the program where the logical time needs to be increased. In order to automate this instrumentation process, based on LLVM~\cite{lattner2004llvm}, we implemented two compiler passes to do the profiling and instrumentation.
+
+% show a flow of generating things
 
 \paragraph{Profile Pass}
 In order to get the execution time of a program, we make a profile pass to collect the execution time at the granularity of basic block. During the compilation time, this compiler pass will assign a unique number to each basic block, and inserts time profiling functions around every basic block beyond a certain threshold in terms of number of instructions. Figure~\ref{fig:profiled} shows a basic block instrumented with the profile functions in LLVM-IR. In this basic block, bbprof\_start (line 3) and bbprof\_end (line 16) are inserted at the beginning and the end of this basic block.
@@ -245,7 +247,6 @@ if.end.23:                                        ; preds = %for.end
 \caption{An instrumented basic block in pbzip2 with execution time profiling functions.}
 \label{fig:profiled}
 \end{figure}
-% put a bb with profile instrumentation here
 
 \begin{figure}
 \centering
@@ -266,8 +267,6 @@ if.end.23:                                        ; preds = %for.end
 \caption{An instrumented basic block in pbzip2 with dettick.}
 \label{fig:instrumented}
 \end{figure}
-
-%Compiler shit here
 
 \subsection{Tick Bumping for External Events}
 

@@ -1,5 +1,5 @@
 \chapter{Popcorn Linux Background}
-Our replication prototype is built on top of Popcorn Linux. It is a multi-kernel OS which allows a multi-core system to boot multiple Linux kernels.
+Our replication prototype is built on top of Popcorn Linux ~\cite{barbalace2014popcorn}. It is a multi-kernel OS which allows a multi-core system to boot multiple Linux kernels.
 % talk about multi-kernel boot here
 % Put a plot of popcorn architecture here
 \section{Hardware Partitioning}
@@ -14,6 +14,7 @@ In Popcorn Linux, hardware resources are partitioned into arbitrary divisions, e
 The hardware partitioning provides a very strong isolation for all the kernels and the applications running on them, which is ideal for our intra-machine fault tolerance model. When a critical hardware error happens on one kernel's hardware partition, this isolation guarantees that the error won't get propagated to another.
 
 \section{Inter-Kernel Messaging Layer}
+Popcorn Linux comes with a high efficient messaging layer for inter-kernel communication ~\cite{shelton2013popcorn}.
 % Important fact: messaging layer is strictly FIFO
 
 \section{Popcorn Namespace}
