@@ -5,7 +5,7 @@ In this chapter we will show some experiment results of our system. We will use 
 \begin{itemize}
   \item Correctness: Given the same input, can the primary and secondary consistently generate the same output?
   \item Performance: Compare to non-replicated execution, how much overhead is introduced by our system?
-  \item Breakdown: Where does the overhead come from?
+  \item Overhead: What do we need to pay for doing replication?
 \end{itemize}
 % Evaluation factors:
 % 1. Lock count & pcnmsg count for schedule part
@@ -83,6 +83,15 @@ Thread count & Deterministic Execution & Schedule Replication \\ \hline
 \label{f:pbzip_b10_performance}
 \end{figure}
 
+\subsection{Message Breakdown}
+Figure~\ref{f:pbzip2_msg} shows the number of messages that were used during the benchmark. In all the figures, "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, while in Schedule Replication this stands for the messages for logging the execution sequence. This result is expected as we assume that Deterministic Execution doesn't require too much communication between the replicas. Here all the system call messages are for gettimeofday, and most of them are from pthread\_cond\_timed\_wait. In pbzip2, pthread\_cond\_timed\_wait is used by Worker threads to wait for available data chunks. An interesting finding is that for the same benchmark Deterministic Execution invoked less system calls than Schedule Replication. This is because for Deterministic Execution there is a minor logical time imbalance issue, where the FileReader and FilerWriter had more chance to run compare to Worker threads. In this situation, whenever a Worker thread has chance to run, it is very likely to find an available data chunk in the queue, thus no need to call pthread\_cond\_timed\_wait. However for Schedule Replication, the arbitrary thread interleaving causes the Worker threads having more chance waiting on an empty queue, which leads to more invocation to pthread\_cond\_timed\_wait.
+\begin{figure}
+\centering
+\includegraphics[width=1\columnwidth]{figures/pbzip2_msg}
+\caption{pbzip2 messages}
+\label{f:pbzip2_msg}
+\end{figure}
+
 \section{Mongoose Webserver}
 % 1. threading model
 % 2. A table of lock and cond var count
@@ -104,7 +113,7 @@ We used ApacheBench to stress test mongoose with different file sizes and differ
 \begin{center}
  \begin{tabular}{c | c}
 System Call & Use in the Application\\ \hline
- time & Generate HTTP header  \\ \hline
+ time & Generate HTTP header  \\ \Figure~\ref{f:mg_msg_4}hline
  poll & Wait for accept, read and write
  \end{tabular}
 \end{center}
@@ -118,11 +127,11 @@ System Call & Use in the Application\\ \hline
 \subsection{Overhead Breakdown}
 
 \subsection{Message Breakdown}
-In order to measure the message consumption of the benchmark, we put counters in different subsystems to count how many messages we need for each benchmark. Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. In all the figures, "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, while in Schedule Replication this stands for the messages for logging the execution sequence.
+Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. The notation is the same as the previous section. Where "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, and in Schedule Replication this stands for the messages for logging the execution sequence.
 
 % mongoose is using synchronous read and write
 
-An interesting result is that actually we need much more messages for deterministic execution, which contradicts the assumption we made for Deterministic Execution. Bigger network payload leads to more socket calls, thus we need more messages for the Tick Shepherd to synchronize the tick bumps. However for Schedule Replication, since the messages for scheduling only depends on the number of synchronization primitives, which totally depends on the number of requests (not the size), as a result, across all the benchmarks, the number of schedule messages for Schedule Replication show a near constant value.
+Actually, we need much more messages for deterministic execution, which contradicts the assumption we made for Deterministic Execution. Bigger network payload leads to more socket calls, thus we need more messages for the Tick Shepherd to synchronize the tick bumps. However for Schedule Replication, since the messages for scheduling only depends on the number of synchronization primitives, which totally depends on the number of requests (not the size), as a result, across all the benchmarks, the number of schedule messages for Schedule Replication show a near constant value.
 
 \begin{figure}
 \centering
@@ -204,7 +213,7 @@ Client count & Deterministic Execution & Schedule Replication \\ \hline
 \subsection{Overhead Profiling}
 
 \section{Discussion}
-The selected benchmarks were used to stress different aspects of this project. Although there are still some optimizations to go, we still achieved decent overhead for different types of concurrent models and different application types. Here we will discuss some particular performance issues, and also some problems during the benchmark.
+The selected benchmarks were used to stress different aspects of this project. Although there are still some optimizations to go, we still achieved decent overhead for different types of concurrent models and different application types. Here we will discuss some interesting issues during the benchmark and some findings from the results.
 
 \subsection{Benchmark for Nginx's Multi-process Mode}
 So far for all the marco benchmarks, we only showed benchmarks for multi-threaded applications. However our system also supports replication for multi-process applications (as we showed for racey microbenchmark). Nginx supports multi-worker mode, which spawns multiple worker processes, all of the worker processes wait on the listening socket together. Nginx implements the accept\_mutex ~\cite{nginxscalability}, which is lock across processes, to ensure an incoming request only wakes up one waiting worker. In order to figure out whether our replication works for this concurrent model or not, we manually instrumented the accept\_mutex acquisition with \detstart\ and \detend\ . During the benchmark, both primary and secondary were able to end up with the same state all the time. However no matter how many workers we put, it was always only one worker handling all the request. This is due to a relatively low workload we used in our benchmark. However, because of the limitation of both our network card (1Gbps) and the limitation of the network stack replication, we couldn't apply heavier workload to saturate the worker. With Nginx's design, the accept\_mutex mechanism will not pass the request to another worker if the current worker is not saturated. Which is the reason we only see one worker handling all the requests.
