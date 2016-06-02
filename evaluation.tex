@@ -113,7 +113,7 @@ We used ApacheBench to stress test mongoose with different file sizes and differ
 \begin{center}
  \begin{tabular}{c | c}
 System Call & Use in the Application\\ \hline
- time & Generate HTTP header  \\ \Figure~\ref{f:mg_msg_4}hline
+ time & Generate HTTP header  \\ \hline
  poll & Wait for accept, read and write
  \end{tabular}
 \end{center}
@@ -127,7 +127,7 @@ System Call & Use in the Application\\ \hline
 \subsection{Overhead Breakdown}
 
 \subsection{Message Breakdown}
-Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. The notation is the same as the previous section. Where "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, and in Schedule Replication this stands for the messages for logging the execution sequence.
+Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. The notation is the same as the previous section. Where "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, a in Schedule Replication this stands for the messages for logging the execution sequence.
 
 % mongoose is using synchronous read and write
 
