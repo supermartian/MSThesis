@@ -78,7 +78,7 @@ In Linux, the behaviour of the dynamic linker can be altered by setting LD\_PREL
 
 \subsection{Interposing at Lock Functions}
 
-Figure~\ref{f:orverridelocks} shows the implementation of pthread\_mutex\_lock in our LD\_PRELOAD library. Line 9 loads the real pthread\_mutex\_lock function from the real pthread library, in Line 12 we simply call this function with \_\_det\_start and \_\_det\_end wrapped around. In our LD\_PRELOAD library, we wrapped all the pthread lock functions include pthread\_mutex\_lock, pthread\_mutex\_trylock, pthread\_rwlock\_rdlock, pthread\_rwlock\_tryrdlock, pthread\_rwlock\_wrlock, pthread\_rwlock\_trywrlock.
+Figure~\ref{f:orverridelocks} shows the implementation of pthread\_mutex\_lock in our LD\_PRELOAD library. Line 9 loads the real pthread\_mutex\_lock function from the real pthread library, in Line 12 we simply call this function with \_\_det\_start and \_\_det\_end wrapped around. In our LD\_PRELOAD library, we wrapped all the pthread lock functions include pthread\_mutex\_lock, pthread\_mutex\_trylock, pthread\_rwlock\_rdlock, pthread\_rwlock\_tryrdlock, pthread\_rwlock\_wrlock, pthread\_rwlock\_trywrlock. There we need no special treatment for unlock primitives, as long as the calling sequence of lock operations are determined, the return timing for the lock operations will follow the same sequence ~\cite{merrifieldincreasing}.
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{locks}

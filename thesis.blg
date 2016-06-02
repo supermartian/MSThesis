@@ -6,45 +6,47 @@ Database file #1: bibliography.bib
 Warning--can't use both volume and number fields in devietti2009dmp
 Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in devietti2011rcdc
-You've used 19 entries,
+Warning--empty journal in merrifieldincreasing
+Warning--empty year in merrifieldincreasing
+You've used 21 entries,
             1791 wiz_defined-function locations,
-            551 strings with 7022 characters,
-and the built_in function-call counts, 5621 in all, are:
-= -- 535
-> -- 214
+            557 strings with 7270 characters,
+and the built_in function-call counts, 5863 in all, are:
+= -- 552
+> -- 223
 < -- 15
-+ -- 79
-- -- 60
-* -- 337
-:= -- 789
-add.period$ -- 66
-call.type$ -- 19
-change.case$ -- 18
++ -- 83
+- -- 62
+* -- 345
+:= -- 822
+add.period$ -- 70
+call.type$ -- 21
+change.case$ -- 20
 chr.to.int$ -- 0
-cite$ -- 22
-duplicate$ -- 287
-empty$ -- 564
-format.name$ -- 60
-if$ -- 1349
+cite$ -- 26
+duplicate$ -- 300
+empty$ -- 596
+format.name$ -- 62
+if$ -- 1405
 int.to.chr$ -- 0
-int.to.str$ -- 19
-missing$ -- 16
-newline$ -- 97
-num.names$ -- 18
-pop$ -- 89
+int.to.str$ -- 21
+missing$ -- 17
+newline$ -- 105
+num.names$ -- 19
+pop$ -- 101
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 172
+skip$ -- 182
 stack$ -- 0
 substring$ -- 357
-swap$ -- 126
+swap$ -- 127
 text.length$ -- 15
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 3
-while$ -- 56
-width$ -- 21
-write$ -- 217
-(There were 3 warnings)
+warning$ -- 5
+while$ -- 57
+width$ -- 23
+write$ -- 231
+(There were 5 warnings)
