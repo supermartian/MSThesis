@@ -55,9 +55,7 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 
 \subsection{Results}
 
-Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions become more obvious. 
-
-The result for deterministic execution seems more interesting. For all the benchmark runs, there seems to be a constant 2~3 seconds overhead compare to vanilla Linux. This is due to 
+Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions becomes more obvious. In pbzip2
 
 %different block sizes
 
