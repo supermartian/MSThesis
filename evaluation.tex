@@ -51,11 +51,11 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 \label{t:pbzip2_syscall}
 \end{table}
 
-\paragraph{Correctness} For Deterministic Execution, any mismatch of the schedule will lead to different calling sequence of gettimeofday on the primary and secondary, which will result different reported execution time. For Schedule Replication, any mismatch of the schedule will lead the secondary waiting for a wrong schedule event forever. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
-
 \subsection{Results}
 
-Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions becomes more obvious. In pbzip2
+Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions becomes more obvious.
+
+For Deterministic Execution, another comes from the logical time imbalance.
 
 %different block sizes
 
@@ -121,31 +121,49 @@ System Call & Use in the Application\\ \hline
 \paragraph{Correctness} For both replication mode, any mismatch will lead to either different thread handling different socket, or divergence in the HTTP responses. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
 
 \subsection{Results}
+\begin{figure}
+\centering
+\includegraphics[width=0.6\columnwidth]{figures/mg_throughput_50k}
+\caption{mongoose performance for 50KB file requests}
+\label{f:mg_50k}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.6\columnwidth]{figures/mg_throughput_100k}
+\caption{mongoose performance for 100KB file requests}
+\label{f:mg_100k}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.6\columnwidth]{figures/mg_throughput_200k}
+\caption{mongoose performance for 200KB file requests}
+\label{f:mg_200k}
+\end{figure}
+
+Figure ~\ref{f:mg_50k}, ~\ref{f:mg_100k} and ~\ref{f:mg_200k} show the performance under different workload. Schedule Replication showed
 
 \subsection{Message Breakdown}
-Figure~\ref{f:mg_msg_4}, Figure~\ref{f:mg_msg_8} and Figure~\ref{f:mg_msg_16} show the breakdown of overall messages for each benchmark set. The notation is the same as the previous section. Where "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, a in Schedule Replication this stands for the messages for logging the execution sequence.
+Figure~\ref{f:mg_msg_50k}, Figure~\ref{f:mg_msg_100k} and Figure~\ref{f:mg_msg_200k} show the breakdown of overall messages for each benchmark set. The notation is the same as the previous section. Where "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, a in Schedule Replication this stands for the messages for logging the execution sequence.
 
-% mongoose is using synchronous read and write
-
-Actually, we need much more messages for deterministic execution, which contradicts the assumption we made for Deterministic Execution. Bigger network payload leads to more socket calls, thus we need more messages for the Tick Shepherd to synchronize the tick bumps. However for Schedule Replication, since the messages for scheduling only depends on the number of synchronization primitives, which totally depends on the number of requests (not the size), as a result, across all the benchmarks, the number of schedule messages for Schedule Replication show a near constant value.
+Actually, we need much more messages for deterministic execution, which contradicts the assumption we made for Deterministic Execution. In mongoose, socket write and file I/O are blocking operations, and bigger network payload leads to more socket calls, thus we need more messages for the Tick Shepherd to synchronize the tick bumps. However for Schedule Replication, since the messages for scheduling only depends on the number of synchronization primitives, which totally depends on the number of requests (not the size), as a result, across all the benchmarks, the number of schedule messages for Schedule Replication show a near constant value across all the benchmarks.
 
 \begin{figure}
 \centering
-\includegraphics[width=1\columnwidth]{figures/mg_msg_4}
-\caption{mongoose messages in 4 threads}
-\label{f:mg_msg_4}
+\includegraphics[width=0.6\columnwidth]{figures/mg_msg_50k}
+\caption{mongoose messages for 50KB file requests}
+\label{f:mg_msg_50k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=1\columnwidth]{figures/mg_msg_8}
-\caption{mongoose messages in 8 threads}
-\label{f:mg_msg_8}
+\includegraphics[width=0.6\columnwidth]{figures/mg_msg_100KB}
+\caption{mongoose messages for 100KB file requests}
+\label{f:mg_msg_100k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=1\columnwidth]{figures/mg_msg_16}
-\caption{mongoose messages in 16 threads}
-\label{f:mg_msg_16}
+\includegraphics[width=0.6\columnwidth]{figures/mg_msg_200KB}
+\caption{mongoose messages for 200KB file requests}
+\label{f:mg_msg_200k}
 \end{figure}
 \section{Nginx Webserver}
 Nginx~\cite{reese2008nginx} is a sophisticated webserver with multiple threading modes. In this benchmark we used the threadpool setup~\cite{nginxthreadpool} for our benchmark. As shown in Figure~\ref{f:nginx_model}, in this threading mode, the additional threads are only for doing file I/O operations. The MasterThread waits on the listening socket, whenever a file request is coming, it hands over the request into a queue. WorkerThreads get notified whenever a new request is coming and try to retrieve one task from the queue. Whenever the content of the requested file is loaded into memory by a WorkerThread, a handle will be put into another queue and the MasterThread will get notified. In the end, the MasterThread will retrieve the handle and send the content of the file back to the client. 
@@ -154,7 +172,7 @@ Table ~\ref{t:nginx_syscall} shows all the tracked system calls used by Nginx. A
 
 \begin{figure}
 \centering
-\includegraphics[width=1\columnwidth]{figures/nginx_model}
+\includegraphics[width=0.8\columnwidth]{figures/nginx_model}
 \caption{Nginx thread pool model}
 \label{f:nginx_model}
 \end{figure}
@@ -246,3 +264,11 @@ Unlike the non-scaling result with the threadpool mode, where all the threads we
 For deterministic execution, a type of overhead comes from the calculation of the token (finding the task with minimal logical time). Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads lead to more computation time.  As we can see from all the benchmarks, deterministic system always leads to a higher overhead when thread count increases. In a previous discussion ~\cite{bergan2011deterministic}, it is pointed out that all the existing deterministic systems, regardless of what type of deterministic algorithm (lockstep or wait for turn), this kind of global communication is inevitable. This also implies that deterministic might not be practical for highly concurrent application with highly intensive inter-thread communications (synchronization primitives). Webservers like mongoose and nginx have very simple inter-thread communication , so that we achieved decent overhead during the benchmark. But for more complicated applications with more different types of locks, we might face severe performance overhead.
 
 \subsection{Which Replication Mode Should I Use?}
+From all the benchmarks, we saw that some are better for Deterministic Execution and some are better for Schedule Replication. Figure~\ref{f:trade_off} shows the basic idea of what kind of price we are paying for different replication modes. For Deterministic Execution, if we are able to precisely balance the logical time, or there is no logical time imbalance problem (like Nginx), it is the choice. Other than that, Schedule Replication is the better choice due to its simplicity and efficiency.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/tradeoff}
+\caption{The tradeoff of two replication modes}
+\label{f:trade_off}
+\end{figure}
