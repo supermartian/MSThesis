@@ -27,7 +27,7 @@ We used a variant of racey~\cite{hillstress} to evaluate the correctness of our 
 % 1. threading model
 % 2. A table of lock and cond var count
 % 3. A table of instrumented dettick count
-PBZip2 is the parallel version of bzip2. The concurrent model of this application is a typical producer-consumer model, as shown in Figure~\ref{f:pbzip_model}. The FileReader thread reads the content of the file, break the input data into data chunks and put all the chunks into a queue. Worker threads get the data chunks from the queue and do the compression/decompression, after all put the produced data to another queue. The FileWriter will keep getting products from the queue and write them to the final zip file. Multiple pthread\_mutex\_lock and pthread\_cond\_wait functions are applied to provide the mutual exclusion to the access of the queues.
+PBZip2~\cite{gilchristparallel} is the parallel version of bzip2. The concurrent model of this application is a typical producer-consumer model, as shown in Figure~\ref{f:pbzip_model}. The FileReader thread reads the content of the file, break the input data into data chunks and put all the chunks into a queue. Worker threads get the data chunks from the queue and do the compression/decompression, after all put the produced data to another queue. The FileWriter will keep getting products from the queue and write them to the final zip file. Multiple pthread\_mutex\_lock and pthread\_cond\_wait functions are applied to provide the mutual exclusion to the access of the queues.
 
 \begin{figure}
 \centering
@@ -214,6 +214,8 @@ System Call & Use in the Application\\ \hline
 \label{t:nginx_syscall}
 \end{table}
 
+\paragraph{Correctness} Similar to mongoose, any mismatch will lead to either different thread handling different socket, or divergence in the HTTP responses. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
+
 \subsection{Results}
 \begin{figure}
 \centering
@@ -339,7 +341,7 @@ From all the benchmarks, we saw that some are better for Deterministic Execution
 
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/tradeoff}
+\includegraphics[width=1\columnwidth]{figures/tradeoff}
 \caption{The tradeoff of two replication modes}
 \label{f:trade_off}
 \end{figure}

@@ -1,4 +1,30 @@
 \chapter{Introduction}
+% 1. single machine replication
+% 2. state machine replication
+% 2.1 weak determinism, total order of synchronization primitives.
+% 3. contribution
+% 3.1 deterministic execution and schedule replication inside kernel
+% 3.2 fully transparent, minimal modification to application
+% 3.3 comparision that sched rep is better
+
+% cite a bunch of intra-machine solutions
+% Hypervisor-based Fault-tolerance
+% Operating System Support for Redundant Multithreading
+% Tardigrade: Leveraging Lightweight Virtual Machines to Easily and Efficiently Construct Fault-Tolerant Services
+
 State machine replication (SMR) has been widely used for fault-tolerance purpose in nowadays computing services. In SMR, it models the service to be replicated with a set of inputs, a set of outputs and a set of states. The replication system ensures that for a given input set, from the same initial state, the replicas can produces the same state transition which in turn leads to the same result. Such a system is able to be resilient to failures in one or more replicas (depends on how many replicas are there in the system). To provide such property, determinism is required for the state machine, otherwise state machines will get diverged in different states even with the same input set.
 
-Current State Machine Replication approaches
+% A section for server applications
+% Practical and Low-Overhead Masking of Failures of TCP-Based Servers
+
+\section{Contributions}
+
+This thesis addresses the following contributions:
+
+\begin{itemize}
+\item Based on Popcorn Linux, we implemented two different replication modes in the kernel, Deterministic Execution and Schedule Replication. to synchronize thread inter-leavings of replicated concurrent applications. They achieved the same goal in two different directions: Deterministic Execution uses a deterministic algorithm to decide the order of execution on both primary and secondary; while Schedule Replication enforces the secondary replica to follow the non-deterministic execution order that happened previously on the primary kernel.
+
+\item Two different replication modes share the same programming interface. By wrapping a code section with \detstart\ and \detend\ system calls, the execution order of wrapped sections can be the same on both primary and secondary kernel. Based on this common interface, we also provide a set of runtime supports that allows the user to run applications on our system with minimal code modification.
+
+\item To explore the pros and cons for both replication modes, we evaluated different types of concurrent applications on our system. For computational application we had maximum 63.39\% slowdown for Deterministic Execution and maximum 36.3\% slowdown for Schedule Replication. For two web servers we had maximum 25.22\% slowdown for Deterministic Execution and maximum 1.96\% slowdown for Schedule Replication. Both replication modes achieved decent overhead for production use, but Schedule Replication is the better replication mode for most of our use case, in terms of both simplicity and lower overall overhead.
+\end{itemize}

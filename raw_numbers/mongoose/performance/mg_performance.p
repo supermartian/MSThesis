@@ -1,8 +1,8 @@
 set terminal postscript eps noenhanced color font 'Helvetica,16'
 set style fill solid
 set boxwidth 0.2
-set xlabel "File Size (KB)"
-set ylabel "Through Put (KB/s)"
+set xlabel "Thread count"
+set ylabel "Throughput (KB/s)"
 set format y "%10.0f"
 set yrange [60000:140000]
 

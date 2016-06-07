@@ -8,45 +8,46 @@ Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in devietti2011rcdc
 Warning--empty journal in merrifieldincreasing
 Warning--empty year in merrifieldincreasing
-You've used 21 entries,
+Warning--empty year in gilchristparallel
+You've used 24 entries,
             1791 wiz_defined-function locations,
-            557 strings with 7270 characters,
-and the built_in function-call counts, 5863 in all, are:
-= -- 552
-> -- 223
+            570 strings with 7695 characters,
+and the built_in function-call counts, 6292 in all, are:
+= -- 584
+> -- 242
 < -- 15
-+ -- 83
-- -- 62
-* -- 345
-:= -- 822
-add.period$ -- 70
-call.type$ -- 21
-change.case$ -- 20
++ -- 91
+- -- 67
+* -- 367
+:= -- 890
+add.period$ -- 78
+call.type$ -- 24
+change.case$ -- 23
 chr.to.int$ -- 0
-cite$ -- 26
-duplicate$ -- 300
-empty$ -- 596
-format.name$ -- 62
-if$ -- 1405
+cite$ -- 30
+duplicate$ -- 322
+empty$ -- 646
+format.name$ -- 67
+if$ -- 1501
 int.to.chr$ -- 0
-int.to.str$ -- 21
-missing$ -- 17
-newline$ -- 105
-num.names$ -- 19
-pop$ -- 101
+int.to.str$ -- 24
+missing$ -- 19
+newline$ -- 119
+num.names$ -- 21
+pop$ -- 112
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 182
+skip$ -- 194
 stack$ -- 0
-substring$ -- 357
-swap$ -- 127
+substring$ -- 360
+swap$ -- 130
 text.length$ -- 15
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 5
-while$ -- 57
-width$ -- 23
-write$ -- 231
-(There were 5 warnings)
+warning$ -- 6
+while$ -- 60
+width$ -- 26
+write$ -- 258
+(There were 6 warnings)

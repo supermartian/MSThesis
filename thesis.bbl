@@ -12,6 +12,11 @@ Benjamin~H Shelton.
 \newblock PhD thesis, Virginia Polytechnic Institute and State University,
   2013.
 
+\bibitem{zagorodnov2009practical}
+Dmitrii Zagorodnov, Keith Marzullo, Lorenzo Alvisi, and Thomas~C Bressoud.
+\newblock Practical and low-overhead masking of failures of tcp-based servers.
+\newblock {\em ACM Transactions on Computer Systems (TOCS)}, 27(2):4, 2009.
+
 \bibitem{devietti2009dmp}
 Joseph Devietti, Brandon Lucia, Luis Ceze, and Mark Oskin.
 \newblock Dmp: deterministic shared memory multiprocessing.
@@ -105,6 +110,11 @@ M~Hill and M~Xu Racey.
 \newblock A stress test for deterministic execution.
 \newblock \url{http://pages.cs.wisc.edu/~markhill/racey.html}.
 
+\bibitem{gilchristparallel}
+J~Gilchrist.
+\newblock Parallel bzip2 (pbzip2) data compression software.
+\newblock {\em URL http://compression.ca/pbzip2}.
+
 \bibitem{reese2008nginx}
 Will Reese.
 \newblock Nginx: the high-performance web server and reverse proxy.
@@ -118,5 +128,10 @@ Thread pools in nginx boost performance 9x!
 Inside nginx: How we designed for performance \& scale.
 \newblock
   \url{https://www.nginx.com/blog/inside-nginx-how-we-designed-for-performance-scale/}.
+
+\bibitem{intelpt}
+Processor tracing.
+\newblock
+  \url{https://software.intel.com/en-us/blogs/2013/09/18/processor-tracing}.
 
 \end{thebibliography}

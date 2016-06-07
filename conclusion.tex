@@ -1,7 +1,11 @@
 \chapter{Conclusion}
 \section{Contributions}
 \section{Future Work}
+\subsection{Precise Tick Bump for Deterministic Execution}
+The major overhead for Deterministic Execution is the imbalanced logical time, the more precise the logical time incremental is the less waiting time a task will need for waiting the token. In chapter ~\ref{chap:detexec} we described our solution with a profiling approach, but from the evaluation we see this is still not precise enough to have the best performance. While performance counters are not deterministic enough to do the job, Intel PT~\cite{intelpt} seems to be a promising approach to track the progress of the execution. 
 \subsection{Pre-Lock Synchronization}
 \subsection{Arbitrary Number Replicas}
+%cite consensus here, mention paxos made transparent, rex
 \subsection{Hybrid Replication}
+%same, cite consensus here, mention paxos made transparent, rex
 \section{Further Evaluation}

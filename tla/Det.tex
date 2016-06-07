@@ -1,0 +1,1590 @@
+\batchmode %% Suppresses most terminal output.
+\documentclass{standalone}
+\setlength{\textwidth}{360pt}
+\setlength{\textheight}{541pt}
+\usepackage{latexsym}
+\usepackage{ifthen}
+% \usepackage{color}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SWITCHES                                                                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newboolean{shading} 
+\setboolean{shading}{false}
+\makeatletter
+ %% this is needed only when inserted into the file, not when
+ %% used as a package file.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                           %
+% DEFINITIONS OF SYMBOL-PRODUCING COMMANDS                                  %
+%                                                                           %
+%    TLA+      LaTeX                                                        %
+%    symbol    command                                                      %
+%    ------    -------                                                      %
+%    =>        \implies                                                     %
+%    <:        \ltcolon                                                     %
+%    :>        \colongt                                                     %
+%    ==        \defeq                                                       %
+%    ..        \dotdot                                                      %
+%    ::        \coloncolon                                                  %
+%    =|        \eqdash                                                      %
+%    ++        \pp                                                          %
+%    --        \mm                                                          %
+%    **        \stst                                                        %
+%    //        \slsl                                                        %
+%    ^         \ct                                                          %
+%    \A        \A                                                           %
+%    \E        \E                                                           %
+%    \AA       \AA                                                          %
+%    \EE       \EE                                                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newlength{\symlength}
+\newcommand{\implies}{\Rightarrow}
+\newcommand{\ltcolon}{\mathrel{<\!\!\mbox{:}}}
+\newcommand{\colongt}{\mathrel{\!\mbox{:}\!\!>}}
+\newcommand{\defeq}{\;\mathrel{\smash   %% keep this symbol from being too tall
+    {{\stackrel{\scriptscriptstyle\Delta}{=}}}}\;}
+\newcommand{\dotdot}{\mathrel{\ldotp\ldotp}}
+\newcommand{\coloncolon}{\mathrel{::\;}}
+\newcommand{\eqdash}{\mathrel = \joinrel \hspace{-.28em}|}
+\newcommand{\pp}{\mathbin{++}}
+\newcommand{\mm}{\mathbin{--}}
+\newcommand{\stst}{*\!*}
+\newcommand{\slsl}{/\!/}
+\newcommand{\ct}{\hat{\hspace{.4em}}}
+\newcommand{\A}{\forall}
+\newcommand{\E}{\exists}
+\renewcommand{\AA}{\makebox{$\raisebox{.05em}{\makebox[0pt][l]{%
+   $\forall\hspace{-.517em}\forall\hspace{-.517em}\forall$}}%
+   \forall\hspace{-.517em}\forall \hspace{-.517em}\forall\,$}}
+\newcommand{\EE}{\makebox{$\raisebox{.05em}{\makebox[0pt][l]{%
+   $\exists\hspace{-.517em}\exists\hspace{-.517em}\exists$}}%
+   \exists\hspace{-.517em}\exists\hspace{-.517em}\exists\,$}}
+\newcommand{\whileop}{\.{\stackrel
+  {\mbox{\raisebox{-.3em}[0pt][0pt]{$\scriptscriptstyle+\;\,$}}}%
+  {-\hspace{-.16em}\triangleright}}}
+
+% Commands are defined to produce the upper-case keywords.
+% Note that some have space after them.
+\newcommand{\ASSUME}{\textsc{assume }}
+\newcommand{\ASSUMPTION}{\textsc{assumption }}
+\newcommand{\AXIOM}{\textsc{axiom }}
+\newcommand{\BOOLEAN}{\textsc{boolean }}
+\newcommand{\CASE}{\textsc{case }}
+\newcommand{\CONSTANT}{\textsc{constant }}
+\newcommand{\CONSTANTS}{\textsc{constants }}
+\newcommand{\ELSE}{\settowidth{\symlength}{\THEN}%
+   \makebox[\symlength][l]{\textsc{ else}}}
+\newcommand{\EXCEPT}{\textsc{ except }}
+\newcommand{\EXTENDS}{\textsc{extends }}
+\newcommand{\FALSE}{\textsc{false}}
+\newcommand{\IF}{\textsc{if }}
+\newcommand{\IN}{\settowidth{\symlength}{\LET}%
+   \makebox[\symlength][l]{\textsc{in}}}
+\newcommand{\INSTANCE}{\textsc{instance }}
+\newcommand{\LET}{\textsc{let }}
+\newcommand{\LOCAL}{\textsc{local }}
+\newcommand{\MODULE}{\textsc{module }}
+\newcommand{\OTHER}{\textsc{other }}
+\newcommand{\STRING}{\textsc{string}}
+\newcommand{\THEN}{\textsc{ then }}
+\newcommand{\THEOREM}{\textsc{theorem }}
+\newcommand{\LEMMA}{\textsc{lemma }}
+\newcommand{\PROPOSITION}{\textsc{proposition }}
+\newcommand{\COROLLARY}{\textsc{corollary }}
+\newcommand{\TRUE}{\textsc{true}}
+\newcommand{\VARIABLE}{\textsc{variable }}
+\newcommand{\VARIABLES}{\textsc{variables }}
+\newcommand{\WITH}{\textsc{ with }}
+\newcommand{\WF}{\textrm{WF}}
+\newcommand{\SF}{\textrm{SF}}
+\newcommand{\CHOOSE}{\textsc{choose }}
+\newcommand{\ENABLED}{\textsc{enabled }}
+\newcommand{\UNCHANGED}{\textsc{unchanged }}
+\newcommand{\SUBSET}{\textsc{subset }}
+\newcommand{\UNION}{\textsc{union }}
+\newcommand{\DOMAIN}{\textsc{domain }}
+% Added for tla2tex
+\newcommand{\BY}{\textsc{by }}
+\newcommand{\OBVIOUS}{\textsc{obvious }}
+\newcommand{\HAVE}{\textsc{have }}
+\newcommand{\QED}{\textsc{qed }}
+\newcommand{\TAKE}{\textsc{take }}
+\newcommand{\DEF}{\textsc{ def }}
+\newcommand{\HIDE}{\textsc{hide }}
+\newcommand{\RECURSIVE}{\textsc{recursive }}
+\newcommand{\USE}{\textsc{use }}
+\newcommand{\DEFINE}{\textsc{define }}
+\newcommand{\PROOF}{\textsc{proof }}
+\newcommand{\WITNESS}{\textsc{witness }}
+\newcommand{\PICK}{\textsc{pick }}
+\newcommand{\DEFS}{\textsc{defs }}
+\newcommand{\PROVE}{\settowidth{\symlength}{\ASSUME}%
+   \makebox[\symlength][l]{\textsc{prove}}\@s{-4.1}}%
+  %% The \@s{-4.1) is a kludge added on 24 Oct 2009 [happy birthday, Ellen]
+  %% so the correct alignment occurs if the user types
+  %%   ASSUME X
+  %%   PROVE  Y
+  %% because it cancels the extra 4.1 pts added because of the 
+  %% extra space after the PROVE.  This seems to works OK.
+  %% However, the 4.1 equals Parameters.LaTeXLeftSpace(1) and
+  %% should be changed if that method ever changes.
+\newcommand{\SUFFICES}{\textsc{suffices }}
+\newcommand{\NEW}{\textsc{new }}
+\newcommand{\LAMBDA}{\textsc{lambda }}
+\newcommand{\STATE}{\textsc{state }}
+\newcommand{\ACTION}{\textsc{action }}
+\newcommand{\TEMPORAL}{\textsc{temporal }}
+\newcommand{\ONLY}{\textsc{only }}              %% added by LL on 2 Oct 2009
+\newcommand{\OMITTED}{\textsc{omitted }}        %% added by LL on 31 Oct 2009
+\newcommand{\@pfstepnum}[2]{\ensuremath{\langle#1\rangle}\textrm{#2}}
+\newcommand{\bang}{\@s{1}\mbox{\small !}\@s{1}}
+%% We should format || differently in PlusCal code than in TLA+ formulas.
+\newcommand{\p@barbar}{\ifpcalsymbols
+   \,\,\rule[-.25em]{.075em}{1em}\hspace*{.2em}\rule[-.25em]{.075em}{1em}\,\,%
+   \else \,||\,\fi}
+%% PlusCal keywords
+\newcommand{\p@fair}{\textbf{fair }}
+\newcommand{\p@semicolon}{\textbf{\,; }}
+\newcommand{\p@algorithm}{\textbf{algorithm }}
+\newcommand{\p@mmfair}{\textbf{-{}-fair }}
+\newcommand{\p@mmalgorithm}{\textbf{-{}-algorithm }}
+\newcommand{\p@assert}{\textbf{assert }}
+\newcommand{\p@await}{\textbf{await }}
+\newcommand{\p@begin}{\textbf{begin }}
+\newcommand{\p@end}{\textbf{end }}
+\newcommand{\p@call}{\textbf{call }}
+\newcommand{\p@define}{\textbf{define }}
+\newcommand{\p@do}{\textbf{ do }}
+\newcommand{\p@either}{\textbf{either }}
+\newcommand{\p@or}{\textbf{or }}
+\newcommand{\p@goto}{\textbf{goto }}
+\newcommand{\p@if}{\textbf{if }}
+\newcommand{\p@then}{\,\,\textbf{then }}
+\newcommand{\p@else}{\ifcsyntax \textbf{else } \else \,\,\textbf{else }\fi}
+\newcommand{\p@elsif}{\,\,\textbf{elsif }}
+\newcommand{\p@macro}{\textbf{macro }}
+\newcommand{\p@print}{\textbf{print }}
+\newcommand{\p@procedure}{\textbf{procedure }}
+\newcommand{\p@process}{\textbf{process }}
+\newcommand{\p@return}{\textbf{return}}
+\newcommand{\p@skip}{\textbf{skip}}
+\newcommand{\p@variable}{\textbf{variable }}
+\newcommand{\p@variables}{\textbf{variables }}
+\newcommand{\p@while}{\textbf{while }}
+\newcommand{\p@when}{\textbf{when }}
+\newcommand{\p@with}{\textbf{with }}
+\newcommand{\p@lparen}{\textbf{(\,\,}}
+\newcommand{\p@rparen}{\textbf{\,\,) }}   
+\newcommand{\p@lbrace}{\textbf{\{\,\,}}   
+\newcommand{\p@rbrace}{\textbf{\,\,\} }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% REDEFINE STANDARD COMMANDS TO MAKE THEM FORMAT BETTER %
+%                                                       %
+% We redefine \in and \notin                            %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\_}{\rule{.4em}{.06em}\hspace{.05em}}
+\newlength{\equalswidth}
+\let\oldin=\in
+\let\oldnotin=\notin
+\renewcommand{\in}{%
+   {\settowidth{\equalswidth}{$\.{=}$}\makebox[\equalswidth][c]{$\oldin$}}}
+\renewcommand{\notin}{%
+   {\settowidth{\equalswidth}{$\.{=}$}\makebox[\equalswidth]{$\oldnotin$}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                  %
+% HORIZONTAL BARS:                                 %
+%                                                  %
+%   \moduleLeftDash    |~~~~~~~~~~                 %
+%   \moduleRightDash    ~~~~~~~~~~|                %
+%   \midbar            |----------|                %
+%   \bottombar         |__________|                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newlength{\charwidth}\settowidth{\charwidth}{{\small\tt M}}
+\newlength{\boxrulewd}\setlength{\boxrulewd}{.4pt}
+\newlength{\boxlineht}\setlength{\boxlineht}{.5\baselineskip}
+\newcommand{\boxsep}{\charwidth}
+\newlength{\boxruleht}\setlength{\boxruleht}{.5ex}
+\newlength{\boxruledp}\setlength{\boxruledp}{-\boxruleht}
+\addtolength{\boxruledp}{\boxrulewd}
+\newcommand{\boxrule}{\leaders\hrule height \boxruleht depth \boxruledp
+                      \hfill\mbox{}}
+\newcommand{\@computerule}{%
+  \setlength{\boxruleht}{.5ex}%
+  \setlength{\boxruledp}{-\boxruleht}%
+  \addtolength{\boxruledp}{\boxrulewd}}
+
+\newcommand{\bottombar}{\hspace{-\boxsep}%
+  \raisebox{-\boxrulewd}[0pt][0pt]{\rule[.5ex]{\boxrulewd}{\boxlineht}}%
+  \boxrule
+  \raisebox{-\boxrulewd}[0pt][0pt]{%
+      \rule[.5ex]{\boxrulewd}{\boxlineht}}\hspace{-\boxsep}\vspace{0pt}}
+
+\newcommand{\moduleLeftDash}%
+   {\hspace*{-\boxsep}%
+     \raisebox{-\boxlineht}[0pt][0pt]{\rule[.5ex]{\boxrulewd
+               }{\boxlineht}}%
+    \boxrule\hspace*{.4em }}
+
+\newcommand{\moduleRightDash}%
+    {\hspace*{.4em}\boxrule
+    \raisebox{-\boxlineht}[0pt][0pt]{\rule[.5ex]{\boxrulewd
+               }{\boxlineht}}\hspace{-\boxsep}}%\vspace{.2em}
+
+\newcommand{\midbar}{\hspace{-\boxsep}\raisebox{-.5\boxlineht}[0pt][0pt]{%
+   \rule[.5ex]{\boxrulewd}{\boxlineht}}\boxrule\raisebox{-.5\boxlineht%
+   }[0pt][0pt]{\rule[.5ex]{\boxrulewd}{\boxlineht}}\hspace{-\boxsep}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FORMATING COMMANDS                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PLUSCAL SHADING                                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The TeX pcalshading switch is set on to cause PlusCal shading to be
+% performed.  This changes the behavior of the following commands and
+% environments to cause full-width shading to be performed on all lines.
+% 
+%   \tstrut \@x cpar mcom \@pvspace
+% 
+% The TeX pcalsymbols switch is turned on when typesetting a PlusCal algorithm,
+% whether or not shading is being performed.  It causes symbols (other than
+% parentheses and braces and PlusCal-only keywords) that should be typeset
+% differently depending on whether they are in an algorithm to be typeset
+% appropriately.  Currently, the only such symbol is "||".
+%
+% The TeX csyntax switch is turned on when typesetting a PlusCal algorithm in
+% c-syntax.  This allows symbols to be format differently in the two syntaxes.
+% The "else" keyword is the only one that is.
+
+\newif\ifpcalshading \pcalshadingfalse
+\newif\ifpcalsymbols \pcalsymbolsfalse
+\newif\ifcsyntax     \csyntaxtrue
+
+% The \@pvspace command makes a vertical space.  It uses \vspace
+% except with \ifpcalshading, in which case it sets \pvcalvspace
+% and the space is added by a following \@x command.
+%
+\newlength{\pcalvspace}\setlength{\pcalvspace}{0pt}%
+\newcommand{\@pvspace}[1]{%
+  \ifpcalshading
+     \par\global\setlength{\pcalvspace}{#1}%
+  \else
+     \par\vspace{#1}%
+  \fi
+}
+
+% The lcom environment was changed to set \lcomindent equal to
+% the indentation it produces.  This length is used by the
+% cpar environment to make shading extend for the full width
+% of the line.  This assumes that lcom environments are not
+% nested.  I hope TLATeX does not nest them.
+%
+\newlength{\lcomindent}%
+\setlength{\lcomindent}{0pt}%
+
+%\tstrut: A strut to produce inter-paragraph space in a comment.
+%\rstrut: A strut to extend the bottom of a one-line comment so
+%         there's no break in the shading between comments on 
+%         successive lines.
+\newcommand\tstrut%
+  {\raisebox{\vshadelen}{\raisebox{-.25em}{\rule{0pt}{1.15em}}}%
+   \global\setlength{\vshadelen}{0pt}}
+\newcommand\rstrut{\raisebox{-.25em}{\rule{0pt}{1.15em}}%
+ \global\setlength{\vshadelen}{0pt}}
+
+
+% \.{op} formats operator op in math mode with empty boxes on either side.
+% Used because TeX otherwise vary the amount of space it leaves around op.
+\renewcommand{\.}[1]{\ensuremath{\mbox{}#1\mbox{}}}
+
+% \@s{n} produces an n-point space
+\newcommand{\@s}[1]{\hspace{#1pt}}           
+
+% \@x{txt} starts a specification line in the beginning with txt
+% in the final LaTeX source.
+\newlength{\@xlen}
+\newcommand\xtstrut%
+  {\setlength{\@xlen}{1.05em}%
+   \addtolength{\@xlen}{\pcalvspace}%
+    \raisebox{\vshadelen}{\raisebox{-.25em}{\rule{0pt}{\@xlen}}}%
+   \global\setlength{\vshadelen}{0pt}%
+   \global\setlength{\pcalvspace}{0pt}}
+
+\newcommand{\@x}[1]{\par
+  \ifpcalshading
+  \makebox[0pt][l]{\shadebox{\xtstrut\hspace*{\textwidth}}}%
+  \fi
+  \mbox{$\mbox{}#1\mbox{}$}}  
+
+% \@xx{txt} continues a specification line with the text txt.
+\newcommand{\@xx}[1]{\mbox{$\mbox{}#1\mbox{}$}}  
+
+% \@y{cmt} produces a one-line comment.
+\newcommand{\@y}[1]{\mbox{\footnotesize\hspace{.65em}%
+  \ifthenelse{\boolean{shading}}{%
+      \shadebox{#1\hspace{-\the\lastskip}\rstrut}}%
+               {#1\hspace{-\the\lastskip}\rstrut}}}
+
+% \@z{cmt} produces a zero-width one-line comment.
+\newcommand{\@z}[1]{\makebox[0pt][l]{\footnotesize
+  \ifthenelse{\boolean{shading}}{%
+      \shadebox{#1\hspace{-\the\lastskip}\rstrut}}%
+               {#1\hspace{-\the\lastskip}\rstrut}}}
+
+
+% \@w{str} produces the TLA+ string "str".
+\newcommand{\@w}[1]{\textsf{``{#1}''}}             
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SHADING                                                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\graymargin{1}
+  % The number of points of margin in the shaded box.
+
+% \definecolor{boxshade}{gray}{.85}
+% Defines the darkness of the shading: 1 = white, 0 = black
+% Added by TLATeX only if needed.
+
+% \shadebox{txt} puts txt in a shaded box.
+\newlength{\templena}
+\newlength{\templenb}
+\newsavebox{\tempboxa}
+\newcommand{\shadebox}[1]{{\setlength{\fboxsep}{\graymargin pt}%
+     \savebox{\tempboxa}{#1}%
+     \settoheight{\templena}{\usebox{\tempboxa}}%
+     \settodepth{\templenb}{\usebox{\tempboxa}}%
+     \hspace*{-\fboxsep}\raisebox{0pt}[\templena][\templenb]%
+        {\colorbox{boxshade}{\usebox{\tempboxa}}}\hspace*{-\fboxsep}}}
+
+% \vshade{n} makes an n-point inter-paragraph space, with
+%  shading if the `shading' flag is true.
+\newlength{\vshadelen}
+\setlength{\vshadelen}{0pt}
+\newcommand{\vshade}[1]{\ifthenelse{\boolean{shading}}%
+   {\global\setlength{\vshadelen}{#1pt}}%
+   {\vspace{#1pt}}}
+
+\newlength{\boxwidth}
+\newlength{\multicommentdepth}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THE cpar ENVIRONMENT                                                      %
+% ^^^^^^^^^^^^^^^^^^^^                                                      %
+% The LaTeX input                                                           %
+%                                                                           %
+%   \begin{cpar}{pop}{nest}{isLabel}{d}{e}{arg6}                            %
+%     XXXXXXXXXXXXXXX                                                       %
+%     XXXXXXXXXXXXXXX                                                       %
+%     XXXXXXXXXXXXXXX                                                       %
+%   \end{cpar}                                                              %
+%                                                                           %
+% produces one of two possible results.  If isLabel is the letter "T",      %
+% it produces the following, where [label] is the result of typesetting     %
+% arg6 in an LR box, and d is is a number representing a distance in        %
+% points.                                                                   %
+%                                                                           %
+%   prevailing |<-- d -->[label]<- e ->XXXXXXXXXXXXXXX                      %
+%         left |                       XXXXXXXXXXXXXXX                      %
+%       margin |                       XXXXXXXXXXXXXXX                      %
+%                                                                           %
+% If isLabel is the letter "F", then it produces                            %
+%                                                                           %
+%   prevailing |<-- d -->XXXXXXXXXXXXXXXXXXXXXXX                            %
+%         left |         <- e ->XXXXXXXXXXXXXXXX                            %
+%       margin |                XXXXXXXXXXXXXXXX                            %
+%                                                                           %
+% where d and e are numbers representing distances in points.               %
+%                                                                           %
+% The prevailing left margin is the one in effect before the most recent    %
+% pop (argument 1) cpar environments with "T" as the nest argument, where   %
+% pop is a number \geq 0.                                                   %
+%                                                                           %
+% If the nest argument is the letter "T", then the prevailing left          %
+% margin is moved to the left of the second (and following) lines of        %
+% X's.  Otherwise, the prevailing left margin is left unchanged.            %
+%                                                                           %
+% An \unnest{n} command moves the prevailing left margin to where it was    %
+% before the most recent n cpar environments with "T" as the nesting        %
+% argument.                                                                 %
+%                                                                           %
+% The environment leaves no vertical space above or below it, or between    %
+% its paragraphs.  (TLATeX inserts the proper amount of vertical space.)    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcounter{pardepth}
+\setcounter{pardepth}{0}
+
+% \setgmargin{txt} defines \gmarginN to be txt, where N is \roman{pardepth}.
+% \thegmargin equals \gmarginN, where N is \roman{pardepth}.
+\newcommand{\setgmargin}[1]{%
+  \expandafter\xdef\csname gmargin\roman{pardepth}\endcsname{#1}}
+\newcommand{\thegmargin}{\csname gmargin\roman{pardepth}\endcsname}
+\newcommand{\gmargin}{0pt}
+
+\newsavebox{\tempsbox}
+
+\newlength{\@cparht}
+\newlength{\@cpardp}
+\newenvironment{cpar}[6]{%
+  \addtocounter{pardepth}{-#1}%
+  \ifthenelse{\boolean{shading}}{\par\begin{lrbox}{\tempsbox}%
+                                 \begin{minipage}[t]{\linewidth}}{}%
+  \begin{list}{}{%
+     \edef\temp{\thegmargin}
+     \ifthenelse{\equal{#3}{T}}%
+       {\settowidth{\leftmargin}{\hspace{\temp}\footnotesize #6\hspace{#5pt}}%
+        \addtolength{\leftmargin}{#4pt}}%
+       {\setlength{\leftmargin}{#4pt}%
+        \addtolength{\leftmargin}{#5pt}%
+        \addtolength{\leftmargin}{\temp}%
+        \setlength{\itemindent}{-#5pt}}%
+      \ifthenelse{\equal{#2}{T}}{\addtocounter{pardepth}{1}%
+                                 \setgmargin{\the\leftmargin}}{}%
+      \setlength{\labelwidth}{0pt}%
+      \setlength{\labelsep}{0pt}%
+      \setlength{\itemindent}{-\leftmargin}%
+      \setlength{\topsep}{0pt}%
+      \setlength{\parsep}{0pt}%
+      \setlength{\partopsep}{0pt}%
+      \setlength{\parskip}{0pt}%
+      \setlength{\itemsep}{0pt}
+      \setlength{\itemindent}{#4pt}%
+      \addtolength{\itemindent}{-\leftmargin}}%
+   \ifthenelse{\equal{#3}{T}}%
+      {\item[\tstrut\footnotesize \hspace{\temp}{#6}\hspace{#5pt}]
+        }%
+      {\item[\tstrut\hspace{\temp}]%
+         }%
+   \footnotesize}
+ {\hspace{-\the\lastskip}\tstrut
+ \end{list}%
+  \ifthenelse{\boolean{shading}}%
+          {\end{minipage}%
+           \end{lrbox}%
+           \ifpcalshading
+             \setlength{\@cparht}{\ht\tempsbox}%
+             \setlength{\@cpardp}{\dp\tempsbox}%
+             \addtolength{\@cparht}{.15em}%
+             \addtolength{\@cpardp}{.2em}%
+             \addtolength{\@cparht}{\@cpardp}%
+            % I don't know what's going on here.  I want to add a
+            % \pcalvspace high shaded line, but I don't know how to
+            % do it.  A little trial and error shows that the following
+            % does a reasonable job approximating that, eliminating
+            % the line if \pcalvspace is small.
+            \addtolength{\@cparht}{\pcalvspace}%
+             \ifdim \pcalvspace > .8em
+               \addtolength{\pcalvspace}{-.2em}%
+               \hspace*{-\lcomindent}%
+               \shadebox{\rule{0pt}{\pcalvspace}\hspace*{\textwidth}}\par
+               \global\setlength{\pcalvspace}{0pt}%
+               \fi
+             \hspace*{-\lcomindent}%
+             \makebox[0pt][l]{\raisebox{-\@cpardp}[0pt][0pt]{%
+                 \shadebox{\rule{0pt}{\@cparht}\hspace*{\textwidth}}}}%
+             \hspace*{\lcomindent}\usebox{\tempsbox}%
+             \par
+           \else
+             \shadebox{\usebox{\tempsbox}}\par
+           \fi}%
+           {}%
+  }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THE ppar ENVIRONMENT                                                       %
+% ^^^^^^^^^^^^^^^^^^^^                                                       %
+% The environment                                                            %
+%                                                                            %
+%   \begin{ppar} ... \end{ppar}                                              %
+%                                                                            %
+% is equivalent to                                                           %
+%                                                                            %
+%   \begin{cpar}{0}{F}{F}{0}{0}{} ... \end{cpar}                             %
+%                                                                            %
+% The environment is put around each line of the output for a PlusCal        %
+% algorithm.                                                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newenvironment{ppar}{%
+%  \ifthenelse{\boolean{shading}}{\par\begin{lrbox}{\tempsbox}%
+%                                 \begin{minipage}[t]{\linewidth}}{}%
+%  \begin{list}{}{%
+%     \edef\temp{\thegmargin}
+%        \setlength{\leftmargin}{0pt}%
+%        \addtolength{\leftmargin}{\temp}%
+%        \setlength{\itemindent}{0pt}%
+%      \setlength{\labelwidth}{0pt}%
+%      \setlength{\labelsep}{0pt}%
+%      \setlength{\itemindent}{-\leftmargin}%
+%      \setlength{\topsep}{0pt}%
+%      \setlength{\parsep}{0pt}%
+%      \setlength{\partopsep}{0pt}%
+%      \setlength{\parskip}{0pt}%
+%      \setlength{\itemsep}{0pt}
+%      \setlength{\itemindent}{0pt}%
+%      \addtolength{\itemindent}{-\leftmargin}}%
+%      \item[\tstrut\hspace{\temp}]}%
+% {\hspace{-\the\lastskip}\tstrut
+% \end{list}%
+%  \ifthenelse{\boolean{shading}}{\end{minipage}  
+%                                 \end{lrbox}%
+%                                 \shadebox{\usebox{\tempsbox}}\par}{}%
+%  }
+
+ %%% TESTING
+ \newcommand{\xtest}[1]{\par
+ \makebox[0pt][l]{\shadebox{\xtstrut\hspace*{\textwidth}}}%
+ \mbox{$\mbox{}#1\mbox{}$}} 
+
+% \newcommand{\xxtest}[1]{\par
+% \makebox[0pt][l]{\shadebox{\xtstrut{#1}\hspace*{\textwidth}}}%
+% \mbox{$\mbox{}#1\mbox{}$}} 
+
+%\newlength{\pcalvspace}
+%\setlength{\pcalvspace}{0pt}
+% \newlength{\xxtestlen}
+% \setlength{\xxtestlen}{0pt}
+% \newcommand\xtstrut%
+%   {\setlength{\xxtestlen}{1.15em}%
+%    \addtolength{\xxtestlen}{\pcalvspace}%
+%     \raisebox{\vshadelen}{\raisebox{-.25em}{\rule{0pt}{\xxtestlen}}}%
+%    \global\setlength{\vshadelen}{0pt}%
+%    \global\setlength{\pcalvspace}{0pt}}
+   
+   %%%% TESTING
+   
+   %% The xcpar environment
+   %%  Note: overloaded use of \pcalvspace for testing.
+   %%
+%   \newlength{\xcparht}%
+%   \newlength{\xcpardp}%
+   
+%   \newenvironment{xcpar}[6]{%
+%  \addtocounter{pardepth}{-#1}%
+%  \ifthenelse{\boolean{shading}}{\par\begin{lrbox}{\tempsbox}%
+%                                 \begin{minipage}[t]{\linewidth}}{}%
+%  \begin{list}{}{%
+%     \edef\temp{\thegmargin}%
+%     \ifthenelse{\equal{#3}{T}}%
+%       {\settowidth{\leftmargin}{\hspace{\temp}\footnotesize #6\hspace{#5pt}}%
+%        \addtolength{\leftmargin}{#4pt}}%
+%       {\setlength{\leftmargin}{#4pt}%
+%        \addtolength{\leftmargin}{#5pt}%
+%        \addtolength{\leftmargin}{\temp}%
+%        \setlength{\itemindent}{-#5pt}}%
+%      \ifthenelse{\equal{#2}{T}}{\addtocounter{pardepth}{1}%
+%                                 \setgmargin{\the\leftmargin}}{}%
+%      \setlength{\labelwidth}{0pt}%
+%      \setlength{\labelsep}{0pt}%
+%      \setlength{\itemindent}{-\leftmargin}%
+%      \setlength{\topsep}{0pt}%
+%      \setlength{\parsep}{0pt}%
+%      \setlength{\partopsep}{0pt}%
+%      \setlength{\parskip}{0pt}%
+%      \setlength{\itemsep}{0pt}%
+%      \setlength{\itemindent}{#4pt}%
+%      \addtolength{\itemindent}{-\leftmargin}}%
+%   \ifthenelse{\equal{#3}{T}}%
+%      {\item[\xtstrut\footnotesize \hspace{\temp}{#6}\hspace{#5pt}]%
+%        }%
+%      {\item[\xtstrut\hspace{\temp}]%
+%         }%
+%   \footnotesize}
+% {\hspace{-\the\lastskip}\tstrut
+% \end{list}%
+%  \ifthenelse{\boolean{shading}}{\end{minipage}  
+%                                 \end{lrbox}%
+%                                 \setlength{\xcparht}{\ht\tempsbox}%
+%                                 \setlength{\xcpardp}{\dp\tempsbox}%
+%                                 \addtolength{\xcparht}{.15em}%
+%                                 \addtolength{\xcpardp}{.2em}%
+%                                 \addtolength{\xcparht}{\xcpardp}%
+%                                 \hspace*{-\lcomindent}%
+%                                 \makebox[0pt][l]{\raisebox{-\xcpardp}[0pt][0pt]{%
+%                                      \shadebox{\rule{0pt}{\xcparht}\hspace*{\textwidth}}}}%
+%                                 \hspace*{\lcomindent}\usebox{\tempsbox}%
+%                                 \par}{}%
+%  }
+%  
+% \newlength{\xmcomlen}
+%\newenvironment{xmcom}[1]{%
+%  \setcounter{pardepth}{0}%
+%  \hspace{.65em}%
+%  \begin{lrbox}{\alignbox}\sloppypar%
+%      \setboolean{shading}{false}%
+%      \setlength{\boxwidth}{#1pt}%
+%      \addtolength{\boxwidth}{-.65em}%
+%      \begin{minipage}[t]{\boxwidth}\footnotesize
+%      \parskip=0pt\relax}%
+%       {\end{minipage}\end{lrbox}%
+%       \setlength{\xmcomlen}{\textwidth}%
+%       \addtolength{\xmcomlen}{-\wd\alignbox}%
+%       \settodepth{\alignwidth}{\usebox{\alignbox}}%
+%       \global\setlength{\multicommentdepth}{\alignwidth}%
+%       \setlength{\boxwidth}{\alignwidth}%
+%       \global\addtolength{\alignwidth}{-\maxdepth}%
+%       \addtolength{\boxwidth}{.1em}%
+%       \raisebox{0pt}[0pt][0pt]{%
+%        \ifthenelse{\boolean{shading}}%
+%          {\hspace*{-\xmcomlen}\shadebox{\rule[-\boxwidth]{0pt}{0pt}%
+%                                 \hspace*{\xmcomlen}\usebox{\alignbox}}}%
+%          {\usebox{\alignbox}}}%
+%       \vspace*{\alignwidth}\pagebreak[0]\vspace{-\alignwidth}\par}
+% % a multi-line comment, whose first argument is its width in points.
+%  
+   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THE lcom ENVIRONMENT                                                       %
+% ^^^^^^^^^^^^^^^^^^^^                                                       %
+% A multi-line comment with no text to its left is typeset in an lcom        % 
+% environment, whose argument is a number representing the indentation       % 
+% of the left margin, in points.  All the text of the comment should be      % 
+% inside cpar environments.                                                  % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{lcom}[1]{%
+  \setlength{\lcomindent}{#1pt} % Added for PlusCal handling.
+  \par\vspace{.2em}%
+  \sloppypar
+  \setcounter{pardepth}{0}%
+  \footnotesize
+  \begin{list}{}{%
+    \setlength{\leftmargin}{#1pt}
+    \setlength{\labelwidth}{0pt}%
+    \setlength{\labelsep}{0pt}%
+    \setlength{\itemindent}{0pt}%
+    \setlength{\topsep}{0pt}%
+    \setlength{\parsep}{0pt}%
+    \setlength{\partopsep}{0pt}%
+    \setlength{\parskip}{0pt}}
+    \item[]}%
+  {\end{list}\vspace{.3em}\setlength{\lcomindent}{0pt}%
+ }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THE mcom ENVIRONMENT AND \mutivspace COMMAND                              %
+% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                              %
+%                                                                           %
+% A part of the spec containing a right-comment of the form                 %
+%                                                                           %
+%      xxxx (*************)                                                 %
+%      yyyy (* ccccccccc *)                                                 %
+%      ...  (* ccccccccc *)                                                 %
+%           (* ccccccccc *)                                                 %
+%           (* ccccccccc *)                                                 %
+%           (*************)                                                 %
+%                                                                           %
+% is typeset by                                                             %
+%                                                                           %
+%     XXXX \begin{mcom}{d}                                                  %
+%            CCCC ... CCC                                                   %
+%          \end{mcom}                                                       %
+%     YYYY ...                                                              %
+%     \multivspace{n}                                                       %
+%                                                                           %
+% where the number d is the width in points of the comment, n is the        %
+% number of xxxx, yyyy, ...  lines to the left of the comment.              %
+% All the text of the comment should be typeset in cpar environments.       %
+%                                                                           %
+% This puts the comment into a single box (so no page breaks can occur      %
+% within it).  The entire box is shaded iff the shading flag is true.       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newlength{\xmcomlen}%
+\newenvironment{mcom}[1]{%
+  \setcounter{pardepth}{0}%
+  \hspace{.65em}%
+  \begin{lrbox}{\alignbox}\sloppypar%
+      \setboolean{shading}{false}%
+      \setlength{\boxwidth}{#1pt}%
+      \addtolength{\boxwidth}{-.65em}%
+      \begin{minipage}[t]{\boxwidth}\footnotesize
+      \parskip=0pt\relax}%
+       {\end{minipage}\end{lrbox}%
+       \setlength{\xmcomlen}{\textwidth}%       % For PlusCal shading
+       \addtolength{\xmcomlen}{-\wd\alignbox}%  % For PlusCal shading
+       \settodepth{\alignwidth}{\usebox{\alignbox}}%
+       \global\setlength{\multicommentdepth}{\alignwidth}%
+       \setlength{\boxwidth}{\alignwidth}%      % For PlusCal shading
+       \global\addtolength{\alignwidth}{-\maxdepth}%
+       \addtolength{\boxwidth}{.1em}%           % For PlusCal shading
+      \raisebox{0pt}[0pt][0pt]{%
+        \ifthenelse{\boolean{shading}}%
+          {\ifpcalshading
+             \hspace*{-\xmcomlen}%
+             \shadebox{\rule[-\boxwidth]{0pt}{0pt}\hspace*{\xmcomlen}%
+                          \usebox{\alignbox}}%
+           \else
+             \shadebox{\usebox{\alignbox}}
+           \fi
+          }%
+          {\usebox{\alignbox}}}%
+       \vspace*{\alignwidth}\pagebreak[0]\vspace{-\alignwidth}\par}
+ % a multi-line comment, whose first argument is its width in points.
+
+
+% \multispace{n} produces the vertical space indicated by "|"s in 
+% this situation
+%   
+%     xxxx (*************)
+%     xxxx (* ccccccccc *)
+%      |   (* ccccccccc *)
+%      |   (* ccccccccc *)
+%      |   (* ccccccccc *)
+%      |   (*************)
+%
+% where n is the number of "xxxx" lines.
+\newcommand{\multivspace}[1]{\addtolength{\multicommentdepth}{-#1\baselineskip}%
+ \addtolength{\multicommentdepth}{1.2em}%
+ \ifthenelse{\lengthtest{\multicommentdepth > 0pt}}%
+    {\par\vspace{\multicommentdepth}\par}{}}
+
+%\newenvironment{hpar}[2]{%
+%  \begin{list}{}{\setlength{\leftmargin}{#1pt}%
+%                 \addtolength{\leftmargin}{#2pt}%
+%                 \setlength{\itemindent}{-#2pt}%
+%                 \setlength{\topsep}{0pt}%
+%                 \setlength{\parsep}{0pt}%
+%                 \setlength{\partopsep}{0pt}%
+%                 \setlength{\parskip}{0pt}%
+%                 \addtolength{\labelsep}{0pt}}%
+%  \item[]\footnotesize}{\end{list}}
+%    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    % Typesets a sequence of paragraphs like this:                         %
+%    %                                                                      %
+%    %      left |<-- d1 --> XXXXXXXXXXXXXXXXXXXXXXXX                       %
+%    %    margin |           <- d2 -> XXXXXXXXXXXXXXX                       %
+%    %           |                    XXXXXXXXXXXXXXX                       %
+%    %           |                                                          %
+%    %           |                    XXXXXXXXXXXXXXX                       %
+%    %           |                    XXXXXXXXXXXXXXX                       %
+%    %                                                                      %
+%    % where d1 = #1pt and d2 = #2pt, but with no vspace between            %
+%    % paragraphs.                                                          %
+%    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Commands for repeated characters that produce dashes.              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \raisedDash{wd}{ht}{thk} makes a horizontal line wd characters wide, 
+% raised a distance ht ex's above the baseline, with a thickness of 
+% thk em's.
+\newcommand{\raisedDash}[3]{\raisebox{#2ex}{\setlength{\alignwidth}{.5em}%
+  \rule{#1\alignwidth}{#3em}}}
+
+% The following commands take a single argument n and produce the
+% output for n repeated characters, as follows
+%   \cdash:    -
+%   \tdash:    ~
+%   \ceqdash:  =
+%   \usdash:   _
+\newcommand{\cdash}[1]{\raisedDash{#1}{.5}{.04}}
+\newcommand{\usdash}[1]{\raisedDash{#1}{0}{.04}}
+\newcommand{\ceqdash}[1]{\raisedDash{#1}{.5}{.08}}
+\newcommand{\tdash}[1]{\raisedDash{#1}{1}{.08}}
+
+\newlength{\spacewidth}
+\setlength{\spacewidth}{.2em}
+\newcommand{\e}[1]{\hspace{#1\spacewidth}}
+%% \e{i} produces space corresponding to i input spaces.
+
+
+%% Alignment-file Commands
+
+\newlength{\alignboxwidth}
+\newlength{\alignwidth}
+\newsavebox{\alignbox}
+
+% \al{i}{j}{txt} is used in the alignment file to put "%{i}{j}{wd}"
+% in the log file, where wd is the width of the line up to that point,
+% and txt is the following text.
+\newcommand{\al}[3]{%
+  \typeout{\%{#1}{#2}{\the\alignwidth}}%
+  \cl{#3}}
+
+%% \cl{txt} continues a specification line in the alignment file
+%% with text txt.
+\newcommand{\cl}[1]{%
+  \savebox{\alignbox}{\mbox{$\mbox{}#1\mbox{}$}}%
+  \settowidth{\alignboxwidth}{\usebox{\alignbox}}%
+  \addtolength{\alignwidth}{\alignboxwidth}%
+  \usebox{\alignbox}}
+
+% \fl{txt} in the alignment file begins a specification line that
+% starts with the text txt.
+\newcommand{\fl}[1]{%
+  \par
+  \savebox{\alignbox}{\mbox{$\mbox{}#1\mbox{}$}}%
+  \settowidth{\alignwidth}{\usebox{\alignbox}}%
+  \usebox{\alignbox}}
+
+
+
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Ordinarily, TeX typesets letters in math mode in a special math italic    %
+% font.  This makes it typeset "it" to look like the product of the         %
+% variables i and t, rather than like the word "it".  The following         %
+% commands tell TeX to use an ordinary italic font instead.                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifx\documentclass\undefined
+\else
+  \DeclareSymbolFont{tlaitalics}{\encodingdefault}{cmr}{m}{it}
+  \let\itfam\symtlaitalics
+\fi
+
+\makeatletter
+\newcommand{\tlx@c}{\c@tlx@ctr\advance\c@tlx@ctr\@ne}
+\newcounter{tlx@ctr}
+\c@tlx@ctr=\itfam \multiply\c@tlx@ctr"100\relax \advance\c@tlx@ctr "7061\relax
+\mathcode`a=\tlx@c \mathcode`b=\tlx@c \mathcode`c=\tlx@c \mathcode`d=\tlx@c
+\mathcode`e=\tlx@c \mathcode`f=\tlx@c \mathcode`g=\tlx@c \mathcode`h=\tlx@c
+\mathcode`i=\tlx@c \mathcode`j=\tlx@c \mathcode`k=\tlx@c \mathcode`l=\tlx@c
+\mathcode`m=\tlx@c \mathcode`n=\tlx@c \mathcode`o=\tlx@c \mathcode`p=\tlx@c
+\mathcode`q=\tlx@c \mathcode`r=\tlx@c \mathcode`s=\tlx@c \mathcode`t=\tlx@c
+\mathcode`u=\tlx@c \mathcode`v=\tlx@c \mathcode`w=\tlx@c \mathcode`x=\tlx@c
+\mathcode`y=\tlx@c \mathcode`z=\tlx@c
+\c@tlx@ctr=\itfam \multiply\c@tlx@ctr"100\relax \advance\c@tlx@ctr "7041\relax
+\mathcode`A=\tlx@c \mathcode`B=\tlx@c \mathcode`C=\tlx@c \mathcode`D=\tlx@c
+\mathcode`E=\tlx@c \mathcode`F=\tlx@c \mathcode`G=\tlx@c \mathcode`H=\tlx@c
+\mathcode`I=\tlx@c \mathcode`J=\tlx@c \mathcode`K=\tlx@c \mathcode`L=\tlx@c
+\mathcode`M=\tlx@c \mathcode`N=\tlx@c \mathcode`O=\tlx@c \mathcode`P=\tlx@c
+\mathcode`Q=\tlx@c \mathcode`R=\tlx@c \mathcode`S=\tlx@c \mathcode`T=\tlx@c
+\mathcode`U=\tlx@c \mathcode`V=\tlx@c \mathcode`W=\tlx@c \mathcode`X=\tlx@c
+\mathcode`Y=\tlx@c \mathcode`Z=\tlx@c
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                THE describe ENVIRONMENT                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+% It is like the description environment except it takes an argument
+% ARG that should be the text of the widest label.  It adjusts the
+% indentation so each item with label LABEL produces
+%%      LABEL             blah blah blah
+%%      <- width of ARG ->blah blah blah
+%%                        blah blah blah
+\newenvironment{describe}[1]%
+   {\begin{list}{}{\settowidth{\labelwidth}{#1}%
+            \setlength{\labelsep}{.5em}%
+            \setlength{\leftmargin}{\labelwidth}% 
+            \addtolength{\leftmargin}{\labelsep}%
+            \addtolength{\leftmargin}{\parindent}%
+            \def\makelabel##1{\rm ##1\hfill}}%
+            \setlength{\topsep}{0pt}}%% 
+                % Sets \topsep to 0 to reduce vertical space above
+                % and below embedded displayed equations
+   {\end{list}}
+
+%   For tlatex.TeX
+\usepackage{verbatim}
+\makeatletter
+\def\tla{\let\%\relax%
+         \@bsphack
+         \typeout{\%{\the\linewidth}}%
+             \let\do\@makeother\dospecials\catcode`\^^M\active
+             \let\verbatim@startline\relax
+             \let\verbatim@addtoline\@gobble
+             \let\verbatim@processline\relax
+             \let\verbatim@finish\relax
+             \verbatim@}
+\let\endtla=\@esphack
+
+\let\pcal=\tla
+\let\endpcal=\endtla
+\let\ppcal=\tla
+\let\endppcal=\endtla
+
+% The tlatex environment is used by TLATeX.TeX to typeset TLA+.
+% TLATeX.TLA starts its files by writing a \tlatex command.  This
+% command/environment sets \parindent to 0 and defines \% to its
+% standard definition because the writing of the log files is messed up
+% if \% is defined to be something else.  It also executes
+% \@computerule to determine the dimensions for the TLA horizonatl
+% bars.
+\newenvironment{tlatex}{\@computerule%
+                        \setlength{\parindent}{0pt}%
+                       \makeatletter\chardef\%=`\%}{}
+
+
+% The notla environment produces no output.  You can turn a 
+% tla environment to a notla environment to prevent tlatex.TeX from
+% re-formatting the environment.
+
+\def\notla{\let\%\relax%
+         \@bsphack
+             \let\do\@makeother\dospecials\catcode`\^^M\active
+             \let\verbatim@startline\relax
+             \let\verbatim@addtoline\@gobble
+             \let\verbatim@processline\relax
+             \let\verbatim@finish\relax
+             \verbatim@}
+\let\endnotla=\@esphack
+
+\let\nopcal=\notla
+\let\endnopcal=\endnotla
+\let\noppcal=\notla
+\let\endnoppcal=\endnotla
+
+%%%%%%%%%%%%%%%%%%%%%%%% end of tlatex.sty file %%%%%%%%%%%%%%%%%%%%%%% 
+% last modified on Fri  3 August 2012 at 14:23:49 PST by lamport
+
+\begin{document}
+\tlatex
+\@x{}\moduleLeftDash\@xx{ {\MODULE} Det}\moduleRightDash\@xx{}%
+\@pvspace{8.0pt}%
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+An algorithm for replicating multi-threaded applications as done in
+ replicated Popcorn. The application is made deterministic through the
+ use of logical time. Any inter-thread synchronization operation must
+ be protected by calls to \ensuremath{EnterSync} and \ensuremath{ExitSync}.
+ Reads of the socket
+ \ensuremath{API} are modeled by \ensuremath{EnterRead}. The scheduler
+ processes (one per kernel)
+ makes sure that the different copies of the application are consistent.
+\end{cpar}%
+\end{lcom}%
+\@pvspace{16.0pt}%
+\@x{ {\EXTENDS} Naturals ,\, Sequences ,\, Integers ,\, Library}%
+\@pvspace{8.0pt}%
+\@x{ {\CONSTANTS} Pid ,\, MaxTime ,\, Kernel ,\, SchedulerPID ,\, Requests}%
+\@pvspace{8.0pt}%
+\@x{ {\ASSUME}\@s{4.1} SchedulerPID \.{\notin} Pid}%
+\@pvspace{8.0pt}%
+\@x{ InitLogTime \.{\defeq} 1}%
+\@x{ LogTime \.{\defeq} InitLogTime \.{\dotdot} MaxTime}%
+\@y{\@s{0}%
+ The set of logical time values
+}%
+\@xx{}%
+\@pvspace{8.0pt}%
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ Processes are of the form \ensuremath{{\langle}k,\,pid{\rangle}}, where
+ \ensuremath{k} is the kernel the process
+ is running on.
+\end{cpar}%
+\end{lcom}%
+\@x{ P \.{\defeq} Kernel \.{\times} Pid}%
+\@x{ Primary \.{\defeq} {\CHOOSE} k \.{\in} Kernel \.{:} {\TRUE}}%
+\@x{ Ker ( p )\@s{1.54} \.{\defeq} p [ 1 ]}%
+\@x{ PID ( p ) \.{\defeq} p [ 2 ]}%
+\@x{ OnKernel ( kernel ) \.{\defeq} \{ kernel \} \.{\times} Pid}%
+\@pvspace{8.0pt}%
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+Logical time comparison, using \ensuremath{PIDs} to break ties.
+\end{cpar}%
+\end{lcom}%
+\@x{ Less ( p ,\, tp ,\, q ,\, tq ) \.{\defeq}}%
+ \@x{\@s{19.35} tp \.{<} tq \.{\lor} ( tp \.{=} tq \.{\land} PID ( p )
+ \.{\leq} PID ( q ) )}%
+\@pvspace{8.0pt}%
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+The sequence of \ensuremath{TCP} packets that will be received. No duplicates
+ allowed (therefore the set \ensuremath{TcpData} must be big enough) so that
+ any
+ misordering of the threads will lead to a different data read.
+ For \ensuremath{TCPMultiStream}, each stream has different data.
+\end{cpar}%
+\end{lcom}%
+\@x{ StreamLength \.{\defeq} 3}%
+\@x{ TcpData \.{\defeq} 1 \.{\dotdot} StreamLength \.{*} Requests}%
+ \@x{ TcpStream \.{\defeq} [ i \.{\in} 1 \.{\dotdot} StreamLength \.{\mapsto}
+ i ]}%
+ \@x{ TcpMultiStream \.{\defeq} [ r \.{\in} 1 \.{\dotdot} Requests
+ \.{\mapsto}}%
+ \@x{\@s{49.19} ( [ i \.{\in} 1 \.{\dotdot} StreamLength \.{\mapsto} i \.{+} (
+ StreamLength \.{*} ( r \.{-} 1 ) ) ] ) ]}%
+\@x{ {\ASSUME} NoDup ( TcpStream )}%
+\@x{ {\ASSUME} Len ( TcpStream ) \.{=} StreamLength}%
+\@pvspace{8.0pt}%
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ Shifts a sequence by 1: \ensuremath{Shift({\langle}1,\,2,\,3{\rangle}) \.{=}
+ {\langle}2,\,3{\rangle}} and \ensuremath{Shift({\langle}{\rangle}) \.{=}
+ {\langle}{\rangle}}.
+\end{cpar}%
+\end{lcom}%
+\@x{ Shift ( s ) \.{\defeq}}%
+\@x{\@s{16.4} {\IF} Len ( s ) \.{>} 1}%
+ \@x{\@s{16.4} \.{\THEN} [ i \.{\in} 1 \.{\dotdot} ( Len ( s ) \.{-} 1 )
+ \.{\mapsto} s [ i \.{+} 1 ] ]}%
+\@x{\@s{16.4} \.{\ELSE} {\langle} {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ Shiftn ( s ) \.{\defeq}}%
+\@x{\@s{16.4} {\IF} Len ( s ) \.{>} 1}%
+ \@x{\@s{16.4} \.{\THEN} [ i \.{\in} 1 \.{\dotdot} ( Len ( s ) \.{-} 1 )
+ \.{\mapsto} s [ i \.{+} 1 ] ]}%
+\@x{\@s{16.4} \.{\ELSE} {\langle} \.{-} 1 {\rangle}}%
+\@pvspace{8.0pt}%
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ The algorithm \ensuremath{ReadAppend} models a set of worker threads being
+ scheduled
+ by the deterministic scheduler and executing the following code.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{T}{F}{10.0}{0}{}%
+Code of worker \ensuremath{w}: \ensuremath{While(true) \{
+}%
+\end{cpar}%
+\begin{cpar}{0}{T}{F}{10.0}{0}{}%
+\ensuremath{x \.{=} read(socket);
+}%
+\end{cpar}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+\ensuremath{append({\langle}w,\,x{\rangle},\,file);
+}%
+\end{cpar}%
+\begin{cpar}{1}{F}{F}{0}{0}{}%
+\ensuremath{\}
+}%
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{1}{F}{F}{0}{0}{}%
+Variables:
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+The variable bumps records all logical time bumps executed by the
+ primary in order for the secondaries to do the same, \ensuremath{i.e}. the
+ initial
+ logical time, the new logical time, and the value read from the tcp
+ buffer. \ensuremath{{\langle}t1,\,t2,\,d{\rangle} \.{\in} bumps[pid]} means
+ that the primary bumped
+ process \ensuremath{pid} from logical time \ensuremath{t1} to
+ \ensuremath{t2} and delivered the data \ensuremath{d}. Note
+ that the scheduler set \ensuremath{bumps[pid]} to a value that depends on the
+ logical time of the processes on all replicas, and this value is then
+ immediately available to all replicas. A more detailed model would
+ instead include a distributed implementation of the choice of the
+ logical time to bump the process to.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ \ensuremath{reads[p]} stores the last value read by \ensuremath{p} from the
+ socket.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ \ensuremath{tcpBuff[k]} represents the state of the tcp buffer on kernel
+ \ensuremath{k}. Each
+ time a process reads from the buffer, the buffer shrinks by 1.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+Definitions:
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ \ensuremath{Bumped(kernel)} is the set of processes running on the kernel
+ ``kernel''
+ which are waiting to execute a ``bump'' decided by the primary.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ If \ensuremath{p \.{\in} Bumped(Ker(p))} then \ensuremath{BumpedTo(p)} is the
+ logical time to which \ensuremath{p
+} should be bumped to.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ If \ensuremath{p \.{\in} WaitingSync(Ker(p))} then
+ \ensuremath{IsNextProc(kernel,\, p)} is true iff \ensuremath{p
+ } is the process to be scheduled next, that is: (1) \ensuremath{p} has the
+ lowest
+ \ensuremath{ltime} among running and waiting-sync processes and (2) if
+ \ensuremath{q} is on the
+ same kernel and \ensuremath{q} is waiting for a read and the primary has
+ already
+ decided to which logical time \ensuremath{tq} to bump \ensuremath{q}, then
+ \ensuremath{ltime[p]} must be less
+ than \ensuremath{tq}.
+\end{cpar}%
+\vshade{5.0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+\ensuremath{BumpTo} is the logical time to which to bump a process that needs
+ bumping. It is some logical time greater than all the logical times
+ reached by any process on any kernel.
+\end{cpar}%
+\end{lcom}%
+\@pvspace{8.0pt}%
+\pcalsymbolstrue
+\csyntaxtrue
+\@x{ {\p@mmalgorithm} ReadAppend {\p@lbrace}}%
+\@x{\@s{16.4} {\p@variables}}%
+\@x{\@s{32.8} status \.{=} [ p \.{\in} P \.{\mapsto}\@w{running} ] ,\,}%
+\@x{\@s{32.8} ltime \.{=} [ p \.{\in} P \.{\mapsto} InitLogTime ] ,\,}%
+ \@x{\@s{32.8} file \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle} {\rangle} ]
+ ,\,}%
+\@x{\@s{32.8} bumps \.{=} [ p \.{\in} Pid \.{\mapsto} \{ \} ] ,\,}%
+\@x{\@s{32.8} reads\@s{5.23} \.{=} [ p \.{\in} P \.{\mapsto} \.{-} 1 ] ,\,}%
+ \@x{\@s{32.8} tcpBuff \.{=} [ k \.{\in} Kernel \.{\mapsto} TcpMultiStream ]
+ ,\,}%
+\@x{\@s{32.8}}%
+\@y{\@s{0}%
+ Queue for accepted connections
+}%
+\@xx{}%
+ \@x{\@s{32.8} socketQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
+ {\rangle} ] ,\,}%
+\@x{\@s{32.8}}%
+\@y{\@s{0}%
+ Queue for unhandled connections
+}%
+\@xx{}%
+ \@x{\@s{32.8} requestQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} [ r \.{\in} 1
+ \.{\dotdot} Requests \.{\mapsto} r ] ] ,\,}%
+\@x{\@s{32.8}}%
+\@y{\@s{0}%
+ The socket that is handled by a process
+}%
+\@xx{}%
+\@x{\@s{32.8} handledSocket \.{=} [ p \.{\in} P \.{\mapsto} \.{-} 1 ] ,\,}%
+ \@x{\@s{32.8} connections \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
+ {\rangle} ]}%
+\@pvspace{8.0pt}%
+\@x{\@s{16.4} {\p@define} \{}%
+\@x{\@s{32.8} Run ( p ) \.{\defeq} status [ p ] \.{=}\@w{running}}%
+ \@x{\@s{32.8} Running ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel )
+ \.{:} Run ( p ) \}}%
+\@x{\@s{32.8} WaitingSync ( kernel ) \.{\defeq}}%
+ \@x{\@s{49.19} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
+ \.{=}\@w{waiting\ sync} \}}%
+\@x{\@s{32.8} WaitingRead ( kernel ) \.{\defeq}}%
+ \@x{\@s{49.19} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
+ \.{=}\@w{waiting\ read} \}}%
+ \@x{\@s{32.8} Bumped ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel )
+ \.{:}}%
+\@x{\@s{49.19} \.{\land}\@s{4.1} status [ p ] \.{=}\@w{waiting\ read}}%
+ \@x{\@s{49.19} \.{\land}\@s{4.10} \E\, t \.{\in} LogTime \.{:} \E\, d \.{\in}
+ TcpData \.{:} {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [
+ PID ( p ) ] \}}%
+\@x{\@s{32.8} BumpedTo ( p ) \.{\defeq}}%
+ \@x{\@s{49.19} {\CHOOSE} t \.{\in} LogTime \.{:} \E\, d \.{\in} TcpData \.{:}
+ {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [ PID ( p ) ]}%
+\@x{\@s{32.8} BumpData ( p ) \.{\defeq}}%
+ \@x{\@s{49.19} {\CHOOSE} d \.{\in} TcpData \.{:} \E\, t \.{\in} LogTime \.{:}
+ {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [ PID ( p ) ]}%
+\@x{\@s{32.8} IsNextProc ( kernel ,\, p ) \.{\defeq}}%
+ \@x{\@s{49.19} \.{\land}\@s{4.1} \A\, q \.{\in} Running ( kernel ) \.{\cup}
+ WaitingSync ( kernel ) \.{:}}%
+ \@x{\@s{75.73} q \.{\neq} p \.{\implies} Less ( p ,\, ltime [ p ] ,\, q ,\,
+ ltime [ q ] )}%
+ \@x{\@s{49.19} \.{\land}\@s{4.10} \A\, q \.{\in} Bumped ( kernel ) \.{:} Less
+ ( p ,\, ltime [ p ] ,\, q ,\, BumpedTo ( q ) )}%
+ \@x{\@s{32.8} BumpTo \.{\defeq} {\CHOOSE} i \.{\in} LogTime \.{:} \A\, p
+ \.{\in} P \.{:} ltime [ p ] \.{<} i}%
+\@x{\@s{16.4} \}}%
+\@pvspace{8.0pt}%
+\@x{\@s{16.4} {\p@macro} EnterRead ( p ) \{}%
+\@x{\@s{32.8} status [ p ] \.{:=}\@w{waiting\ read} {\p@semicolon}}%
+\@x{\@s{16.4} \}}%
+\@x{\@s{16.4} {\p@macro} EnterSync ( p ) \{}%
+\@x{\@s{32.8} status [ p ] \.{:=}\@w{waiting\ sync} {\p@semicolon}}%
+\@x{\@s{16.4} \}}%
+\@x{\@s{16.4} {\p@macro} ExitSync ( p ) \{}%
+\@x{\@s{32.8} ltime [ p ] \.{:=} ltime [ p ] \.{+} 1 {\p@semicolon}}%
+\@x{\@s{16.4} \}}%
+\@pvspace{8.0pt}%
+\@x{\@s{16.4}}%
+\@y{\@s{0}%
+ Processes consume a connection
+}%
+\@xx{}%
+\@x{\@s{16.4} {\p@process} ( worker \.{\in} P ) \{}%
+\@x{\@s{56.88} ww1\@s{.5}\textrm{:}\@s{3} {\p@while} ( {\TRUE} ) \{}%
+\@x{\@s{95.72} EnterSync ( self )\@s{3.33} {\p@semicolon}}%
+ \@x{\@s{56.88} ww2\@s{.5}\textrm{:}\@s{3}\@s{13.20} {\p@await} Run ( self )
+ {\p@semicolon}}%
+ \@x{\@s{56.88} ww3\@s{.5}\textrm{:}\@s{3}\@s{13.20} {\p@if} ( Len (
+ requestQueue [ Ker ( self ) ] ) \.{>} 0 ) \{}%
+ \@x{\@s{114.25} handledSocket [ self ] \.{:=} requestQueue [ Ker ( self ) ] [
+ 1 ] {\p@semicolon}}%
+ \@x{\@s{114.25} requestQueue [ Ker ( self ) ] \.{:=} Shift ( requestQueue [
+ Ker ( self ) ] ) {\p@semicolon}}%
+\@x{\@s{95.72} \} {\p@semicolon}}%
+ \@x{\@s{56.88} ww4\@s{.5}\textrm{:}\@s{3}\@s{13.20} ExitSync ( self )
+ {\p@semicolon}}%
+ \@x{\@s{56.88} ww5\@s{.5}\textrm{:}\@s{3}\@s{13.20} {\p@if} ( handledSocket [
+ self ] \.{\neq} \.{-} 1 ) \{}%
+ \@x{\@s{95.72} ww9\@s{.5}\textrm{:}\@s{3}\@s{12.29} {\p@while} ( Len (
+ tcpBuff [ Ker ( self ) ] [ handledSocket [ self ] ] ) \.{>} 0 ) \{}%
+\@x{\@s{150.96} EnterRead ( self )\@s{2.46} {\p@semicolon}}%
+ \@x{\@s{112.12} ww10\@s{.5}\textrm{:}\@s{3}\@s{8.2} {\p@await} Run ( self )
+ {\p@semicolon}}%
+\@x{\@s{150.96} EnterSync ( self )\@s{3.33} {\p@semicolon}}%
+ \@x{\@s{112.12} ww11\@s{.5}\textrm{:}\@s{3}\@s{8.2} {\p@await} Run ( self )
+ {\p@semicolon}}%
+\@x{\@s{150.96} file [ Ker ( self ) ] \.{:=}}%
+ \@x{\@s{164.49} Append ( file [ Ker ( self ) ] ,\, {\langle} PID ( self ) ,\,
+ reads [ self ] {\rangle} ) {\p@semicolon}}%
+ \@x{\@s{112.12} ww12\@s{.5}\textrm{:}\@s{3}\@s{8.19} ExitSync ( self )
+ {\p@semicolon}}%
+\@x{\@s{112.12} \}}%
+\@x{\@s{95.72} \} {\p@semicolon}}%
+ \@x{\@s{56.88} ww13\@s{.5}\textrm{:}\@s{3}\@s{8.19} handledSocket [ self ]
+ \.{:=} \.{-} 1 {\p@semicolon}}%
+\@x{\@s{56.88} \} {\p@semicolon}}%
+\@x{\@s{32.8} \}}%
+\@pvspace{8.0pt}%
+ \@x{\@s{16.4} {\p@process} ( scheduler \.{\in} \{ {\langle} k ,\,
+ SchedulerPID {\rangle} \.{:} k \.{\in} Kernel \} ) \{}%
+\@x{\@s{32.8} s1\@s{.5}\textrm{:}\@s{3}\@s{7.89} {\p@while} ( {\TRUE} ) \{}%
+\@x{\@s{73.28} {\p@either} \{}%
+\@y{\@s{0}%
+ Schedule a process waiting for synchronization:
+}%
+\@xx{}%
+ \@x{\@s{89.68} {\p@with} ( p \.{\in} \{ p \.{\in} WaitingSync ( Ker ( self )
+ ) \.{:}}%
+\@x{\@s{125.50} IsNextProc ( Ker ( self ) ,\, p ) \} ) \{}%
+\@x{\@s{106.08} status [ p ] \.{:=}\@w{running} \} \}}%
+\@x{\@s{73.28} {\p@or} \{}%
+\@y{\@s{0}%
+ Bump a process waiting for a read:
+}%
+\@xx{}%
+\@x{\@s{91.70} {\p@with} ( p \.{\in} WaitingRead ( Ker ( self ) ) ) \{}%
+\@x{\@s{108.10} {\p@if} ( Ker ( self ) \.{=} Primary ) \{}%
+\@y{\@s{0}%
+ On the primary.
+}%
+\@xx{}%
+\@x{\@s{108.10}}%
+\@y{\@s{0}%
+ Record the bump for the secondaries.
+}%
+\@xx{}%
+\@x{\@s{124.50} bumps [ PID ( p ) ] \.{:=}}%
+ \@x{\@s{140.90} bumps [ PID ( p ) ] \.{\cup} \{ {\langle} ltime [ p ] ,\,
+ BumpTo ,\, tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ] {\rangle}
+ \} {\p@semicolon}}%
+\@x{\@s{124.50} ltime [ p ] \.{:=} BumpTo {\p@semicolon}}%
+\@x{\@s{108.10} \} {\p@else} \{}%
+\@y{\@s{0}%
+ On a replica:
+}%
+\@xx{}%
+\@x{}%
+\@y{\@s{0}%
+ Wait until the primary has bumped \ensuremath{p} and the data to be
+ delivered to \ensuremath{p} in at the head of the tcp buffer
+}%
+\@xx{}%
+ \@x{\@s{114.8} {\p@await} p \.{\in} Bumped ( Ker ( self ) ) \.{\land}
+ BumpData ( p ) \.{=} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ]
+ {\p@semicolon}}%
+\@x{\@s{114.8} ltime [ p ] \.{:=} BumpedTo ( p ) {\p@semicolon}}%
+\@y{\@s{0}%
+ Bump the process
+}%
+\@xx{}%
+\@x{\@s{98.39} \} {\p@semicolon}}%
+ \@x{\@s{98.39} reads [ p ] \.{:=} tcpBuff [ Ker ( self ) ] [ handledSocket [
+ p ] ] [ 1 ] {\p@semicolon}}%
+\@x{\@s{98.39} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] \.{:=}}%
+ \@x{\@s{114.79} Shift ( tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] )
+ {\p@semicolon}}%
+\@x{\@s{98.39} status [ p ] \.{:=}\@w{running} {\p@semicolon}}%
+\@y{\@s{0}%
+ Let \ensuremath{p} run.
+}%
+\@xx{}%
+\@x{\@s{82.0} \}}%
+\@x{\@s{65.6} \}}%
+\@x{\@s{32.8} \}}%
+\@x{\@s{16.4} \}}%
+\@x{ \}}%
+\@y{}%
+\@xx{}%
+\pcalshadingfalse \pcalsymbolsfalse
+\@x{}%
+\@y{\@s{0}%
+ BEGIN TRANSLATION
+}%
+\@xx{}%
+ \@x{ {\VARIABLES} status ,\, ltime ,\, file ,\, bumps ,\, reads ,\, tcpBuff
+ ,\, socketQueue ,\,}%
+\@x{\@s{51.42} requestQueue ,\, handledSocket ,\, connections ,\, pc}%
+\@pvspace{8.0pt}%
+\@x{}%
+\@y{\@s{0}%
+ define statement
+}%
+\@xx{}%
+\@x{ Run ( p ) \.{\defeq} status [ p ] \.{=}\@w{running}}%
+ \@x{ Running ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel ) \.{:} Run
+ ( p ) \}}%
+\@x{ WaitingSync ( kernel ) \.{\defeq}}%
+ \@x{\@s{16.4} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
+ \.{=}\@w{waiting\ sync} \}}%
+\@x{ WaitingRead ( kernel ) \.{\defeq}}%
+ \@x{\@s{16.4} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
+ \.{=}\@w{waiting\ read} \}}%
+\@x{ Bumped ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel ) \.{:}}%
+\@x{\@s{16.4} \.{\land}\@s{4.1} status [ p ] \.{=}\@w{waiting\ read}}%
+ \@x{\@s{16.4} \.{\land}\@s{4.09} \E\, t \.{\in} LogTime \.{:} \E\, d \.{\in}
+ TcpData \.{:} {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [
+ PID ( p ) ] \}}%
+\@x{ BumpedTo ( p ) \.{\defeq}}%
+ \@x{\@s{16.4} {\CHOOSE} t \.{\in} LogTime \.{:} \E\, d \.{\in} TcpData \.{:}
+ {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [ PID ( p ) ]}%
+\@x{ BumpData ( p ) \.{\defeq}}%
+ \@x{\@s{16.4} {\CHOOSE} d \.{\in} TcpData \.{:} \E\, t \.{\in} LogTime \.{:}
+ {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [ PID ( p ) ]}%
+\@x{ IsNextProc ( kernel ,\, p ) \.{\defeq}}%
+ \@x{\@s{16.4} \.{\land}\@s{4.1} \A\, q \.{\in} Running ( kernel ) \.{\cup}
+ WaitingSync ( kernel ) \.{:}}%
+ \@x{\@s{42.93} q \.{\neq} p \.{\implies} Less ( p ,\, ltime [ p ] ,\, q ,\,
+ ltime [ q ] )}%
+ \@x{\@s{16.4} \.{\land}\@s{4.09} \A\, q \.{\in} Bumped ( kernel ) \.{:} Less
+ ( p ,\, ltime [ p ] ,\, q ,\, BumpedTo ( q ) )}%
+ \@x{ BumpTo \.{\defeq} {\CHOOSE} i \.{\in} LogTime \.{:} \A\, p \.{\in} P
+ \.{:} ltime [ p ] \.{<} i}%
+\@pvspace{16.0pt}%
+ \@x{ vars \.{\defeq} {\langle} status ,\, ltime ,\, file ,\, bumps ,\, reads
+ ,\, tcpBuff ,\, socketQueue ,\,}%
+ \@x{\@s{41.61} requestQueue ,\, handledSocket ,\, connections ,\, pc
+ {\rangle}}%
+\@pvspace{8.0pt}%
+ \@x{ ProcSet \.{\defeq} ( P ) \.{\cup} ( \{ {\langle} k ,\, SchedulerPID
+ {\rangle} \.{:} k \.{\in} Kernel \} )}%
+\@pvspace{8.0pt}%
+\@x{ Init \.{\defeq}}%
+\@y{\@s{0}%
+ Global variables
+}%
+\@xx{}%
+ \@x{\@s{35.70} \.{\land} status \.{=} [ p \.{\in} P \.{\mapsto}\@w{running}
+ ]}%
+\@x{\@s{35.70} \.{\land} ltime \.{=} [ p \.{\in} P \.{\mapsto} InitLogTime ]}%
+ \@x{\@s{35.70} \.{\land} file \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
+ {\rangle} ]}%
+\@x{\@s{35.70} \.{\land} bumps \.{=} [ p \.{\in} Pid \.{\mapsto} \{ \} ]}%
+ \@x{\@s{35.70} \.{\land} reads\@s{5.23} \.{=} [ p \.{\in} P \.{\mapsto} \.{-}
+ 1 ]}%
+ \@x{\@s{35.70} \.{\land} tcpBuff \.{=} [ k \.{\in} Kernel \.{\mapsto}
+ TcpMultiStream ]}%
+ \@x{\@s{35.70} \.{\land} socketQueue \.{=} [ k \.{\in} Kernel \.{\mapsto}
+ {\langle} {\rangle} ]}%
+ \@x{\@s{35.70} \.{\land} requestQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} [
+ r \.{\in} 1 \.{\dotdot} Requests \.{\mapsto} r ] ]}%
+ \@x{\@s{35.70} \.{\land} handledSocket \.{=} [ p \.{\in} P \.{\mapsto} \.{-}
+ 1 ]}%
+ \@x{\@s{35.70} \.{\land} connections \.{=} [ k \.{\in} Kernel \.{\mapsto}
+ {\langle} {\rangle} ]}%
+ \@x{\@s{35.70} \.{\land} pc \.{=} [ self \.{\in} ProcSet \.{\mapsto} {\CASE}
+ self \.{\in} P \.{\rightarrow}\@w{ww1}}%
+ \@x{\@s{160.39} {\Box}\@s{10.30} self \.{\in} \{ {\langle} k ,\, SchedulerPID
+ {\rangle} \.{:} k \.{\in} Kernel \} \.{\rightarrow}\@w{s1} ]}%
+\@pvspace{8.0pt}%
+\@x{ ww1 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww1}}%
+ \@x{\@s{62.46} \.{\land} status \.{'} \.{=} [ status {\EXCEPT} {\bang} [ self
+ ] \.{=}\@w{waiting\ sync} ]}%
+ \@x{\@s{62.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww2} ]}%
+ \@x{\@s{62.46} \.{\land} {\UNCHANGED} {\langle} ltime ,\, file ,\, bumps ,\,
+ reads ,\, tcpBuff ,\, socketQueue ,\,}%
+\@x{\@s{136.05} requestQueue ,\, handledSocket ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww2 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww2}}%
+\@x{\@s{62.46} \.{\land} Run ( self )}%
+ \@x{\@s{62.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww3} ]}%
+ \@x{\@s{62.46} \.{\land} {\UNCHANGED} {\langle} status ,\, ltime ,\, file ,\,
+ bumps ,\, reads ,\, tcpBuff ,\,}%
+\@x{\@s{136.05} socketQueue ,\, requestQueue ,\, handledSocket ,\,}%
+\@x{\@s{136.05} connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww3 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww3}}%
+\@x{\@s{62.46} \.{\land} {\IF} Len ( requestQueue [ Ker ( self ) ] ) \.{>} 0}%
+ \@x{\@s{85.72} \.{\THEN} \.{\land} handledSocket \.{'} \.{=} [ handledSocket
+ {\EXCEPT} {\bang} [ self ] \.{=} requestQueue [ Ker ( self ) ] [ 1 ] ]}%
+ \@x{\@s{117.03} \.{\land} requestQueue \.{'} \.{=} [ requestQueue {\EXCEPT}
+ {\bang} [ Ker ( self ) ] \.{=} Shift ( requestQueue [ Ker ( self ) ] ) ]}%
+\@x{\@s{85.72} \.{\ELSE} \.{\land} {\TRUE}}%
+ \@x{\@s{117.03} \.{\land} {\UNCHANGED} {\langle} requestQueue ,\,
+ handledSocket {\rangle}}%
+ \@x{\@s{62.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww4} ]}%
+ \@x{\@s{62.46} \.{\land} {\UNCHANGED} {\langle} status ,\, ltime ,\, file ,\,
+ bumps ,\, reads ,\, tcpBuff ,\,}%
+\@x{\@s{136.05} socketQueue ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww4 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww4}}%
+ \@x{\@s{62.46} \.{\land} ltime \.{'} \.{=} [ ltime {\EXCEPT} {\bang} [ self ]
+ \.{=} ltime [ self ] \.{+} 1 ]}%
+ \@x{\@s{62.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww5} ]}%
+ \@x{\@s{62.46} \.{\land} {\UNCHANGED} {\langle} status ,\, file ,\, bumps ,\,
+ reads ,\, tcpBuff ,\, socketQueue ,\,}%
+\@x{\@s{136.05} requestQueue ,\, handledSocket ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww5 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww5}}%
+\@x{\@s{62.46} \.{\land} {\IF} handledSocket [ self ] \.{\neq} \.{-} 1}%
+ \@x{\@s{85.72} \.{\THEN} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [
+ self ] \.{=}\@w{ww9} ]}%
+ \@x{\@s{85.72} \.{\ELSE} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [
+ self ] \.{=}\@w{ww13} ]}%
+ \@x{\@s{62.46} \.{\land} {\UNCHANGED} {\langle} status ,\, ltime ,\, file ,\,
+ bumps ,\, reads ,\, tcpBuff ,\,}%
+\@x{\@s{136.05} socketQueue ,\, requestQueue ,\, handledSocket ,\,}%
+\@x{\@s{136.05} connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww9 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww9}}%
+ \@x{\@s{62.46} \.{\land} {\IF} Len ( tcpBuff [ Ker ( self ) ] [ handledSocket
+ [ self ] ] ) \.{>} 0}%
+ \@x{\@s{85.72} \.{\THEN} \.{\land} status \.{'} \.{=} [ status {\EXCEPT}
+ {\bang} [ self ] \.{=}\@w{waiting\ read} ]}%
+ \@x{\@s{117.03} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww10} ]}%
+ \@x{\@s{85.72} \.{\ELSE} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [
+ self ] \.{=}\@w{ww13} ]}%
+\@x{\@s{117.03} \.{\land} {\UNCHANGED} status}%
+ \@x{\@s{62.46} \.{\land} {\UNCHANGED} {\langle} ltime ,\, file ,\, bumps ,\,
+ reads ,\, tcpBuff ,\, socketQueue ,\,}%
+\@x{\@s{136.05} requestQueue ,\, handledSocket ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww10 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww10}}%
+\@x{\@s{67.46} \.{\land} Run ( self )}%
+ \@x{\@s{67.46} \.{\land} status \.{'} \.{=} [ status {\EXCEPT} {\bang} [ self
+ ] \.{=}\@w{waiting\ sync} ]}%
+ \@x{\@s{67.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww11} ]}%
+ \@x{\@s{67.46} \.{\land} {\UNCHANGED} {\langle} ltime ,\, file ,\, bumps ,\,
+ reads ,\, tcpBuff ,\, socketQueue ,\,}%
+\@x{\@s{141.05} requestQueue ,\, handledSocket ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww11 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww11}}%
+\@x{\@s{67.46} \.{\land} Run ( self )}%
+ \@x{\@s{67.46} \.{\land} file \.{'} \.{=} [ file {\EXCEPT} {\bang} [ Ker (
+ self ) ] \.{=} Append ( file [ Ker ( self ) ] ,\, {\langle} PID ( self ) ,\,
+ reads [ self ] {\rangle} ) ]}%
+ \@x{\@s{67.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww12} ]}%
+ \@x{\@s{67.46} \.{\land} {\UNCHANGED} {\langle} status ,\, ltime ,\, bumps
+ ,\, reads ,\, tcpBuff ,\,}%
+\@x{\@s{141.05} socketQueue ,\, requestQueue ,\, handledSocket ,\,}%
+\@x{\@s{141.05} connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww12 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww12}}%
+ \@x{\@s{67.46} \.{\land} ltime \.{'} \.{=} [ ltime {\EXCEPT} {\bang} [ self ]
+ \.{=} ltime [ self ] \.{+} 1 ]}%
+ \@x{\@s{67.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww9} ]}%
+ \@x{\@s{67.46} \.{\land} {\UNCHANGED} {\langle} status ,\, file ,\, bumps ,\,
+ reads ,\, tcpBuff ,\, socketQueue ,\,}%
+\@x{\@s{141.05} requestQueue ,\, handledSocket ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ ww13 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{ww13}}%
+ \@x{\@s{67.46} \.{\land} handledSocket \.{'} \.{=} [ handledSocket {\EXCEPT}
+ {\bang} [ self ] \.{=} \.{-} 1 ]}%
+ \@x{\@s{67.46} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{ww1} ]}%
+ \@x{\@s{67.46} \.{\land} {\UNCHANGED} {\langle} status ,\, ltime ,\, file ,\,
+ bumps ,\, reads ,\, tcpBuff ,\,}%
+\@x{\@s{141.05} socketQueue ,\, requestQueue ,\, connections {\rangle}}%
+\@pvspace{8.0pt}%
+ \@x{ worker ( self ) \.{\defeq} ww1 ( self ) \.{\lor} ww2 ( self ) \.{\lor}
+ ww3 ( self ) \.{\lor} ww4 ( self )}%
+ \@x{\@s{92.92} \.{\lor} ww5 ( self ) \.{\lor} ww9 ( self ) \.{\lor} ww10 (
+ self ) \.{\lor} ww11 ( self )}%
+\@x{\@s{92.92} \.{\lor} ww12 ( self ) \.{\lor} ww13 ( self )}%
+\@pvspace{8.0pt}%
+\@x{ s1 ( self ) \.{\defeq} \.{\land} pc [ self ] \.{=}\@w{s1}}%
+ \@x{\@s{53.00} \.{\land} \.{\lor} \.{\land} \E\, p \.{\in}\@s{16.4} \{ p
+ \.{\in} WaitingSync ( Ker ( self ) ) \.{:}}%
+\@x{\@s{115.70} IsNextProc ( Ker ( self ) ,\, p ) \} \.{:}}%
+ \@x{\@s{94.53} status \.{'} \.{=} [ status {\EXCEPT} {\bang} [ p ]
+ \.{=}\@w{running} ]}%
+ \@x{\@s{75.22} \.{\land} {\UNCHANGED} {\langle} ltime ,\, bumps ,\, reads ,\,
+ tcpBuff {\rangle}}%
+ \@x{\@s{64.11} \.{\lor} \.{\land} \E\, p \.{\in} WaitingRead ( Ker ( self ) )
+ \.{:}}%
+\@x{\@s{94.53} \.{\land} {\IF} Ker ( self ) \.{=} Primary}%
+ \@x{\@s{117.80} \.{\THEN} \.{\land} bumps \.{'} \.{=} [ bumps {\EXCEPT}
+ {\bang} [ PID ( p ) ] \.{=} bumps [ PID ( p ) ] \.{\cup} \{ {\langle} ltime
+ [ p ] ,\, BumpTo ,\, tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ]
+ {\rangle} \} ]}%
+ \@x{\@s{149.11} \.{\land} ltime \.{'}\@s{5.69} \.{=} [ ltime {\EXCEPT}
+ {\bang} [ p ] \.{=} BumpTo ]}%
+ \@x{\@s{117.80} \.{\ELSE} \.{\land} p \.{\in} Bumped ( Ker ( self ) )
+ \.{\land} BumpData ( p ) \.{=} tcpBuff [ Ker ( self ) ] [ handledSocket [ p
+ ] ] [ 1 ]}%
+ \@x{\@s{149.11} \.{\land} ltime \.{'}\@s{5.69} \.{=} [ ltime {\EXCEPT}
+ {\bang} [ p ] \.{=} BumpedTo ( p ) ]}%
+\@x{\@s{149.11} \.{\land} bumps \.{'} \.{=} bumps}%
+ \@x{\@s{94.53} \.{\land} reads \.{'} \.{=} [ reads {\EXCEPT} {\bang} [ p ]
+ \.{=} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ] ]}%
+ \@x{\@s{94.53} \.{\land} tcpBuff \.{'} \.{=} [ tcpBuff {\EXCEPT} {\bang} [
+ Ker ( self ) ] [ handledSocket [ p ] ] \.{=} Shift ( tcpBuff [ Ker ( self )
+ ] [ handledSocket [ p ] ] ) ]}%
+ \@x{\@s{94.53} \.{\land} status \.{'} \.{=} [ status {\EXCEPT} {\bang} [ p ]
+ \.{=}\@w{running} ]}%
+ \@x{\@s{53.00} \.{\land} pc \.{'} \.{=} [ pc {\EXCEPT} {\bang} [ self ]
+ \.{=}\@w{s1} ]}%
+ \@x{\@s{53.00} \.{\land} {\UNCHANGED} {\langle} file ,\, socketQueue ,\,
+ requestQueue ,\, handledSocket ,\,}%
+\@x{\@s{126.59} connections {\rangle}}%
+\@pvspace{8.0pt}%
+\@x{ scheduler ( self ) \.{\defeq} s1 ( self )}%
+\@pvspace{8.0pt}%
+\@x{ Next \.{\defeq} ( \E\, self \.{\in} P \.{:} worker ( self ) )}%
+ \@x{\@s{47.82} \.{\lor} ( \E\, self \.{\in} \{ {\langle} k ,\, SchedulerPID
+ {\rangle} \.{:} k \.{\in} Kernel \} \.{:} scheduler ( self ) )}%
+\@pvspace{8.0pt}%
+\@x{ Spec\@s{1.46} \.{\defeq} Init \.{\land} {\Box} [ Next ]_{ vars}}%
+\@pvspace{8.0pt}%
+\@x{}%
+\@y{\@s{0}%
+ END TRANSLATION
+}%
+\@xx{}%
+\@x{ RequestSynchronized \.{\defeq} \A\, k1 ,\, k2 \.{\in} Kernel \.{:}}%
+ \@x{\@s{16.4} \.{\lor}\@s{4.1} Prefix ( socketQueue [ k1 ] ,\, socketQueue [
+ k2 ] )}%
+ \@x{\@s{16.4} \.{\lor}\@s{4.09} Prefix ( socketQueue [ k2 ] ,\, socketQueue [
+ k1 ] )}%
+\@pvspace{8.0pt}%
+\@x{ FilesSynchronized \.{\defeq} \A\, k1 ,\, k2 \.{\in} Kernel \.{:}}%
+\@x{\@s{16.4} \.{\lor}\@s{4.1} Prefix ( file [ k1 ] ,\, file [ k2 ] )}%
+\@x{\@s{16.4} \.{\lor}\@s{4.09} Prefix ( file [ k2 ] ,\, file [ k1 ] )}%
+\@pvspace{8.0pt}%
+\@x{ ConnectionSynchronized \.{\defeq} \A\, k1 ,\, k2 \.{\in} Kernel \.{:}}%
+ \@x{\@s{16.4} \.{\lor}\@s{4.1} Prefix ( connections [ k1 ] ,\, connections [
+ k2 ] )}%
+ \@x{\@s{16.4} \.{\lor}\@s{4.09} Prefix ( connections [ k2 ] ,\, connections [
+ k1 ] )}%
+\@pvspace{8.0pt}%
+\@x{}\bottombar\@xx{}%
+\setboolean{shading}{false}
+\begin{lcom}{0}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+\ensuremath{\.{\,\backslash\,}\.{*}} Modification History
+\end{cpar}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ \ensuremath{\.{\,\backslash\,}\.{*}} Last modified \ensuremath{Fri}
+ \ensuremath{Oct} 23 14:57:58 \ensuremath{EDT} 2015 by \ensuremath{wen
+}%
+\end{cpar}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ \ensuremath{\.{\,\backslash\,}\.{*}} Last modified \ensuremath{Mon}
+ \ensuremath{Oct} 19 20:54:09 \ensuremath{EDT} 2015 by \ensuremath{nano
+}%
+\end{cpar}%
+\begin{cpar}{0}{F}{F}{0}{0}{}%
+ \ensuremath{\.{\,\backslash\,}\.{*}} Created \ensuremath{Fri}
+ \ensuremath{Oct} 16 21:28:32 \ensuremath{EDT} 2015 by \ensuremath{nano
+}%
+\end{cpar}%
+\end{lcom}%
+\end{document}

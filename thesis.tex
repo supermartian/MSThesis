@@ -24,6 +24,9 @@
 % Uncomment for double-spaced document.
 % \renewcommand{\baselinestretch}{2}
 \usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{ifthen}
+\usepackage{standalone}
 \usepackage{epstopdf}
 \usepackage{listings}
 \usepackage{color}
@@ -146,8 +149,9 @@ This work is supported by AFOSR under the grant FA9550-14-1-0163.  Any opinions,
 \input{evaluation}
 \input{conclusion}
 
+
 \bibliographystyle{unsrt}
 \bibliography{bibliography}
-
+%\input{tla/Det}
 \end{document}
 
