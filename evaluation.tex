@@ -51,11 +51,13 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 \label{t:pbzip2_syscall}
 \end{table}
 
+\paragraph{Correctness} For Deterministic Execution, any mismatch of the schedule will lead to different calling sequence of gettimeofday on the primary and secondary, which will result different reported execution time. For Schedule Replication, any mismatch of the schedule will lead the secondary waiting for a wrong schedule event forever. Neither of the case happened during the benchmark, the correctness of the replication thus proven.
+
 \subsection{Results}
 
 Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions becomes more obvious.
 
-For Deterministic Execution, another comes from the logical time imbalance.
+For Deterministic Execution, another type of overhead comes from the logical time imbalance. As we mentioned before, the execution profiler takes the average execution time of basicblocks. However the execution time may vary during the actual run, especially for those basic blocks with file I/O, which has non-determinisitc execution time. Although the instrumented pbzip2 showed decent scalbility, the performance still could have been better if the logical time incremental could be more precise.
 
 %different block sizes
 
@@ -96,6 +98,8 @@ Figure~\ref{f:pbzip2_msg} shows the number of messages that were used during the
 
 Mongoose is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value.
 
+We used ApacheBench to stress test mongoose with different file sizes and different mongoose thread counts. For each benchmark set, we used 100 concurrent connections to make 20000 requests in total. For our benchmark on Deterministic Execution, since the file I/O is set to be blocking in mongoose and we do not track file I/O with Tick Shepherd, we manaully added a \dettick\ right before the file I/O system call with an optimal value. Other than that, nothing was changed for mongoose.
+
 \begin{figure}
 \centering
 \includegraphics[width=0.6\columnwidth]{figures/mongoose_model}
@@ -103,7 +107,7 @@ Mongoose is a compact multithreaded webserver. The concurrent model is shown in 
 \label{f:mongoose_model}
 \end{figure}
 
-We used ApacheBench to stress test mongoose with different file sizes and different mongoose thread counts. For each benchmark set, we used 100 concurrent connections to make 20000 requests in total. Given mongoose's concurrent model, we can see that different file size will affect the frequency of acquiring locks. In this way we can figure out how will two algorithm perform under different lock acquisition load. Also, different thread counts can reflect the scalability of our system.
+%Given mongoose's concurrent model, we can see that different file size will affect the frequency of acquiring locks. In this way we can figure out how will two algorithm perform under different lock acquisition load. Also, different thread counts can reflect the scalability of our system.
 %cite ab
 
 \begin{table}
@@ -123,24 +127,39 @@ System Call & Use in the Application\\ \hline
 \subsection{Results}
 \begin{figure}
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/mg_throughput_50k}
+\includegraphics[width=0.7\columnwidth]{figures/mg_throughput_50k}
 \caption{mongoose performance for 50KB file requests}
 \label{f:mg_50k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/mg_throughput_100k}
+\includegraphics[width=0.7\columnwidth]{figures/mg_throughput_100k}
 \caption{mongoose performance for 100KB file requests}
 \label{f:mg_100k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/mg_throughput_200k}
+\includegraphics[width=0.7\columnwidth]{figures/mg_throughput_200k}
 \caption{mongoose performance for 200KB file requests}
 \label{f:mg_200k}
 \end{figure}
 
-Figure ~\ref{f:mg_50k}, ~\ref{f:mg_100k} and ~\ref{f:mg_200k} show the performance under different workload. Schedule Replication showed
+\begin{table}
+\caption{Mongoose Overall Overhead of Each Replication Mode}
+\begin{center}
+ \begin{tabular}{c | c | c}
+Thread Count & Deterministic Execution & Schedule Replication \\ \hline
+ 4 & 25.22\% & 1.35\% \\ \hline
+ 8 & 15.72\% & 0.27\% \\ \hline
+ 16 & 9.82\% & 0.23\% \\ \hline
+ \end{tabular}
+\end{center}
+\label{t:mongoose_overall}
+\end{table}
+
+Figure ~\ref{f:mg_50k}, ~\ref{f:mg_100k} and ~\ref{f:mg_200k} show the performance under different workload, and Table ~\ref{t:mongoose_overall} shows the overall overhead of each replication mode. Deterministic Execution's overhead becomes lower as the thread count goes up, but still higher than Schedule Replication. This is due to blocking socket write and file I/O  operations. Because the time spent inside those blocking I/O varies all the time, our manually inserted \dettick\ couldn't precisely increase the logical time for every call, as a result we had to suffer the performance loss from logical time imbalance. In the meanwhile, Schedule Replication showed near zero overhead compare to the baseline.
+
+Unlike pbzip where the overhead becomes higher when the thread count increases, mongoose's overhead decreases with more number of threads. This is because monoogse only has two condition variables and one mutex lock, the side effect of serializating pthread primitives is minimal and the performance thus can scale.
 
 \subsection{Message Breakdown}
 Figure~\ref{f:mg_msg_50k}, Figure~\ref{f:mg_msg_100k} and Figure~\ref{f:mg_msg_200k} show the breakdown of overall messages for each benchmark set. The notation is the same as the previous section. Where "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, a in Schedule Replication this stands for the messages for logging the execution sequence.
@@ -149,23 +168,24 @@ Actually, we need much more messages for deterministic execution, which contradi
 
 \begin{figure}
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/mg_msg_50k}
+\includegraphics[width=0.7\columnwidth]{figures/mg_msg_50k}
 \caption{mongoose messages for 50KB file requests}
 \label{f:mg_msg_50k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/mg_msg_100KB}
+\includegraphics[width=0.7\columnwidth]{figures/mg_msg_100KB}
 \caption{mongoose messages for 100KB file requests}
 \label{f:mg_msg_100k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.6\columnwidth]{figures/mg_msg_200KB}
+\includegraphics[width=0.7\columnwidth]{figures/mg_msg_200KB}
 \caption{mongoose messages for 200KB file requests}
 \label{f:mg_msg_200k}
 \end{figure}
 \section{Nginx Webserver}
+
 Nginx~\cite{reese2008nginx} is a sophisticated webserver with multiple threading modes. In this benchmark we used the threadpool setup~\cite{nginxthreadpool} for our benchmark. As shown in Figure~\ref{f:nginx_model}, in this threading mode, the additional threads are only for doing file I/O operations. The MasterThread waits on the listening socket, whenever a file request is coming, it hands over the request into a queue. WorkerThreads get notified whenever a new request is coming and try to retrieve one task from the queue. Whenever the content of the requested file is loaded into memory by a WorkerThread, a handle will be put into another queue and the MasterThread will get notified. In the end, the MasterThread will retrieve the handle and send the content of the file back to the client. 
 
 Table ~\ref{t:nginx_syscall} shows all the tracked system calls used by Nginx. All of the I/O operations are asynchronous and heavily relies on epoll mechanism. 
@@ -195,10 +215,43 @@ System Call & Use in the Application\\ \hline
 \end{table}
 
 \subsection{Results}
+\begin{figure}
+\centering
+\includegraphics[width=0.7\columnwidth]{figures/ng_throughput_50k}
+\caption{nginx performance for 50KB file requests}
+\label{f:ng_50k}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.7\columnwidth]{figures/ng_throughput_100k}
+\caption{nginx performance for 100KB file requests}
+\label{f:ng_100k}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=0.7\columnwidth]{figures/ng_throughput_200k}
+\caption{nginx performance for 200KB file requests}
+\label{f:ng_200k}
+\end{figure}
+
+\begin{table}
+\caption{Nginx Overall Overhead of Each Replication Mode}
+\begin{center}
+ \begin{tabular}{c | c | c}
+Thread Count & Deterministic Execution & Schedule Replication \\ \hline
+ 4 & 3\% & 1.07\% \\ \hline
+ 8 & 1.62\% & 1.96\% \\ \hline
+ 16 & 1.6\% & 1.31\% \\ \hline
+ \end{tabular}
+\end{center}
+\label{t:nginx_overall}
+\end{table}
 
 The reason we see the result is not scaling (even for Linux) is because this threading mode for Nginx is only for concurrent file I/O. During our benchmark, we've already achieved the best of our filesystem even with lower thread counts, although all the threads were loaded, putting more threads won't increase the performance too much. However, the purpose of the benchmark is to show that how will different thread counts affecting our system's overhead (comparing to baseline), a non-scaling result still makes sense here.
 
-Unlike mongoose, the result of Nginx showed both replication modes can achieve very small overhead, but Deterministic Execution actually can perform better than Schedule Replication. When we take a step back to deterministic execution, the major performance hurdle is the logical time imbalance, which happens when there are some time consuming code sections. However, since nginx fully utilizes asynchronous file and network I/O, everything is super fast. In the context of deterministic execution, we can say in Nginx there is no significant time consuming part that will cause logical time imbalance. Therefore Deterministic Execution can perform its best. On the other hand, the massive amount of messages used by Schedule Replication has put a more obvious overhead to the execution. That is why we are able to see Deterministic Execution can perform better.
+Unlike mongoose, the result of Nginx showed both replication modes can achieve very small overhead. When we take a step back to deterministic execution, the major performance hurdle is the logical time imbalance, which happens when there are some time consuming code sections. However, since nginx fully utilizes asynchronous file and network I/O, everything is super fast. In the context of deterministic execution, we can say in Nginx there is no significant time consuming part that will cause logical time imbalance. Therefore Deterministic Execution can perform its best.
+
+%On the other hand, the massive amount of messages used by Schedule Replication has put a more obvious overhead to the execution. That is why we are able to see Deterministic Execution can perform better.
 
 \subsection{Message Breakdown}
 
@@ -250,7 +303,7 @@ Client count & Deterministic Execution & Schedule Replication \\ \hline
 \label{t:redis_overall}
 \end{table}
 
-\subsection{Overhead Profiling}
+\subsection{Message Breakdown}
 
 \section{Discussion}
 The selected benchmarks were used to stress different aspects of this project. Although there are still some optimizations to go, we still achieved decent overhead for different types of concurrent models and different application types. Here we will discuss some interesting issues during the benchmark and some findings from the results.
@@ -258,7 +311,7 @@ The selected benchmarks were used to stress different aspects of this project. A
 \subsection{Benchmark for Nginx's Multi-process Mode}
 So far for all the marco benchmarks, we only showed benchmarks for multi-threaded applications. However our system also supports replication for multi-process applications (as we showed for racey microbenchmark). Nginx supports multi-worker mode, which spawns multiple worker processes, all of the worker processes wait on the listening socket together. Nginx implements the accept\_mutex ~\cite{nginxscalability}, which is lock across processes, to ensure an incoming request only wakes up one waiting worker. In order to figure out whether our replication works for this concurrent model or not, we manually instrumented the accept\_mutex acquisition with \detstart\ and \detend\ . During the benchmark, both primary and secondary were able to end up with the same state all the time. However no matter how many workers we put, it was always only one worker handling all the request. This is due to a relatively low workload we used in our benchmark. However, because of the limitation of our network card (1Gbps), we couldn't apply heavier workload to saturate the worker. With Nginx's design, the accept\_mutex mechanism will not pass the request to another worker if the current worker is not saturated. Which is the reason we only saw one worker handling all the requests.
 
-Unlike the non-scaling result with the threadpool mode, where all the threads were fully loaded, the unbalanced load in multi-worker mode seems not making any sense. As a result we didn't include the result in this chapter.
+Unlike the non-scaling result with the threadpool mode, where all the threads were fully loaded, the unbalanced workload in multi-worker mode seems not making any sense. As a result we didn't include the result in this chapter.
 
 \subsection{Deterministic Execution's Dilemma}
 For deterministic execution, a type of overhead comes from the calculation of the token (finding the task with minimal logical time). Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads lead to more computation time.  As we can see from all the benchmarks, deterministic system always leads to a higher overhead when thread count increases. In a previous discussion ~\cite{bergan2011deterministic}, it is pointed out that all the existing deterministic systems, regardless of what type of deterministic algorithm (lockstep or wait for turn), this kind of global communication is inevitable. This also implies that deterministic might not be practical for highly concurrent application with highly intensive inter-thread communications (synchronization primitives). Webservers like mongoose and nginx have very simple inter-thread communication , so that we achieved decent overhead during the benchmark. But for more complicated applications with more different types of locks, we might face severe performance overhead.

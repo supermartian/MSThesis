@@ -18,10 +18,29 @@ Popcorn Linux comes with a high efficient messaging layer for inter-kernel commu
 % Important fact: messaging layer is strictly FIFO
 
 \section{Popcorn Namespace}
-Popcorn Linux comes with a new Linux namespace in order to isolate normal applications and replicated applications. With this namespace, the user can choose to only replicate a certain subset of applications while the rest in the system will be kept as normal. A user can enter the namespace by executing the namespace launching script, and once the user enters the Popcorn namespace, all the applications that run inside it will be replicated to the secondary kernel.
-\subsection{Replicated Execution}
+In Linux, namespaces are used for creating isolated execution environment for applications. Popcorn Linux implemented a new Linux namespace in order to isolate normal applications and replicated applications. Applications inside Popcorn Namespace will utilize our replication service, once the user enters the Popcorn namespace, all the applications that run inside it will be replicated to the secondary kernel.
 
+\subsection{Replicated Execution}
+When a user launches an application inside the namespace, Popcorn Linux will
 
 \subsection{FT PID}
+In order to match the replicated tasks, Popcorn Linux introduced an extra field to Linux's task\_struct called ft\_pid. As shown in Figure~\ref{f:ft_pid}, ft\_pid is an array of IDs in order to match the tasks on both sides, other parts in the system use ft\_pid to synchronize the execution of tasks on both sides with the same ft\_pid. Popcorn Linux makes sure that the creation of a process/thread is deterministic on both sides, so that all child processes/threads can be matched properly on both sides.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.9575\columnwidth]{figures/ft_pid}
+ \caption{An example of ft\_pid}
+ \label{f:ft_pid}
+\end{figure}
+
 \section{Network Stack Replication}
 % Important fact: accept sequence is same on primary and replica
+The TCP stack in Linux is intrinsically non-deterministic. Given the same network stream, the internal state of TCP stack might end up with different states. For example, for read/write operations, the TCP stack may return a non-predictable number of bytes to the application reading from the socket, which might in turn leads to different states in the replicas.
+
+Based on the idea of FT-TCP~\cite{zagorodnov2003engineering}, Popcorn Linux comes with the network stack replication to eliminate this kind of non-determinism during the replication of network applications. On the inbound path of Linux's network stack, all the TCP traffic that are related to an active Popcorn namespace will be copied to the secondary. All read/write/accept/listen/close system calls that are related to a replicated socket will be synchronized between two kernel instances. Any event that will cause the TCP state to change will also be synchronized (SYN, FIN, etc).
+
+In general, the network stack replication service provides following important functionalities for replicating network applications:
+\begin{itemize}
+\item The internal state of every replicated socket is synchronized.
+\item Read and write operations can have consistent output across all replicas, in terms of size and content.
+\item Upon accept is returned, it is made sure that both replicas are returning the same socket with the same TCP stream.
+\end{itemize}
