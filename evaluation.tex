@@ -217,19 +217,19 @@ System Call & Use in the Application\\ \hline
 \subsection{Results}
 \begin{figure}
 \centering
-\includegraphics[width=0.7\columnwidth]{figures/ng_throughput_50k}
+\includegraphics[width=0.8\columnwidth]{figures/ng_throughput_50k}
 \caption{nginx performance for 50KB file requests}
 \label{f:ng_50k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.7\columnwidth]{figures/ng_throughput_100k}
+\includegraphics[width=0.8\columnwidth]{figures/ng_throughput_100k}
 \caption{nginx performance for 100KB file requests}
 \label{f:ng_100k}
 \end{figure}
 \begin{figure}
 \centering
-\includegraphics[width=0.7\columnwidth]{figures/ng_throughput_200k}
+\includegraphics[width=0.8\columnwidth]{figures/ng_throughput_200k}
 \caption{nginx performance for 200KB file requests}
 \label{f:ng_200k}
 \end{figure}
@@ -254,56 +254,74 @@ Unlike mongoose, the result of Nginx showed both replication modes can achieve v
 %On the other hand, the massive amount of messages used by Schedule Replication has put a more obvious overhead to the execution. That is why we are able to see Deterministic Execution can perform better.
 
 \subsection{Message Breakdown}
-
-The message breakdown has proved the analysis we made. Without any logical time imbalance, messaging and serilization are the only overhead sources for the system for Deterministic Execution. As mention in the beginning of this section, Nginx needs more \detstart\ and \detend\ other than pthread primitives, so Schedule Replication uses way more messages than Deterministic Execution, as a result it has more performance overhead than Deterministic Execution.
-
-Another interesting fact is that since I/O operations are really fast in Nginx, in Deterministic Execution, the Tick Shepherd barely made a tick bump, which is also a reason that Deterministic Execution could perform better. (While in mongoose, almost every blocking I/O had at least one tick bump.)
-
-\section{Redis Database Server}
-Redis is an in-memory database server. It uses a single thread to process requests, but it dynamically creates new threads to write the in-memory data to the disk. This benchmark is perfect for stressing the flexibility of dealing with dynamically spawned threads.
-
-For the performance test we used the redis-benchmark tool, we used the default benchmark parameter which will test all the operations. Each operation is tested for 10000 requests. We also have different number of concurrent clients to stress the server with different frequency of requests. We ran each setup for 5 times and took the average of the numbers.
-
-Redis uses an alternative memory allocator jemalloc, which contains some internal locks to ensure mutual exclusion for concurrent memory allocation. As mentioned in Section~\ref{sec:elision}, those lock acquisitions doesn't affect the output at all, so we modified the jemalloc's source code, to skip the synchronizations for those locks. Other than that, no further modification was made to the application.
-
-\subsection{Results}
-Figure~\ref{f:redis_2}, figure~\ref{f:redis_16} and figure~\ref{f:redis_64} show the  performance of redis with 2, 16 and 64 concurrent clients. Table~\ref{t:redis_overall} shows the overall overhead of each replication mode. 
-
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/redis_2}
-\caption{redis benchmark with 10000 requests and 2 clients}
-\label{f:redis_2}
+\includegraphics[width=0.8\columnwidth]{figures/ng_msg_50k}
+\caption{nginx messages for 50KB file requests}
+\label{f:ng_msg_50k}
 \end{figure}
-
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/redis_16}
-\caption{redis benchmark with 10000 requests and 16 clients}
-\label{f:redis_16}
+\includegraphics[width=0.8\columnwidth]{figures/ng_msg_100KB}
+\caption{nginx messages for 100KB file requests}
+\label{f:ng_msg_100k}
 \end{figure}
-
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/redis_64}
-\caption{redis benchmark with 10000 requests and 64 clients}
-\label{f:redis_64}
+\includegraphics[width=0.8\columnwidth]{figures/ng_msg_200KB}
+\caption{nginx messages for 200KB file requests}
+\label{f:ng_msg_200k}
 \end{figure}
+%The message breakdown has proved the analysis we made. Without any logical time imbalance, messaging and serilization are the only overhead sources for the system for Deterministic Execution.
+Figure ~\ref{f:ng_50k}, figure ~\ref{f:ng_100k} and figure ~\ref{f:ng_100k} show the message break for our benchmark. As mention in the beginning of this section, Nginx needs more \detstart\ and \detend\ other than pthread primitives, so Schedule Replication uses way more messages than Deterministic Execution. Another interesting fact is that since asynchronous I/O operations are really fast in Nginx, in Deterministic Execution, the Tick Shepherd barely made a tick bump, which is also a reason that Deterministic Execution could perform much better than it was in mongoose. While in mongoose, almost every blocking I/O had at least one tick bump.
 
-\begin{table}
-\caption{Redis Overall Overhead of Each Replication Mode}
-\begin{center}
- \begin{tabular}{c | c | c}
-Client count & Deterministic Execution & Schedule Replication \\ \hline
- 2 & 30.38\% & 11.93\% \\ \hline
- 16 & 41.05\% & 26.94\% \\ \hline
- 64 & 39.66\% & 26.48\% \\ \hline
- \end{tabular}
-\end{center}
-\label{t:redis_overall}
-\end{table}
+%\section{Redis Database Server}
+%Redis is an in-memory database server. It uses a single thread to process requests, but it dynamically creates new threads to write the in-memory data to the disk. This benchmark is perfect for stressing the flexibility of dealing with dynamically spawned threads.
 
-\subsection{Message Breakdown}
+%For the performance test we used the redis-benchmark tool, we used the default benchmark parameter which will test all the operations. Each operation is tested for 10000 requests. We also have different number of concurrent clients to stress the server with different frequency of requests. We ran each setup for 5 times and took the average of the numbers.
+
+%Redis uses an alternative memory allocator jemalloc, which contains some internal locks to ensure mutual exclusion for concurrent memory allocation. As mentioned in Section~\ref{sec:elision}, those lock acquisitions doesn't affect the output at all, so we modified the jemalloc's source code, to skip the synchronizations for those locks. Other than that, no further modification was made to the application.
+
+%\subsection{Results}
+%Figure~\ref{f:redis_2}, figure~\ref{f:redis_16} and figure~\ref{f:redis_64} show the  performance of redis with 2, 16 and 64 concurrent clients. Table~\ref{t:redis_overall} shows the overall overhead of each replication mode.
+
+%The configuration was set to save the data every 10000 requests, which means for each benchmark of each operation, we will have one write back to the disk.
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.8\columnwidth]{figures/redis_2}
+%\caption{redis benchmark with 10000 requests and 2 clients}
+%\label{f:redis_2}
+%\end{figure}
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.8\columnwidth]{figures/redis_16}
+%\caption{redis benchmark with 10000 requests and 16 clients}
+%\label{f:redis_16}
+%\end{figure}
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.8\columnwidth]{figures/redis_64}
+%\caption{redis benchmark with 10000 requests and 64 clients}
+%\label{f:redis_64}
+%\end{figure}
+
+%\begin{table}
+%\caption{Redis Overall Overhead of Each Replication Mode}
+%\begin{center}
+% \begin{tabular}{c | c | c}
+%Client count & Deterministic Execution & Schedule Replication \\ \hline
+% 2 & 30.38\% & 11.93\% \\ \hline
+% 16 & 41.05\% & 26.94\% \\ \hline
+% 64 & 39.66\% & 26.48\% \\ \hline
+% \end{tabular}
+%\end{center}
+%\label{t:redis_overall}
+%\end{table}
+
+%\subsection{Message Breakdown}
 
 \section{Discussion}
 The selected benchmarks were used to stress different aspects of this project. Although there are still some optimizations to go, we still achieved decent overhead for different types of concurrent models and different application types. Here we will discuss some interesting issues during the benchmark and some findings from the results.
