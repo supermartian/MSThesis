@@ -13,7 +13,7 @@ In Popcorn Linux, hardware resources are partitioned into arbitrary divisions, a
 \end{figure}
 
 \section{Inter-Kernel Messaging Layer}
-Popcorn Linux comes with a high efficient messaging layer for inter-kernel communication ~\cite{shelton2013popcorn}. From the implementation perspective, the messaging passing is basically just a set of memory copy operations between the address space of the sender kernel and receiver kernel. As a result, the cost of sending a message is very low (under 5us). The replication protocol developed in this project heavily leverage Popcorn’s messaging layer.
+Popcorn Linux comes with a high efficient messaging layer for inter-kernel communication ~\cite{shelton2013popcorn}. From the implementation perspective, the messaging passing is basically just a set of memory copy operations between the address space of the sender kernel and receiver kernel. As a result, the cost of sending a message is very low (under 5us). The replication system developed in this project heavily leverage Popcorn’s messaging layer.
 % Important fact: messaging layer is strictly FIFO
 
 \section{Popcorn Namespace}
@@ -37,9 +37,10 @@ The TCP stack in Linux is intrinsically non-deterministic. Given the same networ
 
 Based on the idea of FT-TCP~\cite{zagorodnov2009practical}, Popcorn Linux comes with a network stack replication technique to eliminate this kind of non-determinism for replicating network applications. On the inbound path of Linux's network stack, all the TCP traffic that are related to an active Popcorn namespace will be copied to the secondary and be put into a TCP logging buffer. All read/write/accept/listen/close system calls that are related to a replicated socket will be synchronized between two kernel instances. Any event that will cause the TCP state to change will be replicated inside the stacks(SYN, FIN, etc) of all the kernels. While for the events that do not affect the TCP state (normal read and write), the secondary simply bypasses its own TCP stack and uses the TCP logging buffer to create the same output for those system calls.
 
-In general, the network stack replication service provides following important functionalities for replicating network applications:
+In general, the network stack replication service provides following important functionalities for network applications replication and fault recovery:
 \begin{itemize}
 \item The internal state of every replicated socket is synchronized.
 \item Read and write operations can have consistent output across all replicas, in terms of size and content.
 \item Upon accept is returned, it is made sure that both replicas are returning the same socket with the same TCP stream.
+\item Upon the primary is crashed, with the consistent state of TCP stack, the secondary can take over the network device driver and continue with previously connected connections.
 \end{itemize}

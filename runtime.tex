@@ -5,6 +5,7 @@ With the implementation of the thread synchronization interface, we are able to 
   \item Section ~\ref{sec:syscall} shows the non-deterministic facts come from some system calls and our system call synchronization mechanism.
   \item Section ~\ref{sec:library} shows how we instrument pthread primitives with \_det\_start and \_\_det\_end transparently.
   \item Section ~\ref{sec:stdxxx} shows how we create a consistent stdin, stdio and stderr interface for the replicated process.
+  \item Section ~\ref{sec:elision} shows an optimization for our system that allows relaxed determinism.
 \end{itemize}
 
 \section{System Call Synchronization} \label{sec:syscall}

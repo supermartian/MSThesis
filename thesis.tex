@@ -83,7 +83,7 @@ Blacksburg, Virginia
 
 \vfill
 
-Keywords: Replication, Runtime Systems, 
+Keywords: State Machine Replication, Runtime Systems, Deterministic System, System Software
 \\
 Copyright 2016, Yuzhong Wen
 
@@ -107,12 +107,13 @@ Yuzhong Wen
 \vfill
 
 \end{center}
+%Modern software systems are becoming complicated than ever before. 
+State Machine Replication (SMR) has become the de-facto methodology of building a fault-tolerance system. Current SMR systems usually have multiple machines involved, each of the machines in the SMR system acts as the replica of others. However having multiple machines leads to more cost to the infrastructure, in both hardware cost and power consumption. For tolerating non-critical CPU and memory failure that won't crash the entire machine, there is no need to have extra machines to do the job. As a result, intra-machine replication is a good fit for this scenario. However, current intra-machine replication approaches do not provide strong isolation among the replicas, which allows the faults to be propagated from one replica to another. 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc nec elit molestie, mattis mi a, consequat arcu. Fusce venenatis rhoncus elit. Morbi ornare, libero a bibendum pretium, nibh orci tristique mauris, in suscipit mauris nibh ac metus. Nullam in sem vitae nisi aliquet iaculis in a nibh. Aliquam lobortis quis turpis ut tempus. Sed eu sapien eu nisi placerat viverra pharetra eu turpis. Mauris placerat massa mi, auctor facilisis sem consequat in. Pellentesque sollicitudin placerat mi quis rhoncus. In euismod lorem semper, scelerisque leo et, dapibus diam. Suspendisse augue dui, placerat at finibus a, cursus vitae erat. Nam accumsan magna vitae lorem tincidunt, et rhoncus elit consequat.
+In order to provide an intra-machine replication technique with strong isolation, in this thesis we present a SMR system on a multi-kernel OS. We implemented a replication system that is capable of replicating concurrent applications on different kernel instances of a multi-kernel OS. Modern concurrent application can be deployed on our system with minimal code modification. Additionally, our system provides two different replication modes that allows the user to switch freely according to the application type.
 
-Suspendisse ut tellus at ex suscipit sollicitudin ut ut elit. Nam malesuada molestie elit eget luctus. Donec id quam ullamcorper, aliquam mauris at, congue felis. Nunc dapibus dui sit amet nisl laoreet, eget rhoncus est tempor. Mauris in blandit mauris. Aenean vitae ipsum lacinia, blandit turpis et, feugiat purus. Mauris in finibus quam, ac dictum lorem. Nam dignissim luctus ante. Suspendisse risus felis, imperdiet a lobortis sed, suscipit ac dui. Nullam fermentum velit eu congue dictum. Pellentesque tempor dui vel nisl tristique, non sollicitudin odio elementum. In ultricies elementum mattis.
+With the evaluation of multiple real world applications, we show that those applications can be easily deployed on our system with 0 to 60 lines of code changes to the source code. From the performance perspective, our system only introduces 0.23\% to 63.39\% overhead compare to non-replicated execution. With the low overhead and transparency to the application, our system has reached the standard of being used in production.
 
-Vestibulum eget imperdiet eros. Proin bibendum sit amet felis quis dignissim. Aliquam convallis mauris ut sapien gravida, eu consequat lacus dignissim. Vivamus porttitor hendrerit nisl, sit amet suscipit lorem vestibulum ut. Donec id tellus condimentum, sollicitudin sapien vel, lobortis nulla. Donec et elit quis est tempor semper. Aliquam erat volutpat. In nec consectetur dui. Nullam aliquam diam at eros ultrices vehicula. Nulla nibh ex, condimentum vitae nisl sed, aliquet ultricies sapien. Suspendisse potenti. Suspendisse pellentesque tincidunt facilisis. Morbi sodales vulputate ex malesuada molestie. Vestibulum eget placerat nunc.
 \vfill
 
 % GRANT INFORMATION
@@ -123,7 +124,8 @@ This work is supported by AFOSR under the grant FA9550-14-1-0163.  Any opinions,
 
 % Dedication and Acknowledgments are both optional
 % \chapter*{Dedication}
-% \chapter*{Acknowledgments}
+\chapter*{Acknowledgments}
+
 
 \tableofcontents
 \pagebreak
