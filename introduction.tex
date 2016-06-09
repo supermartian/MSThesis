@@ -19,12 +19,27 @@ State machine replication (SMR) has been widely used for fault-tolerance purpose
 
 \section{Contributions}
 
-This thesis addresses the following contributions:
+This thesis presents the following contributions:
 
 \begin{itemize}
-\item Based on Popcorn Linux, we implemented two different replication modes in the kernel, Deterministic Execution and Schedule Replication. to synchronize thread inter-leavings of replicated concurrent applications. They achieved the same goal in two different directions: Deterministic Execution uses a deterministic algorithm to decide the order of execution on both primary and secondary; while Schedule Replication enforces the secondary replica to follow the non-deterministic execution order that happened previously on the primary kernel.
+\item To synchronize thread inter-leavings of replicated concurrent applications, based on Popcorn Linux, we implemented two different replication modes in the kernel, Deterministic Execution and Schedule Replication. Both of them achieved the same goal in two different directions: Deterministic Execution uses a deterministic algorithm to decide the order of execution on both primary and secondary; while Schedule Replication enforces the secondary replica to follow the non-deterministic execution order that happened previously on the primary kernel.
 
-\item Two different replication modes share the same programming interface. By wrapping a code section with \detstart\ and \detend\ system calls, the execution order of wrapped sections can be the same on both primary and secondary kernel. Based on this common interface, we also provide a set of runtime supports that allows the user to run applications on our system with minimal code modification.
+\item We provide the same programming interface for both replication modes. By wrapping a code section with \detstart\ and \detend\ system calls, the execution order of wrapped sections can be the same on both primary and secondary kernel. Based on this common interface, we also implemented a set of runtime supports that allows the user to run applications on our system with minimal code modification.
 
 \item To explore the pros and cons for both replication modes, we evaluated different types of concurrent applications on our system. For computational application we had maximum 63.39\% slowdown for Deterministic Execution and maximum 36.3\% slowdown for Schedule Replication. For two web servers we had maximum 25.22\% slowdown for Deterministic Execution and maximum 1.96\% slowdown for Schedule Replication. Both replication modes achieved decent overhead for production use, but Schedule Replication is the better replication mode for most of our use case, in terms of both simplicity and lower overall overhead.
 \end{itemize}
+
+\section{Thesis Organization}
+This thesis is organized as follows:
+
+Chapter 2 presents the background of Popcorn Linux, which is the multi-kernel system we are using for building our intra-machine replication.
+
+Chapter 3 presents our first replication mode, Deterministic Execution. 
+
+Chapter 4 presents our second replication mode, Schedule Replication.
+
+Chapter 5 presents the additional runtime support that we implemented to eliminate some residual non-deterministic issues, and a runtime library to simplify the application deployment on our system.
+
+Chapter 6 shows the performance evaluation of our system on multiple concurrent real world applications.
+
+Chapter 7 concludes the work and discusses some future works.

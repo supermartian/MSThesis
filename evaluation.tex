@@ -36,7 +36,7 @@ PBZip2~\cite{gilchristparallel} is the parallel version of bzip2. The concurrent
 \label{f:pbzip_model}
 \end{figure}
 
-For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to balance the logical time for the deterministic execution, while for schedule replication nothing is modified. The benchmark is to compress a 177MB file with different thread counts, here we measure the performance with the total execution time reported by pbzip2.
+For PBZip2, the time consuming part is the place where it calls the libz2 compression/decompression functions. In this benchmark, we utilized the execution time profiling instrumentation to balance the logical time for the deterministic execution, while for schedule replication nothing is modified. The benchmark is to compress a 177MB file with different thread counts, here we measure the performance with the total execution time reported by pbzip2. Other than that, no manually code modification was applied to the original source code.
 
 Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we only show the system calls that are tracked and synchronized by our system. In pbzip2,  gettimeofday is used for showing the time spent on the whole process, which it is not critical to the output of the application. However pthread\_cond\_timed\_wait also uses gettimeofday to calculate the timeout for the wait time, which is critical to the consistency of the execution.
 
@@ -96,9 +96,9 @@ Figure~\ref{f:pbzip2_msg} shows the number of messages that were used during the
 % 1. threading model
 % 2. A table of lock and cond var count
 
-Mongoose is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value.
+Mongoose~\cite{mongoose} is a compact multithreaded webserver. The concurrent model is shown in Figure~\ref{f:mongoose_model}. The MasterThread opens a listening socket, uses poll to wait for the incoming connections on the listening socket. Whenever a connection comes, the MasterThread accepts it and put the file descriptor to a queue. WorkerThreads get the connections from the queue and make the response to the clients. Table~\ref{t:mongoose_syscall} shows the system calls that are used by mongoose. The non-deterministic points in mongoose comes from both the thread-interleaving and system call output: diverged thread-interleaving leads to WorkerThreads handling incorrect sockets; diverged system call output leads to incorrect socket state and output value.
 
-We used ApacheBench to stress test mongoose with different file sizes and different mongoose thread counts. For each benchmark set, we used 100 concurrent connections to make 20000 requests in total. For our benchmark on Deterministic Execution, since the file I/O is set to be blocking in mongoose and we do not track file I/O with Tick Shepherd, we manaully added a \dettick\ right before the file I/O system call with an optimal value. Other than that, nothing was changed for mongoose.
+We used ApacheBench to stress test mongoose with different file sizes and different mongoose thread counts. For each benchmark set, we used 100 concurrent connections to make 20000 requests in total. For our benchmark on Deterministic Execution, since the file I/O is set to be blocking in mongoose and we do not track file I/O with Tick Shepherd, we manaully added a \dettick\ right before the file I/O system call with an optimal value (only 1 line). Other than that, nothing was changed for mongoose.
 
 \begin{figure}
 \centering
@@ -199,7 +199,7 @@ Table ~\ref{t:nginx_syscall} shows all the tracked system calls used by Nginx. A
 
 The same as mongoose, we used ApacheBench to stress test the server with different file sizes and different mongoose thread counts. For each benchmark set, we used 100 concurrent connections to make 20000 requests in total.
 
-Nginx has multiple explicit atomic operations that might lead to non-deterministic results, here we applied \detstart\ and \detend\ around those operations to maintain the total order of those operations. Another non-deterministic part in Nginx is that it uses eventfd to communicate among threads. As we mentioned before, all inter-thread communication need to be deterministic on all the replicas, as a result, we applied \detstart\ and \detend\ around the read and write operations of eventfd to synchronize the total order of those operations. Other than that, no further modification were applied.
+Nginx has multiple explicit atomic operations that might lead to non-deterministic results, here we applied \detstart\ and \detend\ around those operations to maintain the total order of those operations. Another non-deterministic part in Nginx is that it uses eventfd to communicate among threads. As we mentioned before, all inter-thread communication need to be deterministic on all the replicas, as a result, we applied \detstart\ and \detend\ around the read and write operations of eventfd to synchronize the total order of those operations. Other than that, no further modification were applied. In total, we added around 60 LOC to the original code.
 %cite event fd here
 
 \begin{table}
@@ -258,7 +258,7 @@ Unlike mongoose, the result of Nginx showed both replication modes can achieve v
 \subsection{Message Breakdown}
 \begin{figure}
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/ng_msg_50k}
+\includegraphics[width=0.8\columnwidth]{figures/ng_msg_50KB}
 \caption{nginx messages for 50KB file requests}
 \label{f:ng_msg_50k}
 \end{figure}
@@ -337,7 +337,7 @@ Unlike the non-scaling result with the threadpool mode, where all the threads we
 For deterministic execution, a type of overhead comes from the calculation of the token (finding the task with minimal logical time). Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads lead to more computation time.  As we can see from all the benchmarks, deterministic system always leads to a higher overhead when thread count increases. In a previous discussion ~\cite{bergan2011deterministic}, it is pointed out that all the existing deterministic systems, regardless of what type of deterministic algorithm (lockstep or wait for turn), this kind of global communication is inevitable. This also implies that deterministic might not be practical for highly concurrent application with highly intensive inter-thread communications (synchronization primitives). Webservers like mongoose and nginx have very simple inter-thread communication , so that we achieved decent overhead during the benchmark. But for more complicated applications with more different types of locks, we might face severe performance overhead.
 
 \subsection{Which Replication Mode Should I Use?}
-From all the benchmarks, we saw that some are better for Deterministic Execution and some are better for Schedule Replication. Figure~\ref{f:trade_off} shows the basic idea of what kind of price we are paying for different replication modes. For Deterministic Execution, if we are able to precisely balance the logical time, or there is no logical time imbalance problem (like Nginx), it is the choice. Other than that, Schedule Replication is the better choice due to its simplicity and efficiency.
+From all the benchmarks, we saw that some are better for Deterministic Execution and some are better for Schedule Replication. Figure~\ref{f:trade_off} shows the basic idea of what kind of price we are paying for different replication modes. For Deterministic Execution, if we are able to precisely balance the logical time, or there is no logical time imbalance problem (like Nginx), it is the choice. Other than that, unless the cost of messaging becomes very significant, Schedule Replication is always the better choice due to its simplicity and efficiency.
 
 \begin{figure}
 \centering

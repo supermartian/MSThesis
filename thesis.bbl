@@ -72,6 +72,12 @@ Vincent~M Weaver, Sally McKee, et~al.
 \newblock In {\em Workload Characterization, 2008. IISWC 2008. IEEE
   International Symposium on}, pages 141--150. IEEE, 2008.
 
+\bibitem{merrifield2015high}
+Timothy Merrifield, Joseph Devietti, and Jakob Eriksson.
+\newblock High-performance determinism with total store order consistency.
+\newblock In {\em Proceedings of the Tenth European Conference on Computer
+  Systems}, page~31. ACM, 2015.
+
 \bibitem{bergan2010deterministic}
 Tom Bergan, Nicholas Hunt, Luis Ceze, and Steven~D Gribble.
 \newblock Deterministic process groups in dos.
@@ -97,9 +103,46 @@ Joseph Devietti, Jacob Nelson, Tom Bergan, Luis Ceze, and Dan Grossman.
 
 \bibitem{cui2015p}
 Heming Cui, Rui Gu, Cheng Liu, Tianyu Chen, and Junfeng Yang.
-\newblock P axos made transparent.
+\newblock Paxos made transparent.
 \newblock In {\em Proceedings of the 25th Symposium on Operating Systems
   Principles}, pages 105--120. ACM, 2015.
+
+\bibitem{slember2006static}
+Joseph~G Slember and Priya Narasimhan.
+\newblock Static analysis meets distributed fault-tolerance: Enabling
+  state-machine replication with nondeterminism.
+\newblock In {\em HotDep}, 2006.
+
+\bibitem{guo2014rex}
+Zhenyu Guo, Chuntao Hong, Mao Yang, Dong Zhou, Lidong Zhou, and Li~Zhuang.
+\newblock Rex: Replication at the speed of multi-core.
+\newblock In {\em Proceedings of the Ninth European Conference on Computer
+  Systems}, page~11. ACM, 2014.
+
+\bibitem{lamport2001paxos}
+Leslie Lamport et~al.
+\newblock Paxos made simple.
+\newblock {\em ACM Sigact News}, 32(4):18--25, 2001.
+
+\bibitem{kapritsos2012all}
+Manos Kapritsos, Yang Wang, Vivien Quema, Allen Clement, Lorenzo Alvisi, and
+  Mike Dahlin.
+\newblock All about eve: Execute-verify replication for multi-core servers.
+\newblock In {\em Presented as part of the 10th USENIX Symposium on Operating
+  Systems Design and Implementation (OSDI 12)}, pages 237--250, 2012.
+
+\bibitem{lee2010respec}
+Dongyoon Lee, Benjamin Wester, Kaushik Veeraraghavan, Satish Narayanasamy,
+  Peter~M Chen, and Jason Flinn.
+\newblock Respec: efficient online multiprocessor replayvia speculation and
+  external determinism.
+\newblock {\em ACM SIGARCH Computer Architecture News}, 38(1):77--90, 2010.
+
+\bibitem{kotla2007zyzzyva}
+Ramakrishna Kotla, Lorenzo Alvisi, Mike Dahlin, Allen Clement, and Edmund Wong.
+\newblock Zyzzyva: speculative byzantine fault tolerance.
+\newblock In {\em ACM SIGOPS Operating Systems Review}, volume~41, pages
+  45--58. ACM, 2007.
 
 \bibitem{merrifieldincreasing}
 Timothy Merrifield and Jakob Eriksson.
@@ -114,6 +157,10 @@ M~Hill and M~Xu Racey.
 J~Gilchrist.
 \newblock Parallel bzip2 (pbzip2) data compression software.
 \newblock {\em URL http://compression.ca/pbzip2}.
+
+\bibitem{mongoose}
+Mongoose - embedded web server.
+\newblock \url{https://github.com/cesanta/mongoose}.
 
 \bibitem{reese2008nginx}
 Will Reese.
@@ -133,5 +180,10 @@ Inside nginx: How we designed for performance \& scale.
 Processor tracing.
 \newblock
   \url{https://software.intel.com/en-us/blogs/2013/09/18/processor-tracing}.
+
+\bibitem{franke2002fuss}
+Hubertus Franke, Rusty Russell, and Matthew Kirkwood.
+\newblock Fuss, futexes and furwocks: Fast userlevel locking in linux.
+\newblock In {\em AUUG Conference Proceedings}, page~85. AUUG, Inc., 2002.
 
 \end{thebibliography}

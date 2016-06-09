@@ -6,48 +6,49 @@ Database file #1: bibliography.bib
 Warning--can't use both volume and number fields in devietti2009dmp
 Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in devietti2011rcdc
+Warning--can't use both volume and number fields in kotla2007zyzzyva
 Warning--empty journal in merrifieldincreasing
 Warning--empty year in merrifieldincreasing
 Warning--empty year in gilchristparallel
-You've used 24 entries,
+You've used 33 entries,
             1791 wiz_defined-function locations,
-            570 strings with 7695 characters,
-and the built_in function-call counts, 6292 in all, are:
-= -- 584
-> -- 242
-< -- 15
-+ -- 91
-- -- 67
-* -- 367
-:= -- 890
-add.period$ -- 78
-call.type$ -- 24
-change.case$ -- 23
+            620 strings with 9345 characters,
+and the built_in function-call counts, 8702 in all, are:
+= -- 793
+> -- 358
+< -- 21
++ -- 133
+- -- 100
+* -- 515
+:= -- 1239
+add.period$ -- 108
+call.type$ -- 33
+change.case$ -- 32
 chr.to.int$ -- 0
-cite$ -- 30
-duplicate$ -- 322
-empty$ -- 646
-format.name$ -- 67
-if$ -- 1501
+cite$ -- 40
+duplicate$ -- 448
+empty$ -- 890
+format.name$ -- 100
+if$ -- 2076
 int.to.chr$ -- 0
-int.to.str$ -- 24
-missing$ -- 19
-newline$ -- 119
-num.names$ -- 21
-pop$ -- 112
+int.to.str$ -- 33
+missing$ -- 27
+newline$ -- 163
+num.names$ -- 29
+pop$ -- 158
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 194
+skip$ -- 260
 stack$ -- 0
-substring$ -- 360
-swap$ -- 130
-text.length$ -- 15
+substring$ -- 466
+swap$ -- 178
+text.length$ -- 21
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 6
-while$ -- 60
-width$ -- 26
-write$ -- 258
-(There were 6 warnings)
+warning$ -- 7
+while$ -- 81
+width$ -- 35
+write$ -- 357
+(There were 7 warnings)

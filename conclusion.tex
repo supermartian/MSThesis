@@ -1,11 +1,44 @@
 \chapter{Conclusion}
+
+In this thesis we have explored a novel approach for doing replication: intra-machine replication with a multi-kernel OS. We have shown the challenges of replicating non-deterministic concurrent applications, and implemented two different replication modes to tame the non-deterministic thread-interleaving for concurrent applications. Also with a set of runtime support, we are able to replicate existing applications with minimal modification. With our benchmarks, we have also shown that both replication modes are able to achieve low overhead for different types of  applications.
+
 \section{Contributions}
+This thesis presents the following contributions:
+
+\begin{itemize}
+\item \textbf{We implemented two different replication modes to synchronize the thread-interleavings and output for replicated concurrent applications.} Both of them achieved the same goal in two different directions: Deterministic Execution uses a deterministic algorithm to decide the order of execution on both primary and secondary; while Schedule Replication enforces the secondary replica to follow the non-deterministic execution order that happened previously on the primary kernel.
+
+\item \textbf{For Deterministic Execution, we developed a compiler framework to automatically instrument the application code to increase parallelism.} The compiler framework can profile the application and generate approximate values to increasing the logical time at the end of time consuming basic blocks. By balancing the logical time with instrumented values, the application can achieve decent overhead and scalability in Deterministic Execution.
+
+\item \textbf{Based on the common programming interface for both replication modes, we implemented a set of runtime support to eliminate the non-determinism in pthread library.} By wrapping a code section with \detstart\ and \detend\ system calls, the execution order of wrapped sections can be the same on both primary and secondary kernel. We implemented an instrumented pthread library that can be dynamically linked with LD\_PRELOAD technique, which can minimize the effort of modifying the applications code. \textbf{For our evaluation, we did no modification to pbzip2, added 1 line to mongoose and added around 60 lines to nginx}.
+
+\item \textbf{We evaluated both replication modes with different concurrent applications. Our system showed decent overhead on both replication modes.} For a computational, non-network application we had \textbf{14.27\% to 63.39\%} slowdown for Deterministic Execution and maximum \textbf{0.89\% to 36.3\%} slowdown for Schedule Replication. For two web servers we had maximum \textbf{1.6\% to 25.22\%} slowdown for Deterministic Execution and maximum \textbf{0.23\% to 1.96\%} slowdown for Schedule Replication.
+
+\end{itemize}
 \section{Future Work}
 \subsection{Precise Tick Bump for Deterministic Execution}
-The major overhead for Deterministic Execution is the imbalanced logical time, the more precise the logical time incremental is the less waiting time a task will need for waiting the token. In chapter ~\ref{chap:detexec} we described our solution with a profiling approach, but from the evaluation we see this is still not precise enough to have the best performance. While performance counters are not deterministic enough to do the job, Intel PT~\cite{intelpt} seems to be a promising approach to track the progress of the execution. 
+The major overhead for Deterministic Execution is the imbalanced logical time. The more precise the logical time incremental is the less waiting time we spend on \detstart\ . In chapter ~\ref{chap:detexec} we described our solution with a profiling approach, but from the evaluation we see this is still not precise enough to have the best performance. While performance counters are not deterministic enough to do the job~\cite{weaver2008can}, Intel PT~\cite{intelpt} seems to be a promising approach to track the progress of the execution. PT is able to precisely track the actual behaviour of the execution (e.g. branch decisions) not just a counter of software events, as a result for the same executable, same input and same thread-interleaving, PT should always generate the same execution trace and be deterministic. With this dynamic tracing technique, we might be able to provide precise online tick bumping without having to instrument the code.
 \subsection{Pre-Lock Synchronization}
+From the benchmark results, we occurred more overhead when the type of locks increases. This is because with serializing all the lock acquisitions, we are breaking the parallelism of accessing of different locks. If we only synchronize the access order of each particular lock while relaxing the total order of all the other locks, we might be able to achieve higher parallelism.
+
+We could give an unique ID to \detstart\ as an additional parameter to identify different deterministic sections. However, the reason we couldn't implement this is that there is no perfect solution to generate this ID. A naive solution is to manually instrument the code with \detstart\ and \detend\, and manually assign an ID to each deterministic section. This requires massive changes to existing code. Moreover, some applications require external libraries that includes lock primitives which makes this even harder.
+
+For pthread primitives, given the fact that most of them have futex involved, we could use the futex address~\cite{franke2002fuss} as the unique IDs for each deterministic section. However during our test we found for the same lock, the primary and secondary replica cannot always have the same address for the same lock. This is expected because they are on separate Linux kernels and have different address spaces. Some deterministic systems address the problem of non-deterministic memory address allocation and mitigated the problem with modified memory allocator ~\cite{bergan2010deterministic}~\cite{liu2011dthreads}, in the future if we are able to synchronize the address space on the replicas, we might be able to directly use futex addresses as IDs for deterministic sections and achieve pre-lock synchronization. 
+
 \subsection{Arbitrary Number Replicas}
 %cite consensus here, mention paxos made transparent, rex
+%Address how increasing replicas can impact speed for schedule replication
+Current implementation only supports one primary replica and one secondary replica. However Popcorn Linux supports booting arbitrary number of kernels as long as the hardware has enough resources. It would be interesting to explore the possibility of having more than one secondary replica. The major challenge is to decide how are we going to decide the communication model for multiple replicas.
+
+One solution is to do "Chain-Messaging". In this model we chain all the replicas one by one, the primary sends replication messages to the 2nd replica, and 2nd replica sends messages to 3rd replica and so on. Since point to point messaging is sure strictly FIFO on Popcorn Linux, this approach makes sure that all the replicas will see the same sequence of replication messages. Another advantage is that this can minimize the latency for the primary replica since it only communicates with one kernel. However in this approach the performance of the nth replica will be held back by all previous n-1th replicas, it cannot proceed until all its previous replicas have committed their operations.
+
+We can also do broadcasting from the primary replica. Since we don't have the guarantee that message broadcasting in Popcorn Linux can behave in strictly FIFO, we might need to introduce consensus protocol such as Paxos ~\cite{lamport2001paxos} to make sure that all the replicas see the requests in the same order.
+
+Another challenge is that when multiple replicas involved, who is going to be the primary when the previous primary fails. This can also be solved by utilizing the leader selection mechanism of Paxos ~\cite{lamport2001paxos}.
+
 \subsection{Hybrid Replication}
 %same, cite consensus here, mention paxos made transparent, rex
-\section{Further Evaluation}
+
+It is also interesting to extend this work to inter-machine and intra-machine hybrid replica. We can use intra-machine replica to deal with processor and memory faults with fast recovery, and inter-machine backup to deal with critical power failure with slower recovery. This will also have the same consensus problems as we mentioned in the previous section.
+
+In our intra-machine implementation, we benefit a lot from our low latency messaging layer, the average time for sending a message is below 5 microseconds. However in a inter-machine setup, we might see different result than what we showed in our evaluation. The higher cost of inter-machine communication might cause bigger slow down in Schedule Replication. While for Deterministic Execution which usually needs less message, it might perform better than Schedule Replication in this case.

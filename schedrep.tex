@@ -1,7 +1,7 @@
 \chapter{Nigoki: Schedule Replication} \label{chap:schedrep}
 In chapter ~\ref{chap:detexec} we described using a deterministic system to ensure the applications on the primary and secondary replica can have the same thread interleaving. The major advantage of the deterministic system is that we can minimize the communication between the replicas. However the downside is that we need to precisely adjust the logical time to maintain decent parallelism for multithreaded applications. We showed various solutions to balance the logical time because we need to keep the execution to be fast and deterministic. If all the burdens come from being deterministic, can we break the determinism once for all but still keep the replicas to be synchronized? The answer is yes.
 
-In this chapter we are going to describe Schedule Replication for replicated applications. In this algorithm, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica.
+In this chapter we present our Nigoki\footnote{Unit 02}: Schedule Replication. In this replication mode, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica.
 
 For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication. Any latency in the the messaging will cause the secondary to fall behind the primary. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with relatively low latency (basically memcpy from one kernel to another). As a result having massive massages between replicas won't put too much overhead to the replication.
 
@@ -87,12 +87,6 @@ For each namespace on the secondary, we have a queue for logging the incoming sc
 As we mentioned in Section~\ref{sec:edeadlock}, wrapping all the lock acquisitions with \detstart\ and \detend\ will occur the same deadlock issue, the reason is similar to the case in the Deterministic Execution because we don't release the lock acquisition order when the mutex is contended. The solution in Schedule Replication is similar to what we did in the Deterministic Execution, upon getting into sleep in futex, we release the global mutex and re-acquire it when it wakes up from futex. The futex modification mentioned in Section~\ref{sec:edeadlock} is also applied in this case to ensure the determinism of waking up from futex.
 
 \section{Related Work}
-Several previous works also presented the idea that not using a deterministic system for replication.
-%doublePlay
-%recspec, revirt
+Several previous works also presented the idea of not using a deterministic system for replication. Midas~\cite{slember2006static} points out the non-determinism from both the thread-interleaving and system call outputs, and utilizes a compiler framework to trap those non-deterministic points. The primary records the output of trapped points and replay them on the replica. Rex~\cite{guo2014rex} presents the same idea of logging the lock sequences on the primary and replay it on the replicas. It utilizes Paxos~\cite{lamport2001paxos} to provide a consistent sequence of requests and locks across all the replicas. Comparing to our solution, the advantage of Rex is that it is able to use partial order lock synchronization to provide decent parallelism for different lock acquisitions. But the downside is that both of the solutions are not transparent enough. In Rex, applications need to be manually modified to adopt Rex. (300-500 lines of changes for each application, according to the evaluation part of the paper.) Moreover, both solutions cannot deal with non-determinism comes from an external library.
 
-%REX
-Partial order
-
-%ALL about EVE
-Execute and verify
+A more aggressive idea is not synchronizing the execution sequence at all. EVE~\cite{kapritsos2012all}, Recspec~\cite{lee2010respec} and Zyzzyva~\cite{kotla2007zyzzyva} present the idea of running the replica speculatively without synchronizing the thread-interleaving. All of them assume for most of time the replicas are able to produces the consistent output, but whenever the replica diverges, the diverged one is forced to roll-back to a previous consistent state. Compare to our solution, EVE is implemented in JAVA and needs a good amount of manually annotation work to the applications, Zyzzyva seems to be highly customized and did not show evaluation for real world applications. For Recspec, it runs the application and the replicated one inside the same OS, which doesn't meet the requirement of our use case.
