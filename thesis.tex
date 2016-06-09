@@ -108,11 +108,17 @@ Yuzhong Wen
 
 \end{center}
 %Modern software systems are becoming complicated than ever before. 
-State Machine Replication (SMR) has become the de-facto methodology of building a fault-tolerance system. Current SMR systems usually have multiple machines involved, each of the machines in the SMR system acts as the replica of others. However having multiple machines leads to more cost to the infrastructure, in both hardware cost and power consumption. For tolerating non-critical CPU and memory failure that won't crash the entire machine, there is no need to have extra machines to do the job. As a result, intra-machine replication is a good fit for this scenario. However, current intra-machine replication approaches do not provide strong isolation among the replicas, which allows the faults to be propagated from one replica to another. 
+State Machine Replication (SMR) has become the de-facto methodology of building a fault-tolerance system. Current SMR systems usually have multiple machines involved, each of the machines in the SMR system acts as the replica of others. However having multiple machines leads to more cost to the infrastructure, in both hardware cost and power consumption. For tolerating non-critical CPU and memory failure that will not crash the entire machine, there is no need to have extra machines to do the job. 
+% describe intra-machine replication in detail
+As a result, intra-machine replication is a good fit for this scenario. However, current intra-machine replication approaches do not provide strong isolation among the replicas, which allows the faults to be propagated from one replica to another. 
+% describe many approaches of inter machine ones, and raise the challenages of intra-machine
 
+% In order to answer the questions blah blah...
 In order to provide an intra-machine replication technique with strong isolation, in this thesis we present a SMR system on a multi-kernel OS. We implemented a replication system that is capable of replicating concurrent applications on different kernel instances of a multi-kernel OS. Modern concurrent application can be deployed on our system with minimal code modification. Additionally, our system provides two different replication modes that allows the user to switch freely according to the application type.
 
-With the evaluation of multiple real world applications, we show that those applications can be easily deployed on our system with 0 to 60 lines of code changes to the source code. From the performance perspective, our system only introduces 0.23\% to 63.39\% overhead compare to non-replicated execution. With the low overhead and transparency to the application, our system has reached the standard of being used in production.
+With the evaluation of multiple real world applications, we show that those applications can be easily deployed on our system with 0 to 60 lines of code changes to the source code. From the performance perspective, our system only introduces 0.23\% to 63.39\% overhead compared to non-replicated execution. 
+% show it is practical and viable approach with our implementation
+%With the low overhead and transparency to the application, our system has reached the standard of being used in production.
 
 \vfill
 
@@ -155,5 +161,6 @@ This work is supported by AFOSR under the grant FA9550-14-1-0163.  Any opinions,
 \bibliographystyle{unsrt}
 \bibliography{bibliography}
 %\input{tla/Det}
+% pdfpages
 \end{document}
 

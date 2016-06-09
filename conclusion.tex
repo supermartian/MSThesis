@@ -1,10 +1,12 @@
 \chapter{Conclusion}
 
+% repeat the questions blah...
 In this thesis we have explored a novel approach for doing replication: intra-machine replication with a multi-kernel OS. We have shown the challenges of replicating non-deterministic concurrent applications, and implemented two different replication modes to tame the non-deterministic thread-interleaving for concurrent applications. Also with a set of runtime support, we are able to replicate existing applications with minimal modification. With our benchmarks, we have also shown that both replication modes are able to achieve low overhead for different types of  applications.
 
 \section{Contributions}
 This thesis presents the following contributions:
 
+% answer the questions here blah...
 \begin{itemize}
 \item \textbf{We implemented two different replication modes to synchronize the thread-interleavings and output for replicated concurrent applications.} Both of them achieved the same goal in two different directions: Deterministic Execution uses a deterministic algorithm to decide the order of execution on both primary and secondary; while Schedule Replication enforces the secondary replica to follow the non-deterministic execution order that happened previously on the primary kernel.
 
@@ -18,14 +20,18 @@ This thesis presents the following contributions:
 \section{Future Work}
 \subsection{Precise Tick Bump for Deterministic Execution}
 The major overhead in Deterministic Execution is the imbalanced logical time. The more precise the logical time incremental is the less waiting time we spend on \detstart\ . In chapter ~\ref{chap:detexec} we described our solution with a profiling approach, but from the evaluation we see this is still not precise enough to have the best performance. While performance counters are not deterministic enough to do the job~\cite{weaver2008can}, Intel PT~\cite{intelpt} seems to be a promising approach to track the progress of the execution. PT is able to precisely track the actual behaviour of the execution (e.g. branch decisions) not just a counter of software events, as a result for the same executable, same input and same thread-interleaving, PT should always generate the same execution trace and be deterministic. With this dynamic tracing technique, we might be able to provide precise online tick bumping without having to instrument the code.
-\subsection{Pre-Lock Synchronization}
+
+% describe PT in detail
+\subsection{Per-Lock Synchronization}
 From the benchmark results, we occurred more overhead when the type of locks increases. This is because with serializing all the lock acquisitions, we are breaking the parallelism of accessing of different locks. If we only synchronize the access order of each particular lock while relaxing the total order of all the other locks, we might be able to achieve higher parallelism.
 
 We could give an unique ID to \detstart\ as an additional parameter to identify different deterministic sections. However, the reason we couldn't implement this is that there is no perfect solution to generate this ID. A naive solution is to manually instrument the code with \detstart\ and \detend\, and manually assign an ID to each deterministic section. This requires massive changes to existing code. Moreover, some applications require external libraries that includes lock primitives which makes this even harder.
 
-For pthread primitives, given the fact that most of them have futex involved, we could use the futex address~\cite{drepper2005futexes}~\cite{franke2002fuss} as the unique IDs for each deterministic section. However during our test we found the primary and secondary replica cannot always have the same address for the same lock. This is expected because they are on separate Linux kernels and have different address spaces. Some deterministic systems address the problem of non-deterministic memory address allocation and mitigated the problem with modified memory allocator ~\cite{bergan2010deterministic}~\cite{liu2011dthreads}, in the future if we are able to synchronize the address space on the replicas, we might be able to directly use futex addresses as IDs for deterministic sections and achieve transparent pre-lock synchronization. 
+% static analysis for programs to detect locks
 
-\subsection{Arbitrary Number Replicas}
+For pthread primitives, given the fact that most of them have futex involved, we could use the futex address~\cite{drepper2005futexes}~\cite{franke2002fuss} as the unique IDs for each deterministic section. However during our test we found the primary and secondary replica cannot always have the same address for the same lock. This is expected because they are on separate Linux kernels and have different address spaces. Some deterministic systems address the problem of non-deterministic memory address allocation and mitigate the problem with special memory allocators ~\cite{bergan2010deterministic}~\cite{liu2011dthreads}, in the future if we are able to synchronize the address space on the replicas, we might be able to directly use futex addresses as IDs for deterministic sections and achieve transparent per-lock synchronization. 
+
+\subsection{Arbitrary Number of Replicas}
 %cite consensus here, mention paxos made transparent, rex
 %Address how increasing replicas can impact speed for schedule replication
 Current implementation only supports one primary replica and one secondary replica. However Popcorn Linux supports booting arbitrary number of kernels as long as the hardware has enough resources. It would be interesting to explore the possibility of having more than one secondary replica. The major challenge is to decide the communication model for multiple replicas.

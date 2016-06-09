@@ -53,6 +53,6 @@
 \BOOKMARK [1][-]{section.7.1}{Contributions}{chapter.7}% 53
 \BOOKMARK [1][-]{section.7.2}{Future Work}{chapter.7}% 54
 \BOOKMARK [2][-]{subsection.7.2.1}{Precise Tick Bump for Deterministic Execution}{section.7.2}% 55
-\BOOKMARK [2][-]{subsection.7.2.2}{Pre-Lock Synchronization}{section.7.2}% 56
-\BOOKMARK [2][-]{subsection.7.2.3}{Arbitrary Number Replicas}{section.7.2}% 57
+\BOOKMARK [2][-]{subsection.7.2.2}{Per-Lock Synchronization}{section.7.2}% 56
+\BOOKMARK [2][-]{subsection.7.2.3}{Arbitrary Number of Replicas}{section.7.2}% 57
 \BOOKMARK [2][-]{subsection.7.2.4}{Hybrid Replication}{section.7.2}% 58
