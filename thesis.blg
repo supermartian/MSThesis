@@ -10,45 +10,45 @@ Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in devietti2011rcdc
 Warning--can't use both volume and number fields in kotla2007zyzzyva
 Warning--empty year in gilchristparallel
-You've used 40 entries,
+You've used 41 entries,
             1791 wiz_defined-function locations,
-            661 strings with 11034 characters,
-and the built_in function-call counts, 11266 in all, are:
-= -- 1033
-> -- 480
+            667 strings with 11115 characters,
+and the built_in function-call counts, 11395 in all, are:
+= -- 1044
+> -- 484
 < -- 27
-+ -- 176
-- -- 136
-* -- 692
-:= -- 1602
-add.period$ -- 132
-call.type$ -- 40
-change.case$ -- 39
++ -- 178
+- -- 137
+* -- 695
+:= -- 1626
+add.period$ -- 135
+call.type$ -- 41
+change.case$ -- 40
 chr.to.int$ -- 0
-cite$ -- 47
-duplicate$ -- 569
-empty$ -- 1122
-format.name$ -- 136
-if$ -- 2679
+cite$ -- 48
+duplicate$ -- 577
+empty$ -- 1136
+format.name$ -- 137
+if$ -- 2707
 int.to.chr$ -- 0
-int.to.str$ -- 40
-missing$ -- 34
-newline$ -- 198
-num.names$ -- 36
-pop$ -- 186
+int.to.str$ -- 41
+missing$ -- 35
+newline$ -- 203
+num.names$ -- 37
+pop$ -- 189
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 340
+skip$ -- 343
 stack$ -- 0
 substring$ -- 665
-swap$ -- 233
+swap$ -- 234
 text.length$ -- 27
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 7
-while$ -- 107
-width$ -- 42
-write$ -- 440
+while$ -- 108
+width$ -- 43
+write$ -- 450
 (There were 7 warnings)

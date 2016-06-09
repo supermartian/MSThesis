@@ -109,6 +109,11 @@ Marek Olszewski, Jason Ansel, and Saman Amarasinghe.
 Timothy Merrifield and Jakob Eriksson.
 \newblock Increasing concurrency in deterministic runtimes with conversion.
 
+\bibitem{drepper2005futexes}
+Ulrich Drepper.
+\newblock Futexes are tricky.
+\newblock {\em Red Hat Inc, Japan}, 2005.
+
 \bibitem{lattner2004llvm}
 Chris Lattner and Vikram Adve.
 \newblock Llvm: A compilation framework for lifelong program analysis \&
