@@ -1,5 +1,57 @@
 \begin{thebibliography}{10}
 
+\bibitem{cui2015p}
+Heming Cui, Rui Gu, Cheng Liu, Tianyu Chen, and Junfeng Yang.
+\newblock Paxos made transparent.
+\newblock In {\em Proceedings of the 25th Symposium on Operating Systems
+  Principles}, pages 105--120. ACM, 2015.
+
+\bibitem{zagorodnov2009practical}
+Dmitrii Zagorodnov, Keith Marzullo, Lorenzo Alvisi, and Thomas~C Bressoud.
+\newblock Practical and low-overhead masking of failures of tcp-based servers.
+\newblock {\em ACM Transactions on Computer Systems (TOCS)}, 27(2):4, 2009.
+
+\bibitem{singh2009zeno}
+Atul Singh, Pedro Fonseca, Petr Kuznetsov, Rodrigo Rodrigues, Petros Maniatis,
+  et~al.
+\newblock Zeno: Eventually consistent byzantine-fault tolerance.
+\newblock In {\em NSDI}, volume~9, pages 169--184, 2009.
+
+\bibitem{mao2008mencius}
+Yanhua Mao, Flavio~P. Junqueira, and Keith Marzullo.
+\newblock Mencius: Building efficient replicated state machines for wans.
+\newblock In {\em Proceedings of the 8th USENIX Conference on Operating Systems
+  Design and Implementation}, OSDI'08, pages 369--384, Berkeley, CA, USA, 2008.
+  USENIX Association.
+
+\bibitem{zhang2012runtime}
+Yun Zhang, Soumyadeep Ghosh, Jialu Huang, Jae~W Lee, Scott~A Mahlke, and
+  David~I August.
+\newblock Runtime asynchronous fault tolerance via speculation.
+\newblock In {\em Proceedings of the Tenth International Symposium on Code
+  Generation and Optimization}, pages 145--154. ACM, 2012.
+
+\bibitem{lee2010respec}
+Dongyoon Lee, Benjamin Wester, Kaushik Veeraraghavan, Satish Narayanasamy,
+  Peter~M Chen, and Jason Flinn.
+\newblock Respec: efficient online multiprocessor replayvia speculation and
+  external determinism.
+\newblock {\em ACM SIGARCH Computer Architecture News}, 38(1):77--90, 2010.
+
+\bibitem{bressoud1996hypervisor}
+Thomas~C Bressoud and Fred~B Schneider.
+\newblock Hypervisor-based fault tolerance.
+\newblock {\em ACM Transactions on Computer Systems (TOCS)}, 14(1):80--107,
+  1996.
+
+\bibitem{lorch2015tardigrade}
+Jacob~R Lorch, Andrew Baumann, Lisa Glendenning, Dutch Meyer, and Andrew
+  Warfield.
+\newblock Tardigrade: Leveraging lightweight virtual machines to easily and
+  efficiently construct fault-tolerant services.
+\newblock In {\em 12th USENIX Symposium on Networked Systems Design and
+  Implementation (NSDI 15)}, pages 575--588, 2015.
+
 \bibitem{barbalace2014popcorn}
 Antonio Barbalace, Binoy Ravindran, and David Katz.
 \newblock Popcorn: a replicated-kernel os based on linux.
@@ -11,11 +63,6 @@ Benjamin~H Shelton.
   Linux-based multikernel operating system}.
 \newblock PhD thesis, Virginia Polytechnic Institute and State University,
   2013.
-
-\bibitem{zagorodnov2009practical}
-Dmitrii Zagorodnov, Keith Marzullo, Lorenzo Alvisi, and Thomas~C Bressoud.
-\newblock Practical and low-overhead masking of failures of tcp-based servers.
-\newblock {\em ACM Transactions on Computer Systems (TOCS)}, 27(2):4, 2009.
 
 \bibitem{devietti2009dmp}
 Joseph Devietti, Brandon Lucia, Luis Ceze, and Mark Oskin.
@@ -41,6 +88,10 @@ Tongping Liu, Charlie Curtsinger, and Emery~D Berger.
 Marek Olszewski, Jason Ansel, and Saman Amarasinghe.
 \newblock Kendo: efficient deterministic multithreading in software.
 \newblock {\em ACM Sigplan Notices}, 44(3):97--108, 2009.
+
+\bibitem{merrifieldincreasing}
+Timothy Merrifield and Jakob Eriksson.
+\newblock Increasing concurrency in deterministic runtimes with conversion.
 
 \bibitem{lattner2004llvm}
 Chris Lattner and Vikram Adve.
@@ -101,12 +152,6 @@ Joseph Devietti, Jacob Nelson, Tom Bergan, Luis Ceze, and Dan Grossman.
 \newblock Rcdc: a relaxed consistency deterministic computer.
 \newblock In {\em ACM SIGPLAN Notices}, volume~46, pages 67--78. ACM, 2011.
 
-\bibitem{cui2015p}
-Heming Cui, Rui Gu, Cheng Liu, Tianyu Chen, and Junfeng Yang.
-\newblock Paxos made transparent.
-\newblock In {\em Proceedings of the 25th Symposium on Operating Systems
-  Principles}, pages 105--120. ACM, 2015.
-
 \bibitem{slember2006static}
 Joseph~G Slember and Priya Narasimhan.
 \newblock Static analysis meets distributed fault-tolerance: Enabling
@@ -131,22 +176,11 @@ Manos Kapritsos, Yang Wang, Vivien Quema, Allen Clement, Lorenzo Alvisi, and
 \newblock In {\em Presented as part of the 10th USENIX Symposium on Operating
   Systems Design and Implementation (OSDI 12)}, pages 237--250, 2012.
 
-\bibitem{lee2010respec}
-Dongyoon Lee, Benjamin Wester, Kaushik Veeraraghavan, Satish Narayanasamy,
-  Peter~M Chen, and Jason Flinn.
-\newblock Respec: efficient online multiprocessor replayvia speculation and
-  external determinism.
-\newblock {\em ACM SIGARCH Computer Architecture News}, 38(1):77--90, 2010.
-
 \bibitem{kotla2007zyzzyva}
 Ramakrishna Kotla, Lorenzo Alvisi, Mike Dahlin, Allen Clement, and Edmund Wong.
 \newblock Zyzzyva: speculative byzantine fault tolerance.
 \newblock In {\em ACM SIGOPS Operating Systems Review}, volume~41, pages
   45--58. ACM, 2007.
-
-\bibitem{merrifieldincreasing}
-Timothy Merrifield and Jakob Eriksson.
-\newblock Increasing concurrency in deterministic runtimes with conversion.
 
 \bibitem{hillstress}
 M~Hill and M~Xu Racey.

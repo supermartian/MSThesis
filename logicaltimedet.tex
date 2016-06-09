@@ -27,6 +27,7 @@ The token is updated whenever the logical time is changed, and it is passed base
 \begin{figure}
 \centering
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
+
 void producer() {
     while (running){
         item = generate_item();
@@ -292,6 +293,13 @@ Figure~\ref{f:tick_bump} shows an example of how Tick Shepherd works in action. 
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{tickshepherd}
+/*
+ * Definitions:
+ * ns: current popcorn namespace
+ * ns->token: a pointer pointing to the task holds the token
+ * current->ft_det_tick: logical time of the task
+ * current->ft_pid: replicated task unique identifier
+ */
 while (!kthread_should_stop()) {
   if (ns->task_count == 0 ||
     ns->wait_count == 0) {
