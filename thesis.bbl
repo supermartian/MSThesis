@@ -52,6 +52,22 @@ Jacob~R Lorch, Andrew Baumann, Lisa Glendenning, Dutch Meyer, and Andrew
 \newblock In {\em 12th USENIX Symposium on Networked Systems Design and
   Implementation (NSDI 15)}, pages 575--588, 2015.
 
+\bibitem{dunlap2002revirt}
+George~W Dunlap, Samuel~T King, Sukru Cinar, Murtaza~A Basrai, and Peter~M
+  Chen.
+\newblock Revirt: Enabling intrusion analysis through virtual-machine logging
+  and replay.
+\newblock {\em ACM SIGOPS Operating Systems Review}, 36(SI):211--224, 2002.
+
+\bibitem{baumann2009multikernel}
+Andrew Baumann, Paul Barham, Pierre-Evariste Dagand, Tim Harris, Rebecca
+  Isaacs, Simon Peter, Timothy Roscoe, Adrian Sch{\"u}pbach, and Akhilesh
+  Singhania.
+\newblock The multikernel: a new os architecture for scalable multicore
+  systems.
+\newblock In {\em Proceedings of the ACM SIGOPS 22nd symposium on Operating
+  systems principles}, pages 29--44. ACM, 2009.
+
 \bibitem{barbalace2014popcorn}
 Antonio Barbalace, Binoy Ravindran, and David Katz.
 \newblock Popcorn: a replicated-kernel os based on linux.
