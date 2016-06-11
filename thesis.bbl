@@ -1,5 +1,18 @@
 \begin{thebibliography}{10}
 
+\bibitem{guo2014rex}
+Zhenyu Guo, Chuntao Hong, Mao Yang, Dong Zhou, Lidong Zhou, and Li~Zhuang.
+\newblock Rex: Replication at the speed of multi-core.
+\newblock In {\em Proceedings of the Ninth European Conference on Computer
+  Systems}, page~11. ACM, 2014.
+
+\bibitem{kapritsos2012all}
+Manos Kapritsos, Yang Wang, Vivien Quema, Allen Clement, Lorenzo Alvisi, and
+  Mike Dahlin.
+\newblock All about eve: Execute-verify replication for multi-core servers.
+\newblock In {\em Presented as part of the 10th USENIX Symposium on Operating
+  Systems Design and Implementation (OSDI 12)}, pages 237--250, 2012.
+
 \bibitem{cui2015p}
 Heming Cui, Rui Gu, Cheng Liu, Tianyu Chen, and Junfeng Yang.
 \newblock Paxos made transparent.
@@ -114,6 +127,12 @@ Ulrich Drepper.
 \newblock Futexes are tricky.
 \newblock {\em Red Hat Inc, Japan}, 2005.
 
+\bibitem{weaver2008can}
+Vincent~M Weaver, Sally McKee, et~al.
+\newblock Can hardware performance counters be trusted?
+\newblock In {\em Workload Characterization, 2008. IISWC 2008. IEEE
+  International Symposium on}, pages 141--150. IEEE, 2008.
+
 \bibitem{lattner2004llvm}
 Chris Lattner and Vikram Adve.
 \newblock Llvm: A compilation framework for lifelong program analysis \&
@@ -137,12 +156,6 @@ Charles~E Leiserson.
 Emery~D Berger, Ting Yang, Tongping Liu, and Gene Novark.
 \newblock Grace: Safe multithreaded programming for c/c++.
 \newblock In {\em ACM Sigplan Notices}, volume~44, pages 81--96. ACM, 2009.
-
-\bibitem{weaver2008can}
-Vincent~M Weaver, Sally McKee, et~al.
-\newblock Can hardware performance counters be trusted?
-\newblock In {\em Workload Characterization, 2008. IISWC 2008. IEEE
-  International Symposium on}, pages 141--150. IEEE, 2008.
 
 \bibitem{merrifield2015high}
 Timothy Merrifield, Joseph Devietti, and Jakob Eriksson.
@@ -179,23 +192,10 @@ Joseph~G Slember and Priya Narasimhan.
   state-machine replication with nondeterminism.
 \newblock In {\em HotDep}, 2006.
 
-\bibitem{guo2014rex}
-Zhenyu Guo, Chuntao Hong, Mao Yang, Dong Zhou, Lidong Zhou, and Li~Zhuang.
-\newblock Rex: Replication at the speed of multi-core.
-\newblock In {\em Proceedings of the Ninth European Conference on Computer
-  Systems}, page~11. ACM, 2014.
-
 \bibitem{lamport2001paxos}
 Leslie Lamport et~al.
 \newblock Paxos made simple.
 \newblock {\em ACM Sigact News}, 32(4):18--25, 2001.
-
-\bibitem{kapritsos2012all}
-Manos Kapritsos, Yang Wang, Vivien Quema, Allen Clement, Lorenzo Alvisi, and
-  Mike Dahlin.
-\newblock All about eve: Execute-verify replication for multi-core servers.
-\newblock In {\em Presented as part of the 10th USENIX Symposium on Operating
-  Systems Design and Implementation (OSDI 12)}, pages 237--250, 2012.
 
 \bibitem{kotla2007zyzzyva}
 Ramakrishna Kotla, Lorenzo Alvisi, Mike Dahlin, Allen Clement, and Edmund Wong.
@@ -235,6 +235,13 @@ Inside nginx: How we designed for performance \& scale.
 Processor tracing.
 \newblock
   \url{https://software.intel.com/en-us/blogs/2013/09/18/processor-tracing}.
+
+\bibitem{bergan2010coredet}
+Tom Bergan, Owen Anderson, Joseph Devietti, Luis Ceze, and Dan Grossman.
+\newblock Coredet: a compiler and runtime system for deterministic
+  multithreaded execution.
+\newblock In {\em ACM SIGARCH Computer Architecture News}, volume~38, pages
+  53--64. ACM, 2010.
 
 \bibitem{franke2002fuss}
 Hubertus Franke, Rusty Russell, and Matthew Kirkwood.

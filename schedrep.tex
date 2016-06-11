@@ -1,7 +1,7 @@
 \chapter{Nigoki: Schedule Replication} \label{chap:schedrep}
 In chapter ~\ref{chap:detexec} we described using a deterministic system to ensure the applications on the primary and secondary replica can have the same thread interleaving. The major advantage of the deterministic system is that we can minimize the communication between the replicas. However the downside is that we need to precisely adjust the logical time to maintain decent parallelism for multithreaded applications. We showed various solutions to balance the logical time because we need to keep the execution to be fast and deterministic. If all the burdens come from being deterministic, can we break the determinism once for all but still keep the replicas to be synchronized? The answer is yes.
 
-In this chapter we present our Nigoki\footnote{Unit 02}: Schedule Replication. In this replication mode, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica.
+In this chapter we present Nigoki\footnote{Means Unit 2, in Japanese}: Schedule Replication. In this replication mode, we break the determinism entirely and use messages to synchronize every single synchronization primitives between the primary and replica.
 
 For an application that has massive number of synchronization primitives, this approach might introduce overheads from the communication. Any latency in the the messaging will cause the secondary to fall behind the primary. Fortunately, our system is for inter-kernel replication, and Popcorn Linux provides a messaging layer with relatively low latency (basically memcpy from one kernel to another). As a result having massive massages between replicas won't put too much overhead to the replication.
 

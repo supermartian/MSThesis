@@ -3,6 +3,10 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: thesis.aux
 The style file: unsrt.bst
 Database file #1: bibliography.bib
+Repeated entry---line 80 of file bibliography.bib
+ : @inproceedings{bergan2010coredet
+ :                                 ,
+I'm skipping whatever remains of this entry
 Warning--can't use both volume and number fields in devietti2009dmp
 Warning--empty journal in merrifieldincreasing
 Warning--empty year in merrifieldincreasing
@@ -10,45 +14,46 @@ Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in devietti2011rcdc
 Warning--can't use both volume and number fields in kotla2007zyzzyva
 Warning--empty year in gilchristparallel
-You've used 41 entries,
+Warning--can't use both volume and number fields in bergan2010coredet
+You've used 42 entries,
             1791 wiz_defined-function locations,
-            667 strings with 11115 characters,
-and the built_in function-call counts, 11395 in all, are:
-= -- 1044
-> -- 484
-< -- 27
-+ -- 178
-- -- 137
-* -- 695
-:= -- 1626
-add.period$ -- 135
-call.type$ -- 41
-change.case$ -- 40
+            671 strings with 11302 characters,
+and the built_in function-call counts, 11784 in all, are:
+= -- 1081
+> -- 501
+< -- 29
++ -- 184
+- -- 142
+* -- 724
+:= -- 1679
+add.period$ -- 139
+call.type$ -- 42
+change.case$ -- 41
 chr.to.int$ -- 0
-cite$ -- 48
-duplicate$ -- 577
-empty$ -- 1136
-format.name$ -- 137
-if$ -- 2707
+cite$ -- 50
+duplicate$ -- 596
+empty$ -- 1171
+format.name$ -- 142
+if$ -- 2800
 int.to.chr$ -- 0
-int.to.str$ -- 41
-missing$ -- 35
-newline$ -- 203
-num.names$ -- 37
-pop$ -- 189
+int.to.str$ -- 42
+missing$ -- 36
+newline$ -- 208
+num.names$ -- 38
+pop$ -- 193
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 343
+skip$ -- 355
 stack$ -- 0
-substring$ -- 665
-swap$ -- 234
-text.length$ -- 27
+substring$ -- 689
+swap$ -- 245
+text.length$ -- 29
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 7
-while$ -- 108
-width$ -- 43
-write$ -- 450
-(There were 7 warnings)
+warning$ -- 8
+while$ -- 112
+width$ -- 44
+write$ -- 463
+(There was 1 error message)
