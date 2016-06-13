@@ -57,7 +57,7 @@ Coressponds to the challenges we raised previously, this thesis presents the fol
 \end{itemize}
 
 \section{Scope}
-This thesis mainly discusses about how to ensure the same thread/process inter-leavings across the replicas, and some key system calls to ensure the consistent state of server applications. We do not address the non-determinism from signal, file system, random number generator and memory address space. For the replication of server applications, a member of SSRG has already implemented the replication of the TCP stack and connection recovery from kernel failures, which was able to support replicating simple single-threaded server applications prior to this work. On top of that, the work described in this thesis provides the ability of replicating real world multi-threaded/multi-process server applications.
+This thesis mainly discusses about how to ensure the same thread/process inter-leavings across the replicas, and some key system calls to ensure the consistent state of server applications. We do not address the non-determinism from signal, file system, random number generator and memory address space. We only target on race-free applications. For the replication of server applications, a member of SSRG has already implemented the replication of the TCP stack and connection recovery from kernel failures, which was able to support replicating simple single-threaded server applications prior to this work. On top of that, the work described in this thesis provides the ability of replicating real world multi-threaded/multi-process server applications.
 
 \section{Thesis Organization}
 This thesis is organized as follows:
