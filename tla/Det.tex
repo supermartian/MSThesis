@@ -1265,23 +1265,26 @@ Definitions:
 }%
 \@xx{}%
 \@x{\@s{124.50} bumps [ PID ( p ) ] \.{:=}}%
- \@x{\@s{140.90} bumps [ PID ( p ) ] \.{\cup} \{ {\langle} ltime [ p ] ,\,
- BumpTo ,\, tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ] {\rangle}
- \} {\p@semicolon}}%
+\@x{\@s{140.90} bumps [ PID ( p ) ] \.{\cup} \{ {\langle} ltime [ p ] ,\,}%
+ \@x{\@s{157.30} BumpTo ,\, tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [
+ 1 ] {\rangle} \} {\p@semicolon}}%
 \@x{\@s{124.50} ltime [ p ] \.{:=} BumpTo {\p@semicolon}}%
 \@x{\@s{108.10} \} {\p@else} \{}%
 \@y{\@s{0}%
  On a replica:
 }%
 \@xx{}%
-\@x{}%
-\@y{\@s{0}%
- Wait until the primary has bumped \ensuremath{p} and the data to be
- delivered to \ensuremath{p} in at the head of the tcp buffer
-}%
-\@xx{}%
+\begin{lcom}{30.0}%
+\begin{cpar}{0}{T}{F}{7.5}{0}{}%
+Wait until the primary has bumped \ensuremath{p} and the data to be
+\end{cpar}%
+\begin{cpar}{1}{F}{F}{0}{0}{}%
+delivered to \ensuremath{p} in at the head of the tcp buffer
+\end{cpar}%
+\end{lcom}%
  \@x{\@s{114.8} {\p@await} p \.{\in} Bumped ( Ker ( self ) ) \.{\land}
- BumpData ( p ) \.{=} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ]
+ BumpData ( p ) \.{=}}%
+ \@x{\@s{131.2} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ]
  {\p@semicolon}}%
 \@x{\@s{114.8} ltime [ p ] \.{:=} BumpedTo ( p ) {\p@semicolon}}%
 \@y{\@s{0}%

@@ -1,4 +1,4 @@
-set terminal postscript eps noenhanced color font 'Helvetica,14' size 6,4
+set terminal png font 'Helvetica,12' size 800, 600
 set style data histogram
 set style histogram rowstacked title offset 0,-4
 set boxwidth 0.4
@@ -8,7 +8,7 @@ set yrange[0:8000]
 set bmargin 6
 set xtics rotate by 45 offset 0,-3.3
 
-set output 'pbzip2_msg.eps'
+set output 'pbzip2_msg.png'
 set title "pbzip2 Messages"
 plot newhistogram "2 threads", \
     "<(sed -n '1,2p' pbzip2_pcn_msg.csv)" u 3:xticlabels(1) title 'Schedule Messages' linecolor rgb "red", \
