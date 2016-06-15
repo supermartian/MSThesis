@@ -1,7 +1,8 @@
 \batchmode %% Suppresses most terminal output.
-\documentclass{article}
+\documentclass[11pt]{article}
 \setlength{\textwidth}{360pt}
 \setlength{\textheight}{541pt}
+\pagenumbering{gobble}
 \usepackage{latexsym}
 \usepackage{ifthen}
 % \usepackage{color}
@@ -935,6 +936,8 @@
 % last modified on Fri  3 August 2012 at 14:23:49 PST by lamport
 
 \begin{document}
+\vspace*{-4cm}
+
 \tlatex
 \@x{}\moduleLeftDash\@xx{ {\MODULE} Det}\moduleRightDash\@xx{}%
 \@pvspace{8.0pt}%
@@ -955,7 +958,7 @@ An algorithm for replicating multi-threaded applications as done in
 \@pvspace{8.0pt}%
 \@x{ {\CONSTANTS} Pid ,\, MaxTime ,\, Kernel ,\, SchedulerPID ,\, Requests}%
 \@pvspace{8.0pt}%
-\@x{ {\ASSUME}\@s{4.1} SchedulerPID \.{\notin} Pid}%
+\@x{ {\ASSUME}\@s{4.50} SchedulerPID \.{\notin} Pid}%
 \@pvspace{8.0pt}%
 \@x{ InitLogTime \.{\defeq} 1}%
 \@x{ LogTime \.{\defeq} InitLogTime \.{\dotdot} MaxTime}%
@@ -973,7 +976,7 @@ An algorithm for replicating multi-threaded applications as done in
 \end{lcom}%
 \@x{ P \.{\defeq} Kernel \.{\times} Pid}%
 \@x{ Primary \.{\defeq} {\CHOOSE} k \.{\in} Kernel \.{:} {\TRUE}}%
-\@x{ Ker ( p )\@s{1.54} \.{\defeq} p [ 1 ]}%
+\@x{ Ker ( p )\@s{1.69} \.{\defeq} p [ 1 ]}%
 \@x{ PID ( p ) \.{\defeq} p [ 2 ]}%
 \@x{ OnKernel ( kernel ) \.{\defeq} \{ kernel \} \.{\times} Pid}%
 \@pvspace{8.0pt}%
@@ -983,7 +986,7 @@ Logical time comparison, using \ensuremath{PIDs} to break ties.
 \end{cpar}%
 \end{lcom}%
 \@x{ Less ( p ,\, tp ,\, q ,\, tq ) \.{\defeq}}%
- \@x{\@s{19.35} tp \.{<} tq \.{\lor} ( tp \.{=} tq \.{\land} PID ( p )
+ \@x{\@s{21.19} tp \.{<} tq \.{\lor} ( tp \.{=} tq \.{\land} PID ( p )
  \.{\leq} PID ( q ) )}%
 \@pvspace{8.0pt}%
 \begin{lcom}{0}%
@@ -1001,7 +1004,7 @@ The sequence of \ensuremath{TCP} packets that will be received. No duplicates
  i ]}%
  \@x{ TcpMultiStream \.{\defeq} [ r \.{\in} 1 \.{\dotdot} Requests
  \.{\mapsto}}%
- \@x{\@s{49.19} ( [ i \.{\in} 1 \.{\dotdot} StreamLength \.{\mapsto} i \.{+} (
+ \@x{\@s{54.11} ( [ i \.{\in} 1 \.{\dotdot} StreamLength \.{\mapsto} i \.{+} (
  StreamLength \.{*} ( r \.{-} 1 ) ) ] ) ]}%
 \@x{ {\ASSUME} NoDup ( TcpStream )}%
 \@x{ {\ASSUME} Len ( TcpStream ) \.{=} StreamLength}%
@@ -1014,16 +1017,16 @@ The sequence of \ensuremath{TCP} packets that will be received. No duplicates
 \end{cpar}%
 \end{lcom}%
 \@x{ Shift ( s ) \.{\defeq}}%
-\@x{\@s{16.4} {\IF} Len ( s ) \.{>} 1}%
- \@x{\@s{16.4} \.{\THEN} [ i \.{\in} 1 \.{\dotdot} ( Len ( s ) \.{-} 1 )
+\@x{\@s{18.03} {\IF} Len ( s ) \.{>} 1}%
+ \@x{\@s{18.03} \.{\THEN} [ i \.{\in} 1 \.{\dotdot} ( Len ( s ) \.{-} 1 )
  \.{\mapsto} s [ i \.{+} 1 ] ]}%
-\@x{\@s{16.4} \.{\ELSE} {\langle} {\rangle}}%
+\@x{\@s{18.03} \.{\ELSE} {\langle} {\rangle}}%
 \@pvspace{8.0pt}%
 \@x{ Shiftn ( s ) \.{\defeq}}%
-\@x{\@s{16.4} {\IF} Len ( s ) \.{>} 1}%
- \@x{\@s{16.4} \.{\THEN} [ i \.{\in} 1 \.{\dotdot} ( Len ( s ) \.{-} 1 )
+\@x{\@s{18.03} {\IF} Len ( s ) \.{>} 1}%
+ \@x{\@s{18.03} \.{\THEN} [ i \.{\in} 1 \.{\dotdot} ( Len ( s ) \.{-} 1 )
  \.{\mapsto} s [ i \.{+} 1 ] ]}%
-\@x{\@s{16.4} \.{\ELSE} {\langle} \.{-} 1 {\rangle}}%
+\@x{\@s{18.03} \.{\ELSE} {\langle} \.{-} 1 {\rangle}}%
 \@pvspace{8.0pt}%
 \begin{lcom}{0}%
 \begin{cpar}{0}{F}{F}{0}{0}{}%
@@ -1032,11 +1035,11 @@ The sequence of \ensuremath{TCP} packets that will be received. No duplicates
  by the deterministic scheduler and executing the following code.
 \end{cpar}%
 \vshade{5.0}%
-\begin{cpar}{0}{T}{F}{10.0}{0}{}%
+\begin{cpar}{0}{T}{F}{11.0}{0}{}%
 Code of worker \ensuremath{w}: \ensuremath{While(true) \{
 }%
 \end{cpar}%
-\begin{cpar}{0}{T}{F}{10.0}{0}{}%
+\begin{cpar}{0}{T}{F}{11.0}{0}{}%
 \ensuremath{x \.{=} read(socket);
 }%
 \end{cpar}%
@@ -1120,192 +1123,192 @@ Definitions:
 \pcalsymbolstrue
 \csyntaxtrue
 \@x{ {\p@mmalgorithm} ReadAppend {\p@lbrace}}%
-\@x{\@s{16.4} {\p@variables}}%
-\@x{\@s{32.8} status \.{=} [ p \.{\in} P \.{\mapsto}\@w{running} ] ,\,}%
-\@x{\@s{32.8} ltime \.{=} [ p \.{\in} P \.{\mapsto} InitLogTime ] ,\,}%
- \@x{\@s{32.8} file \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle} {\rangle} ]
+\@x{\@s{18.03} {\p@variables}}%
+\@x{\@s{36.07} status \.{=} [ p \.{\in} P \.{\mapsto}\@w{running} ] ,\,}%
+\@x{\@s{36.07} ltime \.{=} [ p \.{\in} P \.{\mapsto} InitLogTime ] ,\,}%
+ \@x{\@s{36.07} file \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle} {\rangle}
+ ] ,\,}%
+\@x{\@s{36.07} bumps \.{=} [ p \.{\in} Pid \.{\mapsto} \{ \} ] ,\,}%
+\@x{\@s{36.07} reads\@s{5.73} \.{=} [ p \.{\in} P \.{\mapsto} \.{-} 1 ] ,\,}%
+ \@x{\@s{36.07} tcpBuff \.{=} [ k \.{\in} Kernel \.{\mapsto} TcpMultiStream ]
  ,\,}%
-\@x{\@s{32.8} bumps \.{=} [ p \.{\in} Pid \.{\mapsto} \{ \} ] ,\,}%
-\@x{\@s{32.8} reads\@s{5.23} \.{=} [ p \.{\in} P \.{\mapsto} \.{-} 1 ] ,\,}%
- \@x{\@s{32.8} tcpBuff \.{=} [ k \.{\in} Kernel \.{\mapsto} TcpMultiStream ]
- ,\,}%
-\@x{\@s{32.8}}%
+\@x{\@s{36.07}}%
 \@y{\@s{0}%
  Queue for accepted connections
 }%
 \@xx{}%
- \@x{\@s{32.8} socketQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
+ \@x{\@s{36.07} socketQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
  {\rangle} ] ,\,}%
-\@x{\@s{32.8}}%
+\@x{\@s{36.07}}%
 \@y{\@s{0}%
  Queue for unhandled connections
 }%
 \@xx{}%
- \@x{\@s{32.8} requestQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} [ r \.{\in} 1
- \.{\dotdot} Requests \.{\mapsto} r ] ] ,\,}%
-\@x{\@s{32.8}}%
+ \@x{\@s{36.07} requestQueue \.{=} [ k \.{\in} Kernel \.{\mapsto} [ r \.{\in}
+ 1 \.{\dotdot} Requests \.{\mapsto} r ] ] ,\,}%
+\@x{\@s{36.07}}%
 \@y{\@s{0}%
  The socket that is handled by a process
 }%
 \@xx{}%
-\@x{\@s{32.8} handledSocket \.{=} [ p \.{\in} P \.{\mapsto} \.{-} 1 ] ,\,}%
- \@x{\@s{32.8} connections \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
+\@x{\@s{36.07} handledSocket \.{=} [ p \.{\in} P \.{\mapsto} \.{-} 1 ] ,\,}%
+ \@x{\@s{36.07} connections \.{=} [ k \.{\in} Kernel \.{\mapsto} {\langle}
  {\rangle} ]}%
 \@pvspace{8.0pt}%
-\@x{\@s{16.4} {\p@define} \{}%
-\@x{\@s{32.8} Run ( p ) \.{\defeq} status [ p ] \.{=}\@w{running}}%
- \@x{\@s{32.8} Running ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel )
+\@x{\@s{18.03} {\p@define} \{}%
+\@x{\@s{36.07} Run ( p ) \.{\defeq} status [ p ] \.{=}\@w{running}}%
+ \@x{\@s{36.07} Running ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel )
  \.{:} Run ( p ) \}}%
-\@x{\@s{32.8} WaitingSync ( kernel ) \.{\defeq}}%
- \@x{\@s{49.19} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
+\@x{\@s{36.07} WaitingSync ( kernel ) \.{\defeq}}%
+ \@x{\@s{54.11} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
  \.{=}\@w{waiting\ sync} \}}%
-\@x{\@s{32.8} WaitingRead ( kernel ) \.{\defeq}}%
- \@x{\@s{49.19} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
+\@x{\@s{36.07} WaitingRead ( kernel ) \.{\defeq}}%
+ \@x{\@s{54.11} \{ p \.{\in} OnKernel ( kernel ) \.{:} status [ p ]
  \.{=}\@w{waiting\ read} \}}%
- \@x{\@s{32.8} Bumped ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel )
+ \@x{\@s{36.07} Bumped ( kernel ) \.{\defeq} \{ p \.{\in} OnKernel ( kernel )
  \.{:}}%
-\@x{\@s{49.19} \.{\land}\@s{4.1} status [ p ] \.{=}\@w{waiting\ read}}%
- \@x{\@s{49.19} \.{\land}\@s{4.10} \E\, t \.{\in} LogTime \.{:} \E\, d \.{\in}
+\@x{\@s{54.11} \.{\land}\@s{4.50} status [ p ] \.{=}\@w{waiting\ read}}%
+ \@x{\@s{54.11} \.{\land}\@s{4.50} \E\, t \.{\in} LogTime \.{:} \E\, d \.{\in}
  TcpData \.{:} {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [
  PID ( p ) ] \}}%
-\@x{\@s{32.8} BumpedTo ( p ) \.{\defeq}}%
- \@x{\@s{49.19} {\CHOOSE} t \.{\in} LogTime \.{:} \E\, d \.{\in} TcpData \.{:}
+\@x{\@s{36.07} BumpedTo ( p ) \.{\defeq}}%
+ \@x{\@s{54.11} {\CHOOSE} t \.{\in} LogTime \.{:} \E\, d \.{\in} TcpData \.{:}
  {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [ PID ( p ) ]}%
-\@x{\@s{32.8} BumpData ( p ) \.{\defeq}}%
- \@x{\@s{49.19} {\CHOOSE} d \.{\in} TcpData \.{:} \E\, t \.{\in} LogTime \.{:}
+\@x{\@s{36.07} BumpData ( p ) \.{\defeq}}%
+ \@x{\@s{54.11} {\CHOOSE} d \.{\in} TcpData \.{:} \E\, t \.{\in} LogTime \.{:}
  {\langle} ltime [ p ] ,\, t ,\, d {\rangle} \.{\in} bumps [ PID ( p ) ]}%
-\@x{\@s{32.8} IsNextProc ( kernel ,\, p ) \.{\defeq}}%
- \@x{\@s{49.19} \.{\land}\@s{4.1} \A\, q \.{\in} Running ( kernel ) \.{\cup}
+\@x{\@s{36.07} IsNextProc ( kernel ,\, p ) \.{\defeq}}%
+ \@x{\@s{54.11} \.{\land}\@s{4.50} \A\, q \.{\in} Running ( kernel ) \.{\cup}
  WaitingSync ( kernel ) \.{:}}%
- \@x{\@s{75.73} q \.{\neq} p \.{\implies} Less ( p ,\, ltime [ p ] ,\, q ,\,
+ \@x{\@s{83.21} q \.{\neq} p \.{\implies} Less ( p ,\, ltime [ p ] ,\, q ,\,
  ltime [ q ] )}%
- \@x{\@s{49.19} \.{\land}\@s{4.10} \A\, q \.{\in} Bumped ( kernel ) \.{:} Less
+ \@x{\@s{54.11} \.{\land}\@s{4.50} \A\, q \.{\in} Bumped ( kernel ) \.{:} Less
  ( p ,\, ltime [ p ] ,\, q ,\, BumpedTo ( q ) )}%
- \@x{\@s{32.8} BumpTo \.{\defeq} {\CHOOSE} i \.{\in} LogTime \.{:} \A\, p
+ \@x{\@s{36.07} BumpTo \.{\defeq} {\CHOOSE} i \.{\in} LogTime \.{:} \A\, p
  \.{\in} P \.{:} ltime [ p ] \.{<} i}%
-\@x{\@s{16.4} \}}%
+\@x{\@s{18.03} \}}%
 \@pvspace{8.0pt}%
-\@x{\@s{16.4} {\p@macro} EnterRead ( p ) \{}%
-\@x{\@s{32.8} status [ p ] \.{:=}\@w{waiting\ read} {\p@semicolon}}%
-\@x{\@s{16.4} \}}%
-\@x{\@s{16.4} {\p@macro} EnterSync ( p ) \{}%
-\@x{\@s{32.8} status [ p ] \.{:=}\@w{waiting\ sync} {\p@semicolon}}%
-\@x{\@s{16.4} \}}%
-\@x{\@s{16.4} {\p@macro} ExitSync ( p ) \{}%
-\@x{\@s{32.8} ltime [ p ] \.{:=} ltime [ p ] \.{+} 1 {\p@semicolon}}%
-\@x{\@s{16.4} \}}%
+\@x{\@s{18.03} {\p@macro} EnterRead ( p ) \{}%
+\@x{\@s{36.07} status [ p ] \.{:=}\@w{waiting\ read} {\p@semicolon}}%
+\@x{\@s{18.03} \}}%
+\@x{\@s{18.03} {\p@macro} EnterSync ( p ) \{}%
+\@x{\@s{36.07} status [ p ] \.{:=}\@w{waiting\ sync} {\p@semicolon}}%
+\@x{\@s{18.03} \}}%
+\@x{\@s{18.03} {\p@macro} ExitSync ( p ) \{}%
+\@x{\@s{36.07} ltime [ p ] \.{:=} ltime [ p ] \.{+} 1 {\p@semicolon}}%
+\@x{\@s{18.03} \}}%
 \@pvspace{8.0pt}%
-\@x{\@s{16.4}}%
+\@x{\@s{18.03}}%
 \@y{\@s{0}%
  Processes consume a connection
 }%
 \@xx{}%
-\@x{\@s{16.4} {\p@process} ( worker \.{\in} P ) \{}%
-\@x{\@s{56.88} ww1\@s{.5}\textrm{:}\@s{3} {\p@while} ( {\TRUE} ) \{}%
-\@x{\@s{95.72} EnterSync ( self )\@s{3.33} {\p@semicolon}}%
- \@x{\@s{56.88} ww2\@s{.5}\textrm{:}\@s{3}\@s{13.20} {\p@await} Run ( self )
+\@x{\@s{18.03} {\p@process} ( worker \.{\in} P ) \{}%
+\@x{\@s{62.36} ww1\@s{.5}\textrm{:}\@s{3} {\p@while} ( {\TRUE} ) \{}%
+\@x{\@s{104.60} EnterSync ( self )\@s{3.64} {\p@semicolon}}%
+ \@x{\@s{62.36} ww2\@s{.5}\textrm{:}\@s{3}\@s{14.49} {\p@await} Run ( self )
  {\p@semicolon}}%
- \@x{\@s{56.88} ww3\@s{.5}\textrm{:}\@s{3}\@s{13.20} {\p@if} ( Len (
+ \@x{\@s{62.36} ww3\@s{.5}\textrm{:}\@s{3}\@s{14.49} {\p@if} ( Len (
  requestQueue [ Ker ( self ) ] ) \.{>} 0 ) \{}%
- \@x{\@s{114.25} handledSocket [ self ] \.{:=} requestQueue [ Ker ( self ) ] [
+ \@x{\@s{124.92} handledSocket [ self ] \.{:=} requestQueue [ Ker ( self ) ] [
  1 ] {\p@semicolon}}%
- \@x{\@s{114.25} requestQueue [ Ker ( self ) ] \.{:=} Shift ( requestQueue [
+ \@x{\@s{124.92} requestQueue [ Ker ( self ) ] \.{:=} Shift ( requestQueue [
  Ker ( self ) ] ) {\p@semicolon}}%
-\@x{\@s{95.72} \} {\p@semicolon}}%
- \@x{\@s{56.88} ww4\@s{.5}\textrm{:}\@s{3}\@s{13.20} ExitSync ( self )
+\@x{\@s{104.60} \} {\p@semicolon}}%
+ \@x{\@s{62.36} ww4\@s{.5}\textrm{:}\@s{3}\@s{14.49} ExitSync ( self )
  {\p@semicolon}}%
- \@x{\@s{56.88} ww5\@s{.5}\textrm{:}\@s{3}\@s{13.20} {\p@if} ( handledSocket [
+ \@x{\@s{62.36} ww5\@s{.5}\textrm{:}\@s{3}\@s{14.49} {\p@if} ( handledSocket [
  self ] \.{\neq} \.{-} 1 ) \{}%
- \@x{\@s{95.72} ww9\@s{.5}\textrm{:}\@s{3}\@s{12.29} {\p@while} ( Len (
+ \@x{\@s{104.60} ww9\@s{.5}\textrm{:}\@s{3}\@s{13.52} {\p@while} ( Len (
  tcpBuff [ Ker ( self ) ] [ handledSocket [ self ] ] ) \.{>} 0 ) \{}%
-\@x{\@s{150.96} EnterRead ( self )\@s{2.46} {\p@semicolon}}%
- \@x{\@s{112.12} ww10\@s{.5}\textrm{:}\@s{3}\@s{8.2} {\p@await} Run ( self )
+\@x{\@s{164.89} EnterRead ( self )\@s{2.70} {\p@semicolon}}%
+ \@x{\@s{122.64} ww10\@s{.5}\textrm{:}\@s{3}\@s{9.02} {\p@await} Run ( self )
  {\p@semicolon}}%
-\@x{\@s{150.96} EnterSync ( self )\@s{3.33} {\p@semicolon}}%
- \@x{\@s{112.12} ww11\@s{.5}\textrm{:}\@s{3}\@s{8.2} {\p@await} Run ( self )
+\@x{\@s{164.89} EnterSync ( self )\@s{3.64} {\p@semicolon}}%
+ \@x{\@s{122.64} ww11\@s{.5}\textrm{:}\@s{3}\@s{9.02} {\p@await} Run ( self )
  {\p@semicolon}}%
-\@x{\@s{150.96} file [ Ker ( self ) ] \.{:=}}%
- \@x{\@s{164.49} Append ( file [ Ker ( self ) ] ,\, {\langle} PID ( self ) ,\,
+\@x{\@s{164.89} file [ Ker ( self ) ] \.{:=}}%
+ \@x{\@s{179.70} Append ( file [ Ker ( self ) ] ,\, {\langle} PID ( self ) ,\,
  reads [ self ] {\rangle} ) {\p@semicolon}}%
- \@x{\@s{112.12} ww12\@s{.5}\textrm{:}\@s{3}\@s{8.19} ExitSync ( self )
+ \@x{\@s{122.64} ww12\@s{.5}\textrm{:}\@s{3}\@s{9.02} ExitSync ( self )
  {\p@semicolon}}%
-\@x{\@s{112.12} \}}%
-\@x{\@s{95.72} \} {\p@semicolon}}%
- \@x{\@s{56.88} ww13\@s{.5}\textrm{:}\@s{3}\@s{8.19} handledSocket [ self ]
+\@x{\@s{122.64} \}}%
+\@x{\@s{104.60} \} {\p@semicolon}}%
+ \@x{\@s{62.36} ww13\@s{.5}\textrm{:}\@s{3}\@s{9.01} handledSocket [ self ]
  \.{:=} \.{-} 1 {\p@semicolon}}%
-\@x{\@s{56.88} \} {\p@semicolon}}%
-\@x{\@s{32.8} \}}%
+\@x{\@s{62.36} \} {\p@semicolon}}%
+\@x{\@s{36.07} \}}%
 \@pvspace{8.0pt}%
- \@x{\@s{16.4} {\p@process} ( scheduler \.{\in} \{ {\langle} k ,\,
+ \@x{\@s{18.03} {\p@process} ( scheduler \.{\in} \{ {\langle} k ,\,
  SchedulerPID {\rangle} \.{:} k \.{\in} Kernel \} ) \{}%
-\@x{\@s{32.8} s1\@s{.5}\textrm{:}\@s{3}\@s{7.89} {\p@while} ( {\TRUE} ) \{}%
-\@x{\@s{73.28} {\p@either} \{}%
+\@x{\@s{36.07} s1\@s{.5}\textrm{:}\@s{3}\@s{8.89} {\p@while} ( {\TRUE} ) \{}%
+\@x{\@s{80.40} {\p@either} \{}%
 \@y{\@s{0}%
  Schedule a process waiting for synchronization:
 }%
 \@xx{}%
- \@x{\@s{89.68} {\p@with} ( p \.{\in} \{ p \.{\in} WaitingSync ( Ker ( self )
+ \@x{\@s{98.44} {\p@with} ( p \.{\in} \{ p \.{\in} WaitingSync ( Ker ( self )
  ) \.{:}}%
-\@x{\@s{125.50} IsNextProc ( Ker ( self ) ,\, p ) \} ) \{}%
-\@x{\@s{106.08} status [ p ] \.{:=}\@w{running} \} \}}%
-\@x{\@s{73.28} {\p@or} \{}%
+\@x{\@s{137.67} IsNextProc ( Ker ( self ) ,\, p ) \} ) \{}%
+\@x{\@s{116.48} status [ p ] \.{:=}\@w{running} \} \}}%
+\@x{\@s{80.40} {\p@or} \{}%
 \@y{\@s{0}%
  Bump a process waiting for a read:
 }%
 \@xx{}%
-\@x{\@s{91.70} {\p@with} ( p \.{\in} WaitingRead ( Ker ( self ) ) ) \{}%
-\@x{\@s{108.10} {\p@if} ( Ker ( self ) \.{=} Primary ) \{}%
+\@x{\@s{100.59} {\p@with} ( p \.{\in} WaitingRead ( Ker ( self ) ) ) \{}%
+\@x{\@s{118.63} {\p@if} ( Ker ( self ) \.{=} Primary ) \{}%
 \@y{\@s{0}%
  On the primary.
 }%
 \@xx{}%
-\@x{\@s{108.10}}%
+\@x{\@s{118.63}}%
 \@y{\@s{0}%
  Record the bump for the secondaries.
 }%
 \@xx{}%
-\@x{\@s{124.50} bumps [ PID ( p ) ] \.{:=}}%
-\@x{\@s{140.90} bumps [ PID ( p ) ] \.{\cup} \{ {\langle} ltime [ p ] ,\,}%
- \@x{\@s{157.30} BumpTo ,\, tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [
+\@x{\@s{136.67} bumps [ PID ( p ) ] \.{:=}}%
+\@x{\@s{154.71} bumps [ PID ( p ) ] \.{\cup} \{ {\langle} ltime [ p ] ,\,}%
+ \@x{\@s{172.75} BumpTo ,\, tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [
  1 ] {\rangle} \} {\p@semicolon}}%
-\@x{\@s{124.50} ltime [ p ] \.{:=} BumpTo {\p@semicolon}}%
-\@x{\@s{108.10} \} {\p@else} \{}%
+\@x{\@s{136.67} ltime [ p ] \.{:=} BumpTo {\p@semicolon}}%
+\@x{\@s{118.63} \} {\p@else} \{}%
 \@y{\@s{0}%
  On a replica:
 }%
 \@xx{}%
-\begin{lcom}{30.0}%
-\begin{cpar}{0}{T}{F}{7.5}{0}{}%
+\begin{lcom}{33.0}%
+\begin{cpar}{0}{T}{F}{8.25}{0}{}%
 Wait until the primary has bumped \ensuremath{p} and the data to be
 \end{cpar}%
 \begin{cpar}{1}{F}{F}{0}{0}{}%
 delivered to \ensuremath{p} in at the head of the tcp buffer
 \end{cpar}%
 \end{lcom}%
- \@x{\@s{114.8} {\p@await} p \.{\in} Bumped ( Ker ( self ) ) \.{\land}
+ \@x{\@s{126.27} {\p@await} p \.{\in} Bumped ( Ker ( self ) ) \.{\land}
  BumpData ( p ) \.{=}}%
- \@x{\@s{131.2} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ]
+ \@x{\@s{144.31} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] [ 1 ]
  {\p@semicolon}}%
-\@x{\@s{114.8} ltime [ p ] \.{:=} BumpedTo ( p ) {\p@semicolon}}%
+\@x{\@s{126.27} ltime [ p ] \.{:=} BumpedTo ( p ) {\p@semicolon}}%
 \@y{\@s{0}%
  Bump the process
 }%
 \@xx{}%
-\@x{\@s{98.39} \} {\p@semicolon}}%
- \@x{\@s{98.39} reads [ p ] \.{:=} tcpBuff [ Ker ( self ) ] [ handledSocket [
+\@x{\@s{108.23} \} {\p@semicolon}}%
+ \@x{\@s{108.23} reads [ p ] \.{:=} tcpBuff [ Ker ( self ) ] [ handledSocket [
  p ] ] [ 1 ] {\p@semicolon}}%
-\@x{\@s{98.39} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] \.{:=}}%
- \@x{\@s{114.79} Shift ( tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] )
+\@x{\@s{108.23} tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] \.{:=}}%
+ \@x{\@s{126.27} Shift ( tcpBuff [ Ker ( self ) ] [ handledSocket [ p ] ] )
  {\p@semicolon}}%
-\@x{\@s{98.39} status [ p ] \.{:=}\@w{running} {\p@semicolon}}%
+\@x{\@s{108.23} status [ p ] \.{:=}\@w{running} {\p@semicolon}}%
 \@y{\@s{0}%
  Let \ensuremath{p} run.
 }%
 \@xx{}%
-\@x{\@s{82.0} \}}%
-\@x{\@s{65.6} \}}%
-\@x{\@s{32.8} \}}%
-\@x{\@s{16.4} \}}%
+\@x{\@s{90.2} \}}%
+\@x{\@s{72.15} \}}%
+\@x{\@s{36.07} \}}%
+\@x{\@s{18.03} \}}%
 \@x{ \}}%
 \@y{}%
 \@xx{}%
