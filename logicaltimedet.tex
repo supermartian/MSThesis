@@ -144,7 +144,7 @@ Since we already know that a contented mutex will call futex\_wait~\cite{drepper
 \end{figure}
 
 \section{Balance the Logical Time} \label{sec:logimbalance}
-Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model in the program snippet we presented in Figure~\ref{fig:example}, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program. Figure~\ref{f:pbzip_bad} shows an extreme example where pbzip2 becomes a serial program with unbalanced logical time, it doesn't scale at all as we increase the thread count.
+Only increasing the logical time by 1 at \detend\ isn't enough. With an example we show how this could break the scalability and how to mitigate this problem. In Figure~\ref{fig:imbalance}, we show a particular execution point of the producer-consumer model in the program snippet we presented in Figure~\ref{fig:example}, solid lines represents the path that is already executed. In this case, consumer reaches consumeItem with logical time 3 and has the token. While producer has a higher logical time and has to wait for the token. Assume the real execution time of consumeItem is 10s, which means that when the consumer reaches \_\_det\_end, it would be at least 10s later, that is, the producer has to wait at \_\_det\_start for at least 10s. However we've already enforces the access order of the mutex, the execution out of the critical section should go in parallel since threads don't communicate at that point, in worst case, this kind of waiting will turn a parallel program into a serial program. Figure~\ref{f:pbzip_bad} shows an extreme example where pbzip2 becomes a serial program with unbalanced logical time, it doesn't scale at all as we increase the thread count.
 
 \begin{figure}
 \centering
@@ -165,7 +165,7 @@ Only increasing the logical time by 1 at \detend\ isn't enough. With an example 
    \draw[thick] (-0.1,2) -- (0.1,2);
    \node[align=right] at (1.5,1) {mutex\_unlock};
    \draw[thick] (-0.1,1) -- (0.1,1);   
-   \node[align=right] at (0.5,-2) {Logical Time:3};
+   \node[align=right] at (0.5,-2) {Logical Time:4};
    
    \draw[thick] (3,0) --  (3,5); 
    \draw[dotted] (3,0) --  (3,-1);
