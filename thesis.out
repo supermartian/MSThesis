@@ -56,3 +56,4 @@
 \BOOKMARK [2][-]{subsection.7.2.2}{Per-Lock Synchronization}{section.7.2}% 56
 \BOOKMARK [2][-]{subsection.7.2.3}{Arbitrary Number of Replicas}{section.7.2}% 57
 \BOOKMARK [2][-]{subsection.7.2.4}{Hybrid Replication}{section.7.2}% 58
+\BOOKMARK [0][-]{Appendix.a.A}{Appendix PlusCal Code for Logical Time Bumping}{}% 59
