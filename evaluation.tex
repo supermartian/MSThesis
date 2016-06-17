@@ -1,6 +1,6 @@
 \chapter{Evaluation}
 
-In this chapter we will show some experiment results of our system. We will use various applications which will cover all the aspects of our implementation includes thread interleaving synchronization, application instrumentation and system call synchronization. With all the evaluation, we will answer the following questions:
+In this chapter we will show some experiment results of our system. We will use various applications which will cover all the aspects of our implementation include thread interleaving synchronization, application instrumentation and system call synchronization. With all the evaluation, we will answer the following questions:
 
 \begin{itemize}
   \item Correctness: Given the same input, can the primary and secondary consistently generate the same output?
@@ -15,11 +15,11 @@ In this chapter we will show some experiment results of our system. We will use 
 \paragraph{Evaluation Setup} All experiments were run on a server machine with 4 AMD Opteron 6376 Processors (16 cores each, 2.3Ghz), which is 64 cores in total. The total RAM is 128GB. Our Popcorn Linux kernel was installed on Ubuntu 12.04 LTS. We partitioned the hardware resources into half, one for the primary and one for the secondary. Each of them has the full control of their own 32 cores and 64GB RAM. The machine comes with a 1Gbps high speed connection. For benchmarking server applications, we used another server machine in the same rack, connected to the same switch, to act as the benchmark client.
 
 \section{Racey}
-We used a variant of racey~\cite{hillstress} to evaluate the correctness of our system. racey benchmark is a set of concurrent programs which read and write some shared data concurrently with various concurrent models. With a non-deterministic system, all the benchmark will create a different result during each different run. We use racey to validate if we can have the same thread interleaving on primary and secondary, which should lead the same output on both primary and secondary.
+We used a variant of racey~\cite{hillstress} to evaluate if our system can work correctly under various concurrent models, in other words, to evaluate the ability of maintaining the same thread-interleaving on all replicas. racey benchmark is a set of concurrent programs which read and write some shared data concurrently with various concurrent models. With a non-deterministic system, all the benchmark will create a different result during each different run. We use racey to validate if we can have the same thread interleaving on primary and secondary, which should lead the same output on both primary and secondary.
 
 \paragraph{racey-guarded} racey-guarded has a global array, it uses pthread to create multiple threads and modify the global array concurrently. The access to the global array is protected by pthread\_mutex\_lock. We tested this one without any modification to the application. With both synchronization algorithms, we are able to create consistent results on the primary and secondary for over 100 consecutive runs.
 
-\paragraph{racey-forkmmap} racey-forkmmap utilizes mmap to create a shared memory area, and uses fork to create multiple processes to read and modify the shared memory area. We manually added \_\_det\_start and \_\_det\_end around each access to the shared memory area. With both synchronization algorithms, we are able to create consistent results on the primary and secondary for over 100 consecutive runs.
+\paragraph{racey-forkmmap} racey-forkmmap utilizes mmap to create a shared memory area, and uses fork to create multiple processes to read and modify the shared memory area. We 	added \_\_det\_start and \_\_det\_end around each access to the shared memory area. With both synchronization algorithms, we are able to create consistent results on the primary and secondary for over 100 consecutive runs.
 
 \paragraph{racey-tcp} Based on the idea of racey, we developed racey-tcp to stress the determinism for network I/O related tasks. racey-tcp uses pthread to create multiple threads. One thread listens to the socket, whenever a new connection arrives, it puts the connection into a queue, other threads retrieve the connection from the queue, read the data on that connection and write the data into a file. For this benchmark, we wrapped the write system call for writing to the file with \_\_det\_start and \_\_det\_end. With both synchronization algorithms, we are able to create consistent output file on the primary and secondary for over 2000 requests.
 
@@ -57,9 +57,15 @@ Table~\ref{t:pbzip2_syscall} shows the system calls that are used by pbzip2, we 
 
 Figure~\ref{f:pbzip_b10_performance} shows the execution time of vanilla Linux, Deterministic Execution and Schedule Replication. Both replication modes achieved decent scalability. However, as we can see in Table~\ref{t:pbzip2_overall}, both algorithms' overhead increases with the thread count. One important overhead source for both replication modes comes from the serialization of all the synchronization primitives. With increasing thread count, the downside of breaking the parallelism of accessing those regions becomes more obvious.
 
-For Deterministic Execution, another type of overhead comes from the logical time imbalance. As we mentioned before, the execution profiler takes the average execution time of basicblocks. However the execution time may vary during the actual run, especially for those basic blocks with file I/O, which has non-determinisitc execution time. Although the instrumented pbzip2 showed decent scalbility, the performance still could have been better if the logical time incremental could be more precise.
+For Deterministic Execution, another type of overhead comes from the logical time imbalance. As we mentioned before, the execution profiler takes the average execution time of basicblocks. However the execution time may vary during the actual run, especially for those basic blocks with file I/O, which has non-determinisitc execution time. Although the instrumented pbzip2 showed decent scalbility, the performance still could have been better if we could increase the logical time more precisely.
 
 %different block sizes
+\begin{figure}
+\centering
+\includegraphics[width=0.8\columnwidth]{figures/pbzip2_b10}
+\caption{pbzip2 performance}
+\label{f:pbzip_b10_performance}
+\end{figure}
 
 \begin{table}
 \caption{pbzip2 Overall Overhead of Each Replication Mode}
@@ -76,15 +82,8 @@ Thread count & Deterministic Execution & Schedule Replication \\ \hline
 \label{t:pbzip2_overall}
 \end{table}
 
-\begin{figure}
-\centering
-\includegraphics[width=0.8\columnwidth]{figures/pbzip2_b10}
-\caption{pbzip2 performance}
-\label{f:pbzip_b10_performance}
-\end{figure}
-
 \subsection{Message Breakdown}
-Figure~\ref{f:pbzip2_msg} shows the number of messages that were used during the benchmark. In all the figures, "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, while in Schedule Replication this stands for the messages for logging the execution sequence. This result is expected as we assume that Deterministic Execution doesn't require too much communication between the replicas. Here all the system call messages are for gettimeofday, and most of them are from pthread\_cond\_timed\_wait. In pbzip2, pthread\_cond\_timed\_wait is used by Worker threads to wait for available data chunks. An interesting finding is that for the same benchmark Deterministic Execution invoked less system calls than Schedule Replication. This is because for Deterministic Execution there is a minor logical time imbalance issue, where the FileReader and FilerWriter had more chance to run compare to Worker threads. In this situation, whenever a Worker thread has chance to run, it is very likely to find an available data chunk in the queue, thus no need to call pthread\_cond\_timed\_wait. However for Schedule Replication, the arbitrary thread interleaving causes the Worker threads having more chance waiting on an empty queue, which leads to more invocation to pthread\_cond\_timed\_wait.
+Figure~\ref{f:pbzip2_msg} shows the number of messages that were used during the benchmark. In all the figures, "Syscall Messages" is the message count for synchronizing system calls, "Network Messages" mean the message count for replicating the network stack, and "Schedule Messages" means the messages for Tick Shepherd in Deterministic Execution, while in Schedule Replication this stands for the messages for logging the execution sequence. This result is expected as we assume that Deterministic Execution doesn't require too much communication between the replicas. Here all the system call messages are for gettimeofday, and most of them are from pthread\_cond\_timed\_wait. In pbzip2, pthread\_cond\_timed\_wait is used by Worker threads to wait for available data chunks. An interesting finding is that for the same benchmark Deterministic Execution invoked less system calls than Schedule Replication. This is because for Deterministic Execution there is a minor logical time imbalance issue, where the FileReader and FilerWriter had more chance to run compare to Worker threads. In this situation, whenever a Worker thread has chance to run, it is very likely to find an available data chunk in the queue, thus no need to call pthread\_cond\_timed\_wait. However for Schedule Replication, the arbitrary thread interleaving causes the Worker threads having more chance waiting on an empty queue, which leads to more invocation to pthread\_cond\_timed\_wait.
 \begin{figure}
 \centering
 \includegraphics[width=1\columnwidth]{figures/pbzip2_msg}
@@ -337,7 +336,7 @@ Unlike the non-scaling result with the threadpool mode, where all the threads we
 For deterministic execution, a type of overhead comes from the calculation of the token (finding the task with minimal logical time). Current implementation requires O(N) time to decide which task should execute on next \detstart\ , where N is the number of threads. Every logical time update comes with such a computation process, more threads lead to more computation time.  As we can see from all the benchmarks, deterministic system always leads to a higher overhead when thread count increases. In a previous discussion ~\cite{bergan2011deterministic}, it is pointed out that all the existing deterministic systems, regardless of what type of deterministic algorithm (lockstep or wait for turn), this kind of global communication is inevitable. This also implies that deterministic might not be practical for highly concurrent application with highly intensive inter-thread communications (synchronization primitives). Webservers like mongoose and nginx have very simple inter-thread communication , so that we achieved decent overhead during the benchmark. But for more complicated applications with more different types of locks, we might face severe performance overhead.
 
 \subsection{Which Replication Mode Should I Use?}
-From all the benchmarks, we saw that some are better for Deterministic Execution and some are better for Schedule Replication. Figure~\ref{f:trade_off} shows the basic idea of what kind of price we are paying for different replication modes. For Deterministic Execution, if we are able to precisely balance the logical time, or there is no logical time imbalance problem (like Nginx), it is the choice. Other than that, unless the cost of messaging becomes very significant, Schedule Replication is always the better choice due to its simplicity and efficiency.
+From all the benchmarks, we saw that some are better for Deterministic Execution and some are better for Schedule Replication. Figure~\ref{f:trade_off} shows the basic idea of what kind of price we are paying for different replication modes. For Deterministic Execution, if we are able to precisely balance the logical time, or there is no logical time imbalance problem (like Nginx), it is the choice. For Schedule Replication, since on Popcorn Linux, the cost of sending a message is under 2 microseconds, despite the huge amount of messages that Schedule Replication needs, the overall overhead from messaging can nearly be ignored. As long as the cost of sending messages keeps low, Schedule Replication is always the better choice.
 
 \begin{figure}
 \centering

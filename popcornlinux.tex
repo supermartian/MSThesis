@@ -1,9 +1,9 @@
 \chapter{Popcorn Linux Background}
-Our replication prototype is built on top of Popcorn Linux ~\cite{barbalace2014popcorn}. It is a multi-kernel OS which allows a multi-core system to boot multiple Linux kernels. In this project, we leverage this architecture to achieve inter-machine replication. The replicated applications will run on different kernel instances and Popcorn Linux provides strong isolation of the resources on the machine.
+Our replication prototype is built on top of Popcorn Linux ~\cite{barbalace2014popcorn}. It is a multi-kernel OS which allows a multi-core system to boot multiple Linux kernels. In this project, we leverage this architecture to achieve intra-machine replication. The replicated applications will run on different kernel instances and Popcorn Linux provides strong isolation of the resources on the machine.
 % talk about multi-kernel boot here
 % Put a plot of popcorn architecture here
 \section{Hardware Partitioning}
-In Popcorn Linux, hardware resources are partitioned into arbitrary divisions, as shown in Figure~\ref{f:popcorn_arch}, each booted kernel instance can have the full control of its own partition. In general, CPU cores, memory and devices can be splitted into different partitions, each kernel can have its own dedicated CPU cores , memory and devices. The hardware partitioning provides a very strong isolation for all the kernels and the applications running on them, which is ideal for our intra-machine fault tolerance model. Especially when the partition is done based on NUMA zones, a critical hardware error happens on one kernel's hardware partition can hardly get propagated to another.
+In Popcorn Linux, hardware resources are partitioned into arbitrary divisions, as shown in Figure~\ref{f:popcorn_arch}, each booted kernel instance can have the full control of its own partition. In general, CPU cores, memory and devices can be divided into multiple partitions, each kernel can have its own dedicated CPU cores , memory and devices. The hardware partitioning provides a very strong isolation for all the kernels and the applications running on them, which is ideal for our intra-machine fault tolerance model. Especially when the partition is done based on NUMA zones, a critical hardware error happens on one kernel's hardware partition can hardly get propagated to another.
 
 \begin{figure}[!ht]
 \centering
@@ -13,7 +13,7 @@ In Popcorn Linux, hardware resources are partitioned into arbitrary divisions, a
 \end{figure}
 
 \section{Inter-Kernel Messaging Layer}
-Popcorn Linux comes with a high efficient messaging layer for inter-kernel communication ~\cite{shelton2013popcorn}. From the implementation perspective, the messaging passing is basically just a set of memory copy operations between the address space of the sender kernel and receiver kernel. As a result, the cost of sending a message is very low (under 5us). The replication system developed in this project heavily leverage Popcorn’s messaging layer.
+Popcorn Linux comes with a highly efficient messaging layer for inter-kernel communication ~\cite{shelton2013popcorn}. From the implementation perspective, the messaging passing is basically just a set of memory copy operations between the address space of the sender kernel and receiver kernel. As a result, the cost of sending a message is very low (under 2us). The replication system developed in this project heavily relies on Popcorn’s messaging layer.
 % Important fact: messaging layer is strictly FIFO
 
 \section{Popcorn Namespace}
