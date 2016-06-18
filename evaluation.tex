@@ -23,7 +23,7 @@ We used a variant of racey~\cite{hillstress} to evaluate if our system can work 
 
 \paragraph{racey-tcp} Based on the idea of racey, we developed racey-tcp to stress the determinism for network I/O related tasks. racey-tcp uses pthread to create multiple threads. One thread listens to the socket, whenever a new connection arrives, it puts the connection into a queue, other threads retrieve the connection from the queue, read the data on that connection and write the data into a file. For this benchmark, we wrapped the write system call for writing to the file with \_\_det\_start and \_\_det\_end. With both synchronization algorithms, we are able to create consistent output file on the primary and secondary for over 2000 requests.
 
-\section{PBZip2}
+\section{PBZip2} \label{sec:pbzip2}
 % 1. threading model
 % 2. A table of lock and cond var count
 % 3. A table of instrumented dettick count
@@ -91,7 +91,7 @@ Figure~\ref{f:pbzip2_msg} shows the number of messages that were used during the
 \label{f:pbzip2_msg}
 \end{figure}
 
-\section{Mongoose Webserver}
+\section{Mongoose Webserver}  \label{sec:mongoose}
 % 1. threading model
 % 2. A table of lock and cond var count
 
@@ -183,7 +183,7 @@ Actually, we need much more messages for deterministic execution, which contradi
 \caption{mongoose messages for 200KB file requests}
 \label{f:mg_msg_200k}
 \end{figure}
-\section{Nginx Webserver}
+\section{Nginx Webserver} \label{sec:nginx}
 
 Nginx~\cite{reese2008nginx} is a sophisticated webserver with multiple threading modes. In this benchmark we used the threadpool setup~\cite{nginxthreadpool} for our benchmark. As shown in Figure~\ref{f:nginx_model}, in this threading mode, the additional threads are only for doing file I/O operations. The MasterThread waits on the listening socket, whenever a file request is coming, it hands over the request into a queue. WorkerThreads get notified whenever a new request is coming and try to retrieve one task from the queue. Whenever the content of the requested file is loaded into memory by a WorkerThread, a handle will be put into another queue and the MasterThread will get notified. In the end, the MasterThread will retrieve the handle and send the content of the file back to the client. 
 

@@ -86,6 +86,17 @@ Antonio Barbalace, Binoy Ravindran, and David Katz.
 \newblock Popcorn: a replicated-kernel os based on linux.
 \newblock In {\em Proceedings of the Linux Symposium, Ottawa, Canada}, 2014.
 
+\bibitem{schneider1990implementing}
+Fred~B Schneider.
+\newblock Implementing fault-tolerant services using the state machine
+  approach: A tutorial.
+\newblock {\em ACM Computing Surveys (CSUR)}, 22(4):299--319, 1990.
+
+\bibitem{lamport1978time}
+Leslie Lamport.
+\newblock Time, clocks, and the ordering of events in a distributed system.
+\newblock {\em Communications of the ACM}, 21(7):558--565, 1978.
+
 \bibitem{shelton2013popcorn}
 Benjamin~H Shelton.
 \newblock {\em Popcorn Linux: enabling efficient inter-core communication in a
@@ -157,6 +168,13 @@ Emery~D Berger, Ting Yang, Tongping Liu, and Gene Novark.
 \newblock Grace: Safe multithreaded programming for c/c++.
 \newblock In {\em ACM Sigplan Notices}, volume~44, pages 81--96. ACM, 2009.
 
+\bibitem{bergan2010coredet}
+Tom Bergan, Owen Anderson, Joseph Devietti, Luis Ceze, and Dan Grossman.
+\newblock Coredet: a compiler and runtime system for deterministic
+  multithreaded execution.
+\newblock In {\em ACM SIGARCH Computer Architecture News}, volume~38, pages
+  53--64. ACM, 2010.
+
 \bibitem{merrifield2015high}
 Timothy Merrifield, Joseph Devietti, and Jakob Eriksson.
 \newblock High-performance determinism with total store order consistency.
@@ -197,12 +215,6 @@ Leslie Lamport et~al.
 \newblock Paxos made simple.
 \newblock {\em ACM Sigact News}, 32(4):18--25, 2001.
 
-\bibitem{kotla2007zyzzyva}
-Ramakrishna Kotla, Lorenzo Alvisi, Mike Dahlin, Allen Clement, and Edmund Wong.
-\newblock Zyzzyva: speculative byzantine fault tolerance.
-\newblock In {\em ACM SIGOPS Operating Systems Review}, volume~41, pages
-  45--58. ACM, 2007.
-
 \bibitem{hillstress}
 M~Hill and M~Xu Racey.
 \newblock A stress test for deterministic execution.
@@ -211,7 +223,7 @@ M~Hill and M~Xu Racey.
 \bibitem{gilchristparallel}
 J~Gilchrist.
 \newblock Parallel bzip2 (pbzip2) data compression software.
-\newblock {\em URL http://compression.ca/pbzip2}.
+\newblock URL http://compression.ca/pbzip2.
 
 \bibitem{mongoose}
 Mongoose - embedded web server.
@@ -235,13 +247,6 @@ Inside nginx: How we designed for performance \& scale.
 Processor tracing.
 \newblock
   \url{https://software.intel.com/en-us/blogs/2013/09/18/processor-tracing}.
-
-\bibitem{bergan2010coredet}
-Tom Bergan, Owen Anderson, Joseph Devietti, Luis Ceze, and Dan Grossman.
-\newblock Coredet: a compiler and runtime system for deterministic
-  multithreaded execution.
-\newblock In {\em ACM SIGARCH Computer Architecture News}, volume~38, pages
-  53--64. ACM, 2010.
 
 \bibitem{franke2002fuss}
 Hubertus Franke, Rusty Russell, and Matthew Kirkwood.
