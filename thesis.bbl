@@ -1,5 +1,20 @@
 \begin{thebibliography}{10}
 
+\bibitem{sridharan2015memory}
+Vilas Sridharan, Nathan DeBardeleben, Sean Blanchard, Kurt~B Ferreira, Jon
+  Stearley, John Shalf, and Sudhanva Gurumurthi.
+\newblock Memory errors in modern systems: The good, the bad, and the ugly.
+\newblock In {\em Proceedings of the Twentieth International Conference on
+  Architectural Support for Programming Languages and Operating Systems}, pages
+  297--310. ACM, 2015.
+
+\bibitem{meza2015revisiting}
+Justin Meza, Qiang Wu, Sanjeev Kumar, and Onur Mutlu.
+\newblock Revisiting memory errors in large-scale production data centers:
+  Analysis and modeling of new trends from the field.
+\newblock In {\em Dependable Systems and Networks (DSN), 2015 45th Annual
+  IEEE/IFIP International Conference on}, pages 415--426. IEEE, 2015.
+
 \bibitem{guo2014rex}
 Zhenyu Guo, Chuntao Hong, Mao Yang, Dong Zhou, Lidong Zhou, and Li~Zhuang.
 \newblock Rex: Replication at the speed of multi-core.

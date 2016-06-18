@@ -9,45 +9,45 @@ Warning--empty year in merrifieldincreasing
 Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in bergan2010coredet
 Warning--can't use both volume and number fields in devietti2011rcdc
-You've used 43 entries,
+You've used 45 entries,
             1791 wiz_defined-function locations,
-            678 strings with 11410 characters,
-and the built_in function-call counts, 11834 in all, are:
-= -- 1090
-> -- 492
-< -- 27
-+ -- 182
-- -- 139
-* -- 724
-:= -- 1690
-add.period$ -- 141
-call.type$ -- 43
-change.case$ -- 42
+            688 strings with 12063 characters,
+and the built_in function-call counts, 12669 in all, are:
+= -- 1172
+> -- 529
+< -- 29
++ -- 195
+- -- 150
+* -- 776
+:= -- 1803
+add.period$ -- 149
+call.type$ -- 45
+change.case$ -- 44
 chr.to.int$ -- 0
-cite$ -- 49
-duplicate$ -- 592
-empty$ -- 1188
-format.name$ -- 139
-if$ -- 2806
+cite$ -- 51
+duplicate$ -- 634
+empty$ -- 1264
+format.name$ -- 150
+if$ -- 3010
 int.to.chr$ -- 0
-int.to.str$ -- 43
-missing$ -- 36
-newline$ -- 213
-num.names$ -- 39
-pop$ -- 192
+int.to.str$ -- 45
+missing$ -- 38
+newline$ -- 223
+num.names$ -- 41
+pop$ -- 204
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 351
+skip$ -- 379
 stack$ -- 0
-substring$ -- 715
-swap$ -- 236
-text.length$ -- 27
+substring$ -- 779
+swap$ -- 258
+text.length$ -- 29
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 6
-while$ -- 114
-width$ -- 45
-write$ -- 472
+while$ -- 122
+width$ -- 47
+write$ -- 496
 (There were 6 warnings)
