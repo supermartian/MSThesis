@@ -118,7 +118,7 @@ Condition Variables are much more complicated than mutex locks. In the glibc imp
 
 \newpage
 
-In our LD\_PRELOAD library, we re-implemented pthread\_cond\_wait following the existing glibc\'s implementation, and wrapped every lock acquisition with \_\_det\_start and \_\_det\_end, we also did the same wrapping for pthread\_cond\_signal. With this, we are able to make sure that the pthread\_cond\_wait can return at the same timing with the same condition variable on both primary and secondary.
+In our LD\_PRELOAD library, we re-implemented pthread\_cond\_wait following the existing glibc's implementation, and wrapped every lock acquisition with \_\_det\_start and \_\_det\_end, we also did the same wrapping for pthread\_cond\_signal. With this, we are able to make sure that the pthread\_cond\_wait can return at the same timing with the same condition variable on both primary and secondary.
 
 %For pthread\_cond\_timed\_wait, we did the same re-implementation for it. However the timeout part is a little bit tricky. %how the fuck can pthread\_cond\_timed\_wait works accidently?
 
