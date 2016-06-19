@@ -116,8 +116,6 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
 
 Condition Variables are much more complicated than mutex locks. In the glibc implementation, it involves multiple internal lock and unlock operations. As a result simply wrapping pthread\_cond\_wait with \_\_det\_start and \_\_det\_end will not work, because of multiple non-deterministic execution points are inside the implementation. Figure~\ref{f:cond_wait} shows the brief flow of the pthread\_cond\_wait in glibc implementation, yellow blocks are the lock acquisitions. cond\textrightarrow lock is a lock inside the condition variable  data structure, it is used to provide mutual exclusion for the futex value for the condition variable. futex\_wait will wait until cond\textrightarrow futex differs from futex\_val. When it wakes up, it will check again if this condition variable is contended, if so, go back to futex\_wait again. If not, re-acquire the mutex lock and return. Every single lock acquisition here is a non-deterministic point, which leads to passing different values to futex\_wait on primary and replica, which in turn leads to diverged wakeup timing of pthread\_cond\_wait.
 
-\newpage
-
 In our LD\_PRELOAD library, we re-implemented pthread\_cond\_wait following the existing glibc's implementation, and wrapped every lock acquisition with \_\_det\_start and \_\_det\_end, we also did the same wrapping for pthread\_cond\_signal. With this, we are able to make sure that the pthread\_cond\_wait can return at the same timing with the same condition variable on both primary and secondary.
 
 %For pthread\_cond\_timed\_wait, we did the same re-implementation for it. However the timeout part is a little bit tricky. %how the fuck can pthread\_cond\_timed\_wait works accidently?
