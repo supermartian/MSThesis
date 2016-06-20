@@ -1,4 +1,4 @@
-This is BibTeX, Version 0.99d (TeX Live 2015/dev/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2014)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: thesis.aux
 The style file: unsrt.bst
@@ -9,45 +9,45 @@ Warning--empty year in merrifieldincreasing
 Warning--can't use both volume and number fields in berger2009grace
 Warning--can't use both volume and number fields in bergan2010coredet
 Warning--can't use both volume and number fields in devietti2011rcdc
-You've used 46 entries,
+You've used 47 entries,
             1791 wiz_defined-function locations,
-            693 strings with 12184 characters,
-and the built_in function-call counts, 12909 in all, are:
-= -- 1196
-> -- 537
+            696 strings with 12282 characters,
+and the built_in function-call counts, 13009 in all, are:
+= -- 1204
+> -- 538
 < -- 29
-+ -- 198
++ -- 199
 - -- 152
 * -- 795
-:= -- 1840
-add.period$ -- 152
-call.type$ -- 46
-change.case$ -- 45
+:= -- 1849
+add.period$ -- 154
+call.type$ -- 47
+change.case$ -- 46
 chr.to.int$ -- 0
-cite$ -- 52
-duplicate$ -- 643
-empty$ -- 1288
+cite$ -- 53
+duplicate$ -- 648
+empty$ -- 1306
 format.name$ -- 152
-if$ -- 3062
+if$ -- 3089
 int.to.chr$ -- 0
-int.to.str$ -- 46
+int.to.str$ -- 47
 missing$ -- 39
-newline$ -- 228
+newline$ -- 232
 num.names$ -- 42
-pop$ -- 205
+pop$ -- 211
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 383
+skip$ -- 389
 stack$ -- 0
 substring$ -- 804
-swap$ -- 259
+swap$ -- 260
 text.length$ -- 29
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 6
 while$ -- 125
-width$ -- 48
-write$ -- 507
+width$ -- 49
+write$ -- 514
 (There were 6 warnings)

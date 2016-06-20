@@ -240,6 +240,10 @@ M~Hill and M~Xu Racey.
 \newblock A stress test for deterministic execution.
 \newblock \url{http://pages.cs.wisc.edu/~markhill/racey.html}.
 
+\bibitem{racey-suite}
+racey-suite - racey and its invariants.
+\newblock \url{https://github.com/supermartian/racey-suite}.
+
 \bibitem{gilchristparallel}
 J~Gilchrist.
 \newblock Parallel bzip2 (pbzip2) data compression software.

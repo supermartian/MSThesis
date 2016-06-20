@@ -12,18 +12,16 @@ In this chapter we present Shogoki\footnote{Means Unit 1, in Japanese}: Determin
 %\end{itemize}
 
 \section{Logical Time Based Deterministic Scheduling} \label{sec:detsched}
-Inspired by Kendo~\cite{olszewski2009kendo} and Conversion~\cite{merrifieldincreasing}, this scheduling policy maintains a logical time for each task inside the current Popcorn namespace. There is a "token" being passed among all the tasks in the namespace according to the logical time of each task. Our system provides following system calls for the applications to control the thread-interleaving:
+Inspired by Kendo~\cite{olszewski2009kendo} and Conversion~\cite{merrifieldincreasing}, this replication mode maintains a logical time for each task inside the current Popcorn namespace. There is a "token" being passed among all the tasks in the namespace according to the logical time of each task. Our system provides following system calls for the applications to control the thread-interleaving:
 \begin{itemize}
    \item \_\_det\_start: When it is called, only the task holds the token can proceed. If the current thread is able to proceed, this thread will be marked as "in a deterministic section".
    \item \_\_det\_end: When it is called, the system will increase the current thread's logical time by 1, and marks it as "out of a deterministic section".
-\end{itemize}.
-
+\end{itemize}
 The token is updated whenever the logical time is changed, and it is passed based on following rules:
 \begin{itemize}
    \item Among all the tasks inside the namespace, the one with the minimal logical time gets the token.
    \item If multiple tasks have the same minimal logical time, the one with the smallest PID gets the token.
-\end{itemize}.
-
+\end{itemize}
 \begin{figure}
 \centering
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{blah}
@@ -57,7 +55,7 @@ Figure~\ref{fig:example} shows an example use of the system calls. Simply wrap p
 
 If the logical time is updated but the one has the minimal logical time is sleeping in \_\_det\_start, the one whose updates the tick will wake the sleeping one up. As long as the replicated application updates logical time in a same way on both primary and secondary, they will sure end up with the same thread interleaving. Figure~\ref{f:algorithm} shows a simplified version of this algorithm (some mutual exclusion points are omitted here).
 
-To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock , so that the order of getting into critical sections is controlled under our deterministic scheduling.
+To make an application to run in a deterministic way, one should put \_\_det\_start and \_\_det\_end around the synchronization primitives such as pthread\_mutex\_lock, so that the order of getting into critical sections is controlled under our deterministic scheduling.
 
 \begin{figure}
 \begin{lstlisting}[numbers=left, frame=single, basicstyle=\small, breaklines]{detsys}
@@ -358,4 +356,4 @@ Almost all the deterministic systems mentioned the use case for replication but 
 
 Actually skipping the threads sleeping in network events is applicable with some workarounds, as long as the system can ensure that when those threads are back from sleeping, all the replicas can be in the same state. A solution is to delay the wakeup time of those threads a little bit until all the replicas reach the same state. We investigated the skipping strategy with Kendo's algorithm, a possible solution is to bump the logical time of the sleeping threads to a relatively high value, so that when they are back to the deterministic schedule, no running thread can have a higher logical time other then them. We modelled such strategy with a multi-threaded network server in PlusCal/TLA+ (See appendix~\ref{app:tickbump}) and proved the correctness of it. However, in practical, it is very hard to pre-determine such a future logical time for the unpredictable network events, furthermore, delaying the wakeup time of those threads will sure have impact on the performance. As a result, we chose to not to skip any socket operations and ended up with the current Tick Shepherd solution.
 
-Several works showed the same idea that network operations should not be skipped, dOS~\cite{bergan2010deterministic} mentioned a use case for replicating a micro web server, which uses the SHIM layer to block the network requests until the all replicas reach the same state. This solution will harm the performance badly and requires modifications to the application. Crane~\cite{cui2015p} utilizes Parrot\cite{cui2013parrot} as the underlying deterministic system but without skipping the network operations. On top of that, Crane uses Paxos to bridge the gap between non-deterministic socket requests and the deterministic system, which ensures that all the replicas can receive the requests in the same state. However, Crane does not show any performance scalability in their work, and with our experiment on Crane, their Paxos layer becomes very unstable with large number of network requests.
+Several works showed the same idea that network operations should not be skipped, dOS~\cite{bergan2010deterministic} mentioned a use case for replicating a micro web server, which uses the SHIM layer to block network requests until all the replicas reach the same state. This solution will harm the performance badly and requires modifications to the application. Crane~\cite{cui2015p} utilizes Parrot\cite{cui2013parrot} as the underlying deterministic system but without skipping the network operations. On top of that, Crane uses Paxos to bridge the gap between non-deterministic socket requests and the deterministic system, which ensures that all the replicas can receive the requests in the same state. However, Crane does not show any performance scalability in their work, and with our experiment on Crane, their Paxos layer becomes very unstable with large number of network requests.
